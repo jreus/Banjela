@@ -15,7 +15,7 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 // number of sensors per Trill device
 #define NUM_SENSORS 26
 
-// InterfaceTable contains pointers to functions in the host (scserver).
+// InterfaceTable contains pointers to global functions in the host (scserver).
 static InterfaceTable *ft;
 
 // These functions are provided by Xenomai
@@ -30,22 +30,67 @@ struct TrillRaw : public Unit {
   unsigned int readIntervalSamples;
   unsigned int readCount;
 
+  // Readins for all the different pads on the Trill Craft
+  float sensorReading[NUM_SENSORS] = { 0.0 };
+
+
   // DEBUGGING bookkeeping
   unsigned int debugCounter = 0;
   unsigned char debugPrintRate = 4; // 4 times per second
 };
 
+// Prescaler options for Trill sensor
+int gPrescalerOpts[6] = {1, 2, 4, 8, 16, 32};
+// Threshold options for Trill sensor
+int gThresholdOpts[7] = {0, 10, 20, 30, 40, 50, 60};
+
+
 static void TrillRaw_Ctor(TrillRaw* unit); // constructor
 static void TrillRaw_Dtor(TrillRaw* unit); // destructor
 static void TrillRaw_next_k(TrillRaw* unit, int inNumSamples); // audio callback
 
+/*
+/*
+ * Function to be run on an auxiliary task that reads data from the Trill sensor.
+ * Here, a loop is defined so that the task runs recurrently for as long as the
+ * audio thread is running.
+void loop(void*)
+{
+	// loop
+	while(!gShouldStop)
+	{
+		if(touchSensor.isReady()) {
+			// Read raw data from sensor
+			touchSensor.readI2C();
+			for(unsigned int i = 0; i < NUM_SENSORS; i++) {
+				gSensorReading[i] = map(touchSensor.rawData[i], gSensorRange[0], gSensorRange[1], 0, 1);
+				gSensorReading[i] = constrain(gSensorReading[i], 0, 1);
+			}
+		} else {
+			printf("Sensor is not ready\n");
+		}
 
+		// Sleep for ... milliseconds
+		usleep(gTaskSleepTime);
+	}
+}
+
+
+*/
+
+// read I2C without a constant loop (this is handled in the audio thread)
 void readSensor(void* data)
 {
   TrillRaw *unit = (TrillRaw*)data;
 	if(unit->sensor.isReady()) {
 		unit->sensor.readI2C();
-	}
+    for(unsigned int i=0; i < NUM_SENSORS; i++) {
+      //unit->sensorReading[i] = map(unit->sensor.rawData[i], 200, 2000, 0.0, 1.0);
+      unit->sensorReading[i] = unit->sensor.rawData[i];
+    }
+  } else {
+      printf("Sensor is not ready to read!\n");
+  }
 }
 
 void TrillRaw_Ctor(TrillRaw* unit) {
@@ -58,33 +103,27 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   threshold = (int)IN0(2);
   prescaler = (int)IN0(3);
 
-  // initialize outputs
-  /*
-  for (int j = 0; j < NUM_SENSORS; j++)
-    OUT0(j) = 0.f;
-  */
+  // zero outputs
+  for (int j = 0; j < unit->mNumOutputs; j++)
+    OUT0(j) = 111.f;
 
-  //fprintf(stderr, "thresh: %d  prescaler: %d", threshold, prescaler);
-
-  printf("Hello Trill\n");
-  printf("Raw inputs~~ I2C BUS: %d   I2C ADDR: %d\n", i2c_bus, i2c_address);
-  printf("Raw inputs~~ mode: %d   thresh: %d   pre: %d\n", mode, threshold, prescaler);
-
-  printf("Unit Inputs: %d  Outputs: %d\n", unit->mNumInputs, unit->mNumOutputs);
 
   unit->readInterval = 500; // read every 500ms
+  unit->readIntervalSamples = 0;
   unit->readCount = 0;
+  unit->i2cReadTask = Bela_createAuxiliaryTask(readSensor, 30, "I2C-read", (void*)unit);
+  unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
 
-  if(unit->sensor.setup(i2c_bus, i2c_address, mode, threshold, prescaler) != 0) {
+
+  //unit->sensor.setup(i2c_bus, i2c_address, mode, threshold, prescaler);
+
+  if(unit->sensor.setup(1, 0x18, Trill::DIFF, gThresholdOpts[6], gPrescalerOpts[0]) != 0) {
       fprintf(stderr, "Unable to initialize touch sensor\n");
       return;
   } else {
     printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion());
+    printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", unit->mNumOutputs, i2c_bus, i2c_address, mode, threshold, prescaler);
   }
-
-
-  //unit->sensor.setup();
-
 
 /* for some reason the craft sensor appears as devicetype NONE
   just comment this out for now
@@ -95,9 +134,6 @@ void TrillRaw_Ctor(TrillRaw* unit) {
      return;
    }
 */
-
-  unit->i2cReadTask = Bela_createAuxiliaryTask(readSensor, 50, "I2C-read", (void*)unit);
-  unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
 
   if(unit->sensor.isReady()) {
     unit->sensor.readI2C();
@@ -121,14 +157,6 @@ void TrillRaw_Dtor(TrillRaw* unit)
 // Don't change the names of the arguments, or the helper macros won't work.
 void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
 
-  // Get pointers to the output values
-  // TODO: maybe use unit->sensor.numSensors() instead
-  //       and dynamically allocate this array.
-  float out = OUT0(0);
-  float outs[NUM_SENSORS];
-  for(int i = 0; i < NUM_SENSORS; i++) {
-    outs[i] = OUT0(i);
-  }
 
   // NOTE: In general it's not a good idea to use static variables here
   //       they might be shared between plug-in instances!
@@ -149,29 +177,26 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
 
 
   // check if another read is necessary before setting output samples
-  for(int n=0; n < inNumSamples; n++) {
+  for(unsigned int n=0; n < inNumSamples; n++) {
     // This kind of sample-precision is not possible
     //   in the callback with Aux tasks, BUT this is realibly
     //   counting samples so the AUX task is called at a regular rate.
     // Running Aux tasks is more of a "request" than a demand..
     //   if an Aux task is called a second time the first call will be
     //   ignored...
-    if(++unit->readCount >= unit->readIntervalSamples) {
+    unit->readCount += 1;
+    if(unit->readCount >= unit->readIntervalSamples) {
       unit->readCount = 0;
-      Bela_scheduleAuxiliaryTask(unit->i2cReadTask);
+      Bela_scheduleAuxiliaryTask(unit->i2cReadTask); // run the i2c read every so many samples
     }
   }
 
-  for (int i = 0; i < NUM_SENSORS; i++) {
-      outs[i] = (float)unit->sensor.rawData[i];
+  // TODO: maybe use unit->sensor.numSensors() instead
+  //       and modify TrillRaw.sc to specify a variable number of sensors
+
+  for (int i = 0; i < unit->mNumOutputs; i++) {
+    OUT0(i) = unit->sensorReading[i];
   }
-
-  out = (float)unit->sensor.rawData[0];
-
-  OUT0(0) = 33.4123;
-  //OUT0(1) = 80.3725;
-  //OUT0(2) = 1098.429873;
-
 }
 
 PluginLoad(TrillRaw) {

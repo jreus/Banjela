@@ -12,6 +12,7 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
+
 (
 {
 		var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
