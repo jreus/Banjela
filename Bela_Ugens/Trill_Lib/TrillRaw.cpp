@@ -58,12 +58,15 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
   unit->sensor.printDetails();
 
-  // Exit if sensor is not a one-dimensional trill sensor
+/* for some reason the craft sensor appears as devicetype NONE
+  just comment this out for now
+  // Exit if no Trill sensor found
   if(unit->sensor.deviceType() == Trill::NONE) {
   	 fprintf(stderr, "TrillRaw UGen must be used with an attached Trill sensor. \n");
      Print("TrillRaw UGen must be used with an attached Trill sensor. \n");
      return;
    }
+*/
 
   unit->i2cReadTask = Bela_createAuxiliaryTask(readSensor, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);

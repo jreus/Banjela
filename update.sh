@@ -6,7 +6,7 @@ dryrun=1
 
 # example of using arguments to a script
 lineargs1="-auz"
-lineargs2="-e ssh --exclude .git --exclude .gitignore --progress --delete"
+lineargs2="-e ssh --exclude .git --exclude .gitignore --exclude build --progress --delete"
 
 # argument parsing
 PARAMS=""
