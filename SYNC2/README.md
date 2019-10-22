@@ -1,3 +1,0 @@
-# BANJO
-
-Blah Blah
