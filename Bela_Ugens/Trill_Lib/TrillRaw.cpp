@@ -3,9 +3,17 @@ See the Server Plugin API for more info
 http://doc.sccode.org/Reference/ServerPluginAPI.html
 *****/
 
+// TODO: make sure multiple Trill UGens access the same I2C data?
+//      This follows the idiom of Input UGens accessing global signal busses.
+//      ?? does this mean I2C data should be global?
+
+
 #include "Bela.h"
 #include "Trill.h"
 #include "SC_PlugIn.h"
+
+// number of sensors per Trill device
+#define NUM_SENSORS 26
 
 // InterfaceTable contains pointers to functions in the host (scserver).
 static InterfaceTable *ft;
@@ -21,6 +29,10 @@ struct TrillRaw : public Unit {
   unsigned int readInterval; // read interval in ms
   unsigned int readIntervalSamples;
   unsigned int readCount;
+
+  // DEBUGGING bookkeeping
+  unsigned int debugCounter = 0;
+  unsigned char debugPrintRate = 4; // 4 times per second
 };
 
 static void TrillRaw_Ctor(TrillRaw* unit); // constructor
@@ -40,23 +52,39 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   int i2c_bus, i2c_address, mode, threshold, prescaler;
 
   // Get initial arguments to UGen for I2C setup
-  i2c_bus = IN0(0);
-  i2c_address = IN0(1);
+  i2c_bus = (int)IN0(0);
+  i2c_address = (int)IN0(1);
   mode = Trill::DIFF; // read all sensors, return differential from baseline
-  threshold = IN0(2);
-  prescaler = IN0(3);
+  threshold = (int)IN0(2);
+  prescaler = (int)IN0(3);
 
-  rt_printf("thresh: %d  prescaler: %d", threshold, prescaler);
+  // initialize outputs
+  /*
+  for (int j = 0; j < NUM_SENSORS; j++)
+    OUT0(j) = 0.f;
+  */
 
-  unit->readInterval = 10; // read every 10ms
+  //fprintf(stderr, "thresh: %d  prescaler: %d", threshold, prescaler);
+
+  printf("Hello Trill\n");
+  printf("Raw inputs~~ I2C BUS: %d   I2C ADDR: %d\n", i2c_bus, i2c_address);
+  printf("Raw inputs~~ mode: %d   thresh: %d   pre: %d\n", mode, threshold, prescaler);
+
+  printf("Unit Inputs: %d  Outputs: %d\n", unit->mNumInputs, unit->mNumOutputs);
+
+  unit->readInterval = 500; // read every 500ms
   unit->readCount = 0;
+
   if(unit->sensor.setup(i2c_bus, i2c_address, mode, threshold, prescaler) != 0) {
       fprintf(stderr, "Unable to initialize touch sensor\n");
-      Print("Unable to initialize touch sensor\n");
       return;
+  } else {
+    printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion());
   }
 
-  unit->sensor.printDetails();
+
+  //unit->sensor.setup();
+
 
 /* for some reason the craft sensor appears as devicetype NONE
   just comment this out for now
@@ -75,7 +103,6 @@ void TrillRaw_Ctor(TrillRaw* unit) {
     unit->sensor.readI2C();
   } else {
     fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
-    Print("Trill Sensor is not ready for I2C read.\n");
     return;
   }
 
@@ -94,27 +121,35 @@ void TrillRaw_Dtor(TrillRaw* unit)
 // Don't change the names of the arguments, or the helper macros won't work.
 void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
 
-  // *** DEBUGGING ***
-  static unsigned int debugCounter = 0;
-  static unsigned char debugPrintRate = 4; // 4 times per second
+  // Get pointers to the output values
+  // TODO: maybe use unit->sensor.numSensors() instead
+  //       and dynamically allocate this array.
+  float out = OUT0(0);
+  float outs[NUM_SENSORS];
+  for(int i = 0; i < NUM_SENSORS; i++) {
+    outs[i] = OUT0(i);
+  }
+
+  // NOTE: In general it's not a good idea to use static variables here
+  //       they might be shared between plug-in instances!
+  //static int readCount = 0;
+  //       Put them in the unit struct instead!
+
+
+  //*** DEBUGGING BOOKKEEPING ***/
   bool DEBUG = false;
-  debugCounter += inNumSamples;
-  if(debugCounter >= (SAMPLERATE / debugPrintRate)) {
-    debugCounter = 0;
+  unit->debugCounter += inNumSamples;
+  if(unit->debugCounter >= (SAMPLERATE / unit->debugPrintRate)) {
+    unit->debugCounter = 0;
     DEBUG = true;
   }
-  // *** END DEBUGGING ***
+  //*** END DEBUGGING ***/
 
 
-  // TODO: make sure multiple UGens access the same I2C data.
-  //      This follows the idiom of Input UGens accessing global signal busses.
-  //      ?? < does this mean I2C data should be global?
-  //static int readCount = 0; // NOTE: probably not a good idea to use static variables here, might be shared between plugin instances!
-  // 26 kr outputs, one for each trill sensor raw value
 
 
   // check if another read is necessary before setting output samples
-  for(unsigned char n=0; n < inNumSamples; n++) {
+  for(int n=0; n < inNumSamples; n++) {
     // This kind of sample-precision is not possible
     //   in the callback with Aux tasks, BUT this is realibly
     //   counting samples so the AUX task is called at a regular rate.
@@ -127,9 +162,16 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
     }
   }
 
-  for (unsigned char i = 0; i < unit->sensor.numSensors(); i++) {
-      OUT0(i) = unit->sensor.rawData[i];
+  for (int i = 0; i < NUM_SENSORS; i++) {
+      outs[i] = (float)unit->sensor.rawData[i];
   }
+
+  out = (float)unit->sensor.rawData[0];
+
+  OUT0(0) = 33.4123;
+  //OUT0(1) = 80.3725;
+  //OUT0(2) = 1098.429873;
+
 }
 
 PluginLoad(TrillRaw) {
