@@ -1,7 +1,7 @@
 #!/bin/bash
 
 local=.
-remote="root@192.168.7.2:~/myfiles"
+remote="root@192.168.7.2:~/banjer"
 dryrun=1
 
 # example of using arguments to a script
