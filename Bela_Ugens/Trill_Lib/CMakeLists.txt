@@ -2,7 +2,7 @@
 # Build with
 #
 
-# cmake -DSC_PATH=~/supercollider3.10b/ -DBELA_PATH=~/Bela/ -DCMAKE_C_COMPILE=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILE=/usr/bin/g++-6 -DCMAKE_C_FLAGS="-march=armv7-a -mtune=cortex-a8 -mfloat-abi=hard -mfpu=neon -O2" -DCMAKE_CPP_FLAGS="-march=armv7-a -mtune=cortex-a8 -mfloat-abi=hard -mfpu=neon -O2" ..
+# cmake -DSC_PATH=~/supercollider3.10b/ -DBELA_PATH=~/Bela/ ..
 
 # cmake -DCMAKE_BUILD_TYPE=RELEASE ..
 
@@ -10,7 +10,7 @@
 
 cmake_minimum_required (VERSION 2.8)
 
-set(FILENAME TrillIn.cpp)
+set(FILENAME TrillRaw.cpp)
 set(CMAKE_BUILD_TYPE Release)
 
 #automatically sets project name from the FILENAME variable

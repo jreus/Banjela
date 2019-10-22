@@ -17,7 +17,6 @@ int rt_fprintf(FILE *stream, const char *format, ...);
 // Holds UGen state variables
 struct TrillRaw : public Unit {
   Trill sensor;
-  unsigned int numSensors;
   AuxiliaryTask i2cReadTask;
   unsigned int readInterval; // read interval in ms
   unsigned int readIntervalSamples;
@@ -32,7 +31,7 @@ static void TrillRaw_next_k(TrillRaw* unit, int inNumSamples); // audio callback
 void readSensor(void* data)
 {
   TrillRaw *unit = (TrillRaw*)data;
-	if(unit->sensor.ready()) {
+	if(unit->sensor.isReady()) {
 		unit->sensor.readI2C();
 	}
 }
@@ -49,12 +48,12 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
   rt_printf("thresh: %d  prescaler: %d", threshold, prescaler);
 
-  unit->numSensors = Trill::numSensors;
   unit->readInterval = 10; // read every 10ms
   unit->readCount = 0;
   if(unit->sensor.setup(i2c_bus, i2c_address, mode, threshold, prescaler) != 0) {
       fprintf(stderr, "Unable to initialize touch sensor\n");
-      return false;
+      Print("Unable to initialize touch sensor\n");
+      return;
   }
 
   unit->sensor.printDetails();
@@ -62,16 +61,23 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   // Exit if sensor is not a one-dimensional trill sensor
   if(unit->sensor.deviceType() != Trill::ONED) {
   	 fprintf(stderr, "TrillRaw UGen must be used with a linear Trill sensor. \n You may have to adapt it to make it work with other Trill devices.\n");
-  	 return false;
+     Print("TrillRaw UGen must be used with a linear Trill sensor. \n You may have to adapt it to make it work with other Trill devices.\n");
+     return;
    }
 
   unit->i2cReadTask = Bela_createAuxiliaryTask(readSensor, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
 
-  unit->sensor.readI2C();
+  if(unit->sensor.isReady()) {
+    unit->sensor.readI2C();
+  } else {
+    fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
+    Print("Trill Sensor is not ready for I2C read.\n");
+    return;
+  }
 
   SETCALC(TrillRaw_next_k); // Use the same calc function no matter what the input rate is.
-  TrillRaw_next_k(unit, 1); // calc 1 sample of output so that downstream Ugens don't access garbage
+  TrillRaw_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
 }
 
 void TrillRaw_Dtor(TrillRaw* unit)
@@ -118,7 +124,7 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
     }
   }
 
-  for (unsigned char i = 0; i < unit->numSensors; i++) {
+  for (unsigned char i = 0; i < unit->sensor.numSensors(); i++) {
       OUT0(i) = unit->sensor.rawData[i];
   }
 }
