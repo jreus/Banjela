@@ -59,9 +59,9 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   unit->sensor.printDetails();
 
   // Exit if sensor is not a one-dimensional trill sensor
-  if(unit->sensor.deviceType() != Trill::ONED) {
-  	 fprintf(stderr, "TrillRaw UGen must be used with a linear Trill sensor. \n You may have to adapt it to make it work with other Trill devices.\n");
-     Print("TrillRaw UGen must be used with a linear Trill sensor. \n You may have to adapt it to make it work with other Trill devices.\n");
+  if(unit->sensor.deviceType() == Trill::NONE) {
+  	 fprintf(stderr, "TrillRaw UGen must be used with an attached Trill sensor. \n");
+     Print("TrillRaw UGen must be used with an attached Trill sensor. \n");
      return;
    }
 
