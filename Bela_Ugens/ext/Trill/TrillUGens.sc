@@ -43,24 +43,37 @@ TrillRaw : MultiOutUGen {
 /*
 Default values are chosen which are viable for most usage scenarios.
 By default noise threshold is high and sensitivity is high.
+The outputs should be interpreted as the number of active touches, followed by location, size pairs for each touch centroid like so:
 
-i2c_bus        I2C bus to use on BeagleBone
-i2c_address    I2C address of Trill sensor
-thresholdOpt   noise threshold, int: 0-6, 6=highest noise threshold
-prescalerOpt   int: 0-5, lower values=higher sensitivity
+[numActive, loc1, size1, loc2, size2, loc3, size3, loc4, size4, loc5, size5]
+
+Where:
+loc - is a value from 0.-1. specifying the position on the trill bar.
+size - is a value somewhere in the range of 0-6000 specifying the centroid size.
+
+By default all 5 potential centroids are tracked (for a total of 10 kr outputs),
+but the number of centroids can be limited to a smaller number using the
+limitNumTouches argument.
+
+i2c_bus          I2C bus to use on BeagleBone
+i2c_address      I2C address of Trill sensor
+thresholdOpt     noise threshold, int: 0-6, 6=highest noise threshold
+prescalerOpt     int: 0-5, lower values=higher sensitivity
+limitNumTouches  int: 1-5, limit number of simultaneous centroids returned
 */
 TrillCentroids : MultiOutUGen {
-  *kr {arg i2c_bus=1, i2c_address=0x18, thresholdOpt=6, prescalerOpt=0;
+  *kr {arg i2c_bus=1, i2c_address=0x18, thresholdOpt=6, prescalerOpt=0, limitNumTouches=5;
     if(thresholdOpt.inclusivelyBetween(0,6).not) { Exception("Threshold option % out of bounds. Must be an index from 0 to 6.".format(thresholdOpt)).throw };
-    if(prescalerOpt.inclusivelyBetween(0,5).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 5.".format(thresholdOpt)).throw };
+    if(prescalerOpt.inclusivelyBetween(0,5).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 5.".format(prescalerOpt)).throw };
+    if(limitNumTouches.inclusivelyBetween(1,5).not) { Exception("Num touches limited to %. Value must be an integer from 1 to 5.".format(limitNumTouches)).throw };
 
-    ^this.multiNew('control', i2c_bus, i2c_address, threshold, prescaler);
+    ^this.multiNew('control', i2c_bus, i2c_address, threshold, prescaler, limitNumTouches);
   }
 
-  //
+  // TrillCentroids has a variable number of control rate output channels
   init { arg ... theInputs;
     inputs = theInputs;
-    ^this.initOutputs(26, rate);
+    ^this.initOutputs((theInputs[4] * 2) + 1, rate);
   }
 }
 

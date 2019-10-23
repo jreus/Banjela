@@ -7,13 +7,12 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 //      This follows the idiom of Input UGens accessing global signal busses.
 //      ?? does this mean I2C data should be global?
 
-
-#include "Bela.h"
-#include "Trill.h"
+#include <Bela.h>
+#include <libraries/Trill/Trill.h>
 #include "SC_PlugIn.h"
 
-// number of sensors per Trill device
-#define NUM_SENSORS 26
+// maximum number of touch centroids
+#define NUM_TOUCH 5
 
 // InterfaceTable contains pointers to global functions in the host (scserver).
 static InterfaceTable *ft;
@@ -23,16 +22,18 @@ int rt_printf(const char *format, ...);
 int rt_fprintf(FILE *stream, const char *format, ...);
 
 // Holds UGen state variables
-struct TrillRaw : public Unit {
+struct TrillCentroids : public Unit {
   Trill sensor;
-  AuxiliaryTask i2cReadTask;
+  unsigned int limitTouches = 5;
+  AuxiliaryTask centroidReadTask;
   unsigned int readInterval; // read interval in ms
   unsigned int readIntervalSamples;
   unsigned int readCount;
 
-  // Readins for all the different pads on the Trill Craft
-  float sensorReading[NUM_SENSORS] = { 0.0 };
-
+  // CENTROID STATE VARIABLES
+  float touchLocations[NUM_TOUCH] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+  float touchSizes[NUM_TOUCH] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+  int numActiveTouches = 0;
 
   // DEBUGGING bookkeeping
   unsigned int debugCounter = 0;
@@ -45,126 +46,95 @@ int gPrescalerOpts[6] = {1, 2, 4, 8, 16, 32};
 int gThresholdOpts[7] = {0, 10, 20, 30, 40, 50, 60};
 
 
-static void TrillRaw_Ctor(TrillRaw* unit); // constructor
-static void TrillRaw_Dtor(TrillRaw* unit); // destructor
-static void TrillRaw_next_k(TrillRaw* unit, int inNumSamples); // audio callback
+static void TrillCentroids_Ctor(TrillCentroids* unit); // constructor
+static void TrillCentroids_Dtor(TrillCentroids* unit); // destructor
+static void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples); // audio callback
 
-/*
-/*
- * Function to be run on an auxiliary task that reads data from the Trill sensor.
- * Here, a loop is defined so that the task runs recurrently for as long as the
- * audio thread is running.
-void loop(void*)
-{
-	// loop
-	while(!gShouldStop)
-	{
-		if(touchSensor.isReady()) {
-			// Read raw data from sensor
-			touchSensor.readI2C();
-			for(unsigned int i = 0; i < NUM_SENSORS; i++) {
-				gSensorReading[i] = map(touchSensor.rawData[i], gSensorRange[0], gSensorRange[1], 0, 1);
-				gSensorReading[i] = constrain(gSensorReading[i], 0, 1);
-			}
-		} else {
-			printf("Sensor is not ready\n");
-		}
-
-		// Sleep for ... milliseconds
-		usleep(gTaskSleepTime);
-	}
-}
-
-
-*/
-
-// read I2C without a constant loop (this is handled in the audio thread)
 void readSensor(void* data)
 {
-  TrillRaw *unit = (TrillRaw*)data;
-	if(unit->sensor.isReady()) {
-		unit->sensor.readI2C();
-    for(unsigned int i=0; i < NUM_SENSORS; i++) {
-      //unit->sensorReading[i] = map(unit->sensor.rawData[i], 200, 2000, 0.0, 1.0);
-      unit->sensorReading[i] = unit->sensor.rawData[i];
-    }
-  } else {
-      printf("Sensor is not ready to read!\n");
-  }
+  TrillCentroids *unit = (TrillCentroids*)data;
+  unit->sensor.readLocations(); // read latest i2c data & calculate centroids
+
+  // Remap locations so that they are expressed in a 0-1 range
+	for(int i = 0; i <  unit->sensor.numberOfTouches(); i++) {
+		unit->touchLocations[i] = map(unit->sensor.touchLocation(i), 0, 3200, 0.f, 1.f);
+		unit->touchSizes[i] = unit->sensor.touchSize(i);
+	 }
+	 unit->numActiveTouches = unit->sensor.numberOfTouches();
+
+	 // For all innactive touches, set location and size to 0
+	 for(int i = unit->numActiveTouches; i <  NUM_TOUCH; i++) {
+		unit->touchLocations[i] = 0.f;
+		unit->touchSizes[i] = 0.f;
+	 }
 }
 
-void TrillRaw_Ctor(TrillRaw* unit) {
-  int i2c_bus, i2c_address, mode, threshold, prescaler;
+void TrillCentroids_Ctor(TrillCentroids* unit) {
+  int i2c_bus, i2c_address, mode, thresholdOpt, prescalerOpt;
 
   // Get initial arguments to UGen for I2C setup
   i2c_bus = (int)IN0(0);
   i2c_address = (int)IN0(1);
-  mode = Trill::DIFF; // read all sensors, return differential from baseline
-  threshold = (int)IN0(2);
-  prescaler = (int)IN0(3);
+  mode = Trill::NORMAL; // tell sensor to calculate touch centroids
+  thresholdOpt = (int)IN0(2);
+  prescalerOpt = (int)IN0(3);
+  unit->limitTouches = (int)IN0(4);
 
   // zero outputs
-  for (int j = 0; j < unit->mNumOutputs; j++)
-    OUT0(j) = 111.f;
+  OUT0(0) = 0.f;
+  for (int j = 0; j < (unit->limitTouches * 2); j+=2) {
+    OUT0(j+1) = 0.f;  // location i
+    OUT0(j+2) = 0.f;  // size i
+  }
 
-
-  unit->readInterval = 500; // read every 500ms
+  unit->readInterval = 100; // read every 100ms
   unit->readIntervalSamples = 0;
   unit->readCount = 0;
-  unit->i2cReadTask = Bela_createAuxiliaryTask(readSensor, 30, "I2C-read", (void*)unit);
+  unit->centroidReadTask = Bela_createAuxiliaryTask(readSensor, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
 
-
-  //unit->sensor.setup(i2c_bus, i2c_address, mode, threshold, prescaler);
-
-  if(unit->sensor.setup(1, 0x18, Trill::DIFF, gThresholdOpts[6], gPrescalerOpts[0]) != 0) {
-      fprintf(stderr, "Unable to initialize touch sensor\n");
-      return;
+  if(unit->sensor.setup(i2c_bus, i2c_address, mode) != 0) {
+    fprintf(stderr, "Unable to initialize touch sensor\n");
+    return;
   } else {
+    // DEFAULT OPTS are defined in TrillUGens.sc
+    unit->sensor.setPrescaler(gPrescalerOpts[prescalerOpt]);
+    unit->sensor.setNoiseThreshold(gThresholdOpts[thresholdOpt]);
+
     printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion());
     printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", unit->mNumOutputs, i2c_bus, i2c_address, mode, threshold, prescaler);
   }
 
-/* for some reason the craft sensor appears as devicetype NONE
-  just comment this out for now
-  // Exit if no Trill sensor found
-  if(unit->sensor.deviceType() == Trill::NONE) {
-  	 fprintf(stderr, "TrillRaw UGen must be used with an attached Trill sensor. \n");
-     Print("TrillRaw UGen must be used with an attached Trill sensor. \n");
-     return;
-   }
-*/
-
-  if(unit->sensor.isReady()) {
-    unit->sensor.readI2C();
-  } else {
-    fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
+  // Exit if using a 2D Trill sensor
+  if(unit->sensor.deviceType() == Trill::TWOD) {
+  	fprintf(stderr, "TrillCentroids UGen cannot be used with a 2D Trill sensor.\n");
     return;
   }
 
-  SETCALC(TrillRaw_next_k); // Use the same calc function no matter what the input rate is.
-  TrillRaw_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
+  unit->sensor.readLocations();
+
+  SETCALC(TrillCentroids_next_k); // Use the same calc function no matter what the input rate is.
+  TrillCentroids_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
 }
 
-void TrillRaw_Dtor(TrillRaw* unit)
+void TrillCentroids_Dtor(TrillCentroids* unit)
 {
 	unit->sensor.cleanup();
 }
 
 
-// the calculation function can have any name, but this is conventional. the first argument must be "unit."
-// this function is called every control period (64 samples is typical)
-// Don't change the names of the arguments, or the helper macros won't work.
-void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
+/*
+Called every control period (64 samples is typical)
+The calculation function can have any name, but this is conventional.
+the first argument must be named "unit" for the IN and OUT macros to work.
+*/
+void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
+  // NOTE: In general it's not a good idea to use static variables inside
+  //        UGens as they might be shared between plug-in instances!
+  //      Put state variables in the unit struct instead!
+  //static int readCount = 0; // NO!
 
-
-  // NOTE: In general it's not a good idea to use static variables here
-  //       they might be shared between plug-in instances!
-  //static int readCount = 0;
-  //       Put them in the unit struct instead!
-
-
-  //*** DEBUGGING BOOKKEEPING ***/
+  //*** DEBUGGING BOOKKEEPING, for printing throttled output from the audio loop ***/
   bool DEBUG = false;
   unit->debugCounter += inNumSamples;
   if(unit->debugCounter >= (SAMPLERATE / unit->debugPrintRate)) {
@@ -173,33 +143,25 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
   }
   //*** END DEBUGGING ***/
 
-
-
-
-  // check if another read is necessary before setting output samples
   for(unsigned int n=0; n < inNumSamples; n++) {
-    // This kind of sample-precision is not possible
-    //   in the callback with Aux tasks, BUT this is realibly
-    //   counting samples so the AUX task is called at a regular rate.
-    // Running Aux tasks is more of a "request" than a demand..
-    //   if an Aux task is called a second time the first call will be
-    //   ignored...
+    // This kind of sample-precision is not possible using aux tasks.
+    //   But at least the samples are being counted reliably, so this way
+    //   the AUX task is "requested" to run at a regular rate.
     unit->readCount += 1;
     if(unit->readCount >= unit->readIntervalSamples) {
       unit->readCount = 0;
-      Bela_scheduleAuxiliaryTask(unit->i2cReadTask); // run the i2c read every so many samples
+      Bela_scheduleAuxiliaryTask(unit->centroidReadTask); // run the i2c read every so many samples
     }
   }
-
-  // TODO: maybe use unit->sensor.numSensors() instead
-  //       and modify TrillRaw.sc to specify a variable number of sensors
-
-  for (int i = 0; i < unit->mNumOutputs; i++) {
-    OUT0(i) = unit->sensorReading[i];
+  // update control rate outputs
+  OUT0(0) = unit->numActiveTouches;
+  for (int i = 0; i < (unit->limitTouches * 2); i+=2) {
+    OUT0(i+1) = unit->touchLocations[i];
+    OUT0(i+2) = unit->touchSizes[i];
   }
 }
 
-PluginLoad(TrillRaw) {
+PluginLoad(TrillCentroids) {
     ft = inTable; // store pointer to InterfaceTable
-    DefineSimpleUnit(TrillRaw);
+    DefineSimpleUnit(TrillCentroids);
 }

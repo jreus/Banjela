@@ -49,36 +49,6 @@ static void TrillRaw_Ctor(TrillRaw* unit); // constructor
 static void TrillRaw_Dtor(TrillRaw* unit); // destructor
 static void TrillRaw_next_k(TrillRaw* unit, int inNumSamples); // audio callback
 
-/*
-/*
- * Function to be run on an auxiliary task that reads data from the Trill sensor.
- * Here, a loop is defined so that the task runs recurrently for as long as the
- * audio thread is running.
-void loop(void*)
-{
-	// loop
-	while(!gShouldStop)
-	{
-		if(touchSensor.isReady()) {
-			// Read raw data from sensor
-			touchSensor.readI2C();
-			for(unsigned int i = 0; i < NUM_SENSORS; i++) {
-				gSensorReading[i] = map(touchSensor.rawData[i], gSensorRange[0], gSensorRange[1], 0, 1);
-				gSensorReading[i] = constrain(gSensorReading[i], 0, 1);
-			}
-		} else {
-			printf("Sensor is not ready\n");
-		}
-
-		// Sleep for ... milliseconds
-		usleep(gTaskSleepTime);
-	}
-}
-
-
-*/
-
-// read I2C without a constant loop (this is handled in the audio thread)
 void readSensor(void* data)
 {
   TrillRaw *unit = (TrillRaw*)data;
@@ -103,9 +73,9 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   thresholdOpt = (int)IN0(2);
   prescalerOpt = (int)IN0(3);
 
-  // zero outputs
+  // zero control rate outputs
   for (int j = 0; j < unit->mNumOutputs; j++)
-    OUT0(j) = 111.f;
+    OUT0(j) = 0.f;
 
 
   unit->readInterval = 500; // read every 500ms

@@ -24,8 +24,8 @@ x = 1;
 		var prescaler = 8; // lower values = higher sensitivity, must be one of: {1, 2, 4, 8, 16, 32}
 		var vals, valsMF, fft;
 
-    	fft = FFT(LocalBuf(1024), WhiteNoise.ar);
-    	valsMF = MFCC.kr(fft);
+    fft = FFT(LocalBuf(1024), WhiteNoise.ar);
+    valsMF = MFCC.kr(fft);
 		vals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
 
 		//vals.poll(1);
