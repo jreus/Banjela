@@ -12,6 +12,9 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
+x = 1;
+
+5.inclusivelyBetween
 
 (
 {
