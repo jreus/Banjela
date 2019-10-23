@@ -96,22 +96,22 @@ void TrillRaw_Ctor(TrillRaw* unit) {
     printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", unit->mNumOutputs, i2c_bus, i2c_address, mode, gThresholdOpts[thresholdOpt], gPrescalerOpts[prescalerOpt]);
   }
 
-/* for some reason the craft sensor appears as devicetype NONE
-  just comment this out for now
-  // Exit if no Trill sensor found
-  if(unit->sensor.deviceType() == Trill::NONE) {
-  	 fprintf(stderr, "TrillRaw UGen must be used with an attached Trill sensor. \n");
-     Print("TrillRaw UGen must be used with an attached Trill sensor. \n");
+  // Exit if 2D trill sensor is found
+  if(unit->sensor.deviceType() == Trill::TWOD) {
+  	 fprintf(stderr, "TrillRaw UGen cannot be used with a 2D Trill sensor. \n");
      return;
    }
-*/
 
+  unit->sensor.readI2C();
+
+/* Throwing errors for some reason...
   if(unit->sensor.isReady()) {
     unit->sensor.readI2C();
   } else {
     fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
     return;
   }
+*/
 
   SETCALC(TrillRaw_next_k); // Use the same calc function no matter what the input rate is.
   TrillRaw_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
