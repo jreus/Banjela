@@ -82,9 +82,9 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
   // zero outputs
   OUT0(0) = 0.f;
-  for (int j = 0; j < (unit->limitTouches * 2); j+=2) {
-    OUT0(j+1) = 0.f;  // location i
-    OUT0(j+2) = 0.f;  // size i
+  for (int j = 0; j < unit->limitTouches; j++) {
+    OUT0(j*2+1) = 0.f;  // location i
+    OUT0(j*2+2) = 0.f;  // size i
   }
 
   unit->readInterval = 100; // read every 100ms
@@ -155,9 +155,9 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
   }
   // update control rate outputs
   OUT0(0) = unit->numActiveTouches;
-  for (int i = 0; i < (unit->limitTouches * 2); i+=2) {
-    OUT0(i+1) = unit->touchLocations[i];
-    OUT0(i+2) = unit->touchSizes[i];
+  for (unsigned int i = 0; i < unit->limitTouches; i++) {
+    OUT0(i*2+1) = unit->touchLocations[i];
+    OUT0(i*2+2) = unit->touchSizes[i];
   }
 }
 

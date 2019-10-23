@@ -30,18 +30,17 @@ s.waitForBoot({
 		var i2c_address = 0x18; // I2C address of Trill sensor
 		var thresh = 5; // noise threshold option, int: 0-5 (5=highest noise threshold)
 		var prescaler = 0; // sensitivity, int: 0-5 (0=highest sensitivity)
-		var limitTouches = 5; // limit number of touch centroids returned by UGen
+		var limitTouches = 2; // limit number of touch centroids returned by UGen
 		var vals;
 		var sig;
 		
-		vals = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
-		SendReply.kr(Impulse.kr(1), "/trill", vals);
+		vals = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler, limitTouches);
+		SendReply.kr(Impulse.kr(2), "/trill", vals);
 		//sig = Saw.ar(max(20, vals), mul: Lag.kr(vals > 30, 0.1)) * 0.4;
 		//sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
 		//Splay.ar(sig);
 		WhiteNoise.ar * 0.1;
 	}.play;
-	"DONE".postln;
 
-	OSCdef(\trill, {|msg| msg.postln }, "/trill")
+	OSCdef(\trill, {|msg| msg[3..].postln }, "/trill")
 });
