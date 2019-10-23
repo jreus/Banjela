@@ -1,5 +1,5 @@
 /**
-Functional example of using TrillRaw UGen
+Remote control of Bela
 **/
 
 ( // connect to the already-running remote belaserver
@@ -12,29 +12,32 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
-x = 1;
 
-5.inclusivelyBetween
 
+
+// Trill Centroid patch
 (
-{
-		var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
-		var i2c_address = 0x18; // I2C address of Trill sensor
-		var thresh = 30; // noise threshold, must be one of: {0, 10, 20, 30, 40, 50, 60}
-		var prescaler = 8; // lower values = higher sensitivity, must be one of: {1, 2, 4, 8, 16, 32}
-		var vals, valsMF, fft;
 
-    fft = FFT(LocalBuf(1024), WhiteNoise.ar);
-    valsMF = MFCC.kr(fft);
-		vals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
+Ndef(\centroid, {
+  var i2c_bus = 1;
+  var i2c_address = 0x18;
+  var thresh = 6;
+  var prescaler = 0;
+  var limitTouches = 5;
+  var touchsigs = DC.ar(0).dup(5);
+  var centroids;
 
-		//vals.poll(1);
-		vals.poll(0.5);
-		//SendReply.kr(Impulse.kr(0.5), "/trill", vals);
-		WhiteNoise.ar(SinOsc.ar(1.0).unipolar) * 0.1;
-}.play(s);
+  centroids = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler, limitTouches);
+
+  touchsigs[0] = PMOsc.ar((centroids[1]+0.001) * 1500, 1500, (centroids[2]+1) / 500., 0.1) * 0.2;
+
+  //vals.poll(1);
+  //vals.poll(0.5);
+  //SendReply.kr(Impulse.kr(0.5), "/trill", vals);
+  //WhiteNoise.ar() * 0.1 * SinOsc.ar(centroids[0] + 1);
+  Splay.ar(touchsigs);
+}).play(0, numChannels: 2, group: s);
+
 );
 
-OSCdef(\trill, {|msg| msg.postln }, "/trill");
 
-);
