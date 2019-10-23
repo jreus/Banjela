@@ -30,7 +30,7 @@ TrillRaw : MultiOutUGen {
     if(thresholdOpt.inclusivelyBetween(0,6).not) { Exception("Threshold option % out of bounds. Must be an index from 0 to 6.".format(thresholdOpt)).throw };
     if(prescalerOpt.inclusivelyBetween(0,5).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 5.".format(thresholdOpt)).throw };
 
-    ^this.multiNew('control', i2c_bus, i2c_address, threshold, prescaler);
+    ^this.multiNew('control', i2c_bus, i2c_address, thresholdOpt, prescalerOpt);
   }
 
   // 26 fixed outputs (TODO: should be increased to 30 for latest Trill sensors)
@@ -67,7 +67,7 @@ TrillCentroids : MultiOutUGen {
     if(prescalerOpt.inclusivelyBetween(0,5).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 5.".format(prescalerOpt)).throw };
     if(limitNumTouches.inclusivelyBetween(1,5).not) { Exception("Num touches limited to %. Value must be an integer from 1 to 5.".format(limitNumTouches)).throw };
 
-    ^this.multiNew('control', i2c_bus, i2c_address, threshold, prescaler, limitNumTouches);
+    ^this.multiNew('control', i2c_bus, i2c_address, thresholdOpt, prescalerOpt, limitNumTouches);
   }
 
   // TrillCentroids has a variable number of control rate output channels

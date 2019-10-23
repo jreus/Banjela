@@ -3,10 +3,9 @@
 #
 
 # cmake -DSC_PATH=~/supercollider3.10b/ -DBELA_PATH=~/Bela/ ..
-
 # cmake -DCMAKE_BUILD_TYPE=RELEASE ..
-
 # make
+# make && mv TrillRaw.so ../../ext/Trill/
 
 cmake_minimum_required (VERSION 2.8)
 

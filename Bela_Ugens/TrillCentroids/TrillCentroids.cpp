@@ -102,7 +102,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
     unit->sensor.setNoiseThreshold(gThresholdOpts[thresholdOpt]);
 
     printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion());
-    printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", unit->mNumOutputs, i2c_bus, i2c_address, mode, threshold, prescaler);
+    printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", unit->mNumOutputs, i2c_bus, i2c_address, mode, gThresholdOpts[thresholdOpt], gPrescalerOpts[prescalerOpt]);
   }
 
   // Exit if using a 2D Trill sensor

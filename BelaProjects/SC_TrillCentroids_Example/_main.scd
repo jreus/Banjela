@@ -1,6 +1,10 @@
 /**
-Functional example of using TrillRaw UGen
+Functional example of using TrillCentroids UGen
+
+(C) 2019 Jonathan Reus
+
 **/
+
 s = Server.default;
 
 s.options.numAnalogInChannels = 8; // can be 2, 4 or 8
@@ -24,16 +28,18 @@ s.waitForBoot({
 	{
 		var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
 		var i2c_address = 0x18; // I2C address of Trill sensor
-		var thresh = 30; // noise threshold, must be one of: {0, 10, 20, 30, 40, 50, 60}
-		var prescaler = 1; // lower values = higher sensitivity, must be one of: {1, 2, 4, 8, 16, 32}
+		var thresh = 5; // noise threshold option, int: 0-5 (5=highest noise threshold)
+		var prescaler = 0; // sensitivity, int: 0-5 (0=highest sensitivity)
+		var limitTouches = 5; // limit number of touch centroids returned by UGen
 		var vals;
 		var sig;
 		
-		vals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
-		//SendReply.kr(Impulse.kr(1), "/trill", vals);
-		sig = Saw.ar(max(20, vals), mul: Lag.kr(vals > 30, 0.1)) * 0.4;
-		sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
-		Splay.ar(sig);
+		vals = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
+		SendReply.kr(Impulse.kr(1), "/trill", vals);
+		//sig = Saw.ar(max(20, vals), mul: Lag.kr(vals > 30, 0.1)) * 0.4;
+		//sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
+		//Splay.ar(sig);
+		WhiteNoise.ar * 0.1;
 	}.play;
 	"DONE".postln;
 

@@ -1,5 +1,8 @@
 /**
 Functional example of using TrillRaw UGen
+
+(C) 2019 Jonathan Reus
+
 **/
 s = Server.default;
 

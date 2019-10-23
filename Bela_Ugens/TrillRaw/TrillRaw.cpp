@@ -93,7 +93,7 @@ void TrillRaw_Ctor(TrillRaw* unit) {
     unit->sensor.setPrescaler(gPrescalerOpts[prescalerOpt]);
     unit->sensor.setNoiseThreshold(gThresholdOpts[thresholdOpt]);
     printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion());
-    printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", unit->mNumOutputs, i2c_bus, i2c_address, mode, threshold, prescaler);
+    printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", unit->mNumOutputs, i2c_bus, i2c_address, mode, gThresholdOpts[thresholdOpt], gPrescalerOpts[prescalerOpt]);
   }
 
 /* for some reason the craft sensor appears as devicetype NONE
