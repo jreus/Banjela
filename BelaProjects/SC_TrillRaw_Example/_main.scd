@@ -27,8 +27,8 @@ s.waitForBoot({
 	{
 		var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
 		var i2c_address = 0x18; // I2C address of Trill sensor
-		var thresh = 30; // noise threshold, must be one of: {0, 10, 20, 30, 40, 50, 60}
-		var prescaler = 1; // lower values = higher sensitivity, must be one of: {1, 2, 4, 8, 16, 32}
+		var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
+		var prescaler = 0; // sensitvity, int: 0-5 (0=highest sensitivity)
 		var vals;
 		var sig;
 		
@@ -38,7 +38,6 @@ s.waitForBoot({
 		sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
 		Splay.ar(sig);
 	}.play;
-	"DONE".postln;
 
 	OSCdef(\trill, {|msg| msg.postln }, "/trill")
 });
