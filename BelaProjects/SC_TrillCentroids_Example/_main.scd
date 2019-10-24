@@ -24,27 +24,40 @@ s.options.numInputBusChannels = 2;
 s.options.numOutputBusChannels = 2;
 
 
-s.waitForBoot({
+s.waitForBoot {
 	{
-		var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
-		var i2c_address = 0x18; // I2C address of Trill sensor
-		var thresh = 5; // noise threshold option, int: 0-5 (5=highest noise threshold)
-		var prescaler = 0; // sensitivity, int: 0-5 (0=highest sensitivity)
-		var limitTouches = 5; // limit number of touch centroids returned by UGen
-		var vals;
-		var sig;
-		var touchsigs = [DC.ar(0), DC.ar(0), DC.ar(0), DC.ar(0), DC.ar(0)];
-		
-		vals = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler, limitTouches);
-		SendReply.kr(Impulse.kr(2), "/trill", vals);
-		//sig = Saw.ar(max(20, vals), mul: Lag.kr(vals > 30, 0.1)) * 0.4;
-		//sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
-		
-		//touchsigs[0] = PMOsc.ar()
-		
-		//Splay.ar(sig);
-		WhiteNoise.ar * 0.1;
+  var i2c_bus = 1;
+  var i2c_address = 0x18;
+  var thresh = 6;
+  var prescaler = 0;
+  var touchsigs = DC.ar(0).dup(5);
+  var centroids;
+  var mix, out;
+
+  centroids = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
+
+  
+  // slap tappy
+  touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 800, 2400).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
+  touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
+  touchsigs[2] = EnvGen.ar(Env.perc(0.001, 0.2), (centroids[6] > 0.0)) * SinOsc.ar([40, 45, 60, 61, 100], mul: 1.0).sum;
+  touchsigs[3] = Pluck.ar(WhiteNoise.ar, (centroids[8] > 0), 0.2, centroids[7].linexp(0.0, 1.0, 50, 400).reciprocal, 1.0, 0.8);
+  touchsigs[4] = Pluck.ar(WhiteNoise.ar, (centroids[10] > 0), 0.2, centroids[9].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
+  out = Splay.ar(touchsigs);
+  
+
+
+  /* synthy
+  touchsigs[0] = Ringz.ar(Trig1.ar(centroids[2] > 0.0, 0.01), centroids[1].linexp(0.0, 1.0, 4000, 1000), 0.1, mul: 1.0).tanh * (centroids[2] > 0.0);
+  touchsigs[1] = PMOsc.ar((centroids[3]+0.001) * 2500, 500, centroids[4].linexp(0.0, 3000, 0.1, 12.0), 0.1) * 0.2 * EnvGen.ar(Env.perc, (centroids[4] > 0.0), timeScale: centroids[4].linexp(500, 3000, 0.3, 5.0));
+
+  mix = Mix([touchsigs[0], touchsigs[1]]);
+  out = GVerb.ar(mix, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + mix;
+	*/
+	
+  centroids.poll(0.5);
+  out;
 	}.play;
 
-	OSCdef(\trill, {|msg| msg[3..].postln }, "/trill")
-});
+
+};

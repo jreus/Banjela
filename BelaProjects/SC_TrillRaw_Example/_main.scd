@@ -23,21 +23,22 @@ s.options.numInputBusChannels = 2;
 s.options.numOutputBusChannels = 2;
 
 
-s.waitForBoot({
-	{
-		var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
-		var i2c_address = 0x18; // I2C address of Trill sensor
-		var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
-		var prescaler = 0; // sensitvity, int: 0-5 (0=highest sensitivity)
-		var vals;
-		var sig;
-		
-		vals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
-		//SendReply.kr(Impulse.kr(1), "/trill", vals);
-		sig = Saw.ar(max(20, vals), mul: Lag.kr(vals > 30, 0.1)) * 0.4;
-		sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
-		Splay.ar(sig);
+s.waitForBoot {
+  {
+  var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
+  var i2c_address = 0x18; // I2C address of Trill sensor
+  var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
+  var prescaler = 0; // sensitvity, int: 0-5 (0=highest sensitivity)
+  var rawvals;
+  var sig;
+
+  rawvals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
+  //SendReply.kr(Impulse.kr(0.5), "/trill", rawvals);
+
+  sig = Saw.ar(rawvals.linlin(0.0, 4100, 30, 2000), mul: Lag.kr(rawvals.linlin(0.0, 4100, 0.0, 1.0), 0.1)) * 0.3;
+  //sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
+  Splay.ar(sig.tanh);
 	}.play;
 
 	OSCdef(\trill, {|msg| msg.postln }, "/trill")
-});
+};
