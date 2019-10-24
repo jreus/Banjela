@@ -22,7 +22,9 @@ s = Server.default;
 s.options.numAnalogInChannels = 8; // can be 2, 4 or 8
 s.options.numAnalogOutChannels = 8; // can be 2, 4 or 8
 s.options.numDigitalChannels = 16;
-s.options.maxLogins = 5;
+s.options.maxLogins = 6; // NOTE: does this actually do anything? - I get the following response in the client:
+// belaServer: server process has maxLogins 8 - adjusting my options accordingly.
+
 
 s.options.pgaGainLeft = 5;     // pregain for left / right audio inputs (+dB)
 s.options.pgaGainRight = 5;    
