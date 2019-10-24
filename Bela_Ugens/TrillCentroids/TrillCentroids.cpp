@@ -24,7 +24,6 @@ int rt_fprintf(FILE *stream, const char *format, ...);
 // Holds UGen state variables
 struct TrillCentroids : public Unit {
   Trill sensor;
-  unsigned int limitTouches = 5;
   AuxiliaryTask centroidReadTask;
   unsigned int readInterval; // read interval in ms
   unsigned int readIntervalSamples;
@@ -78,11 +77,10 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
   mode = Trill::NORMAL; // tell sensor to calculate touch centroids
   thresholdOpt = (int)IN0(2);
   prescalerOpt = (int)IN0(3);
-  unit->limitTouches = (int)IN0(4);
 
   // zero outputs
   OUT0(0) = 0.f;
-  for (int j = 0; j < unit->limitTouches; j++) {
+  for (int j = 0; j < NUM_TOUCH; j++) {
     OUT0(j*2+1) = 0.f;  // location i
     OUT0(j*2+2) = 0.f;  // size i
   }
@@ -155,7 +153,7 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
   }
   // update control rate outputs
   OUT0(0) = unit->numActiveTouches;
-  for (unsigned int i = 0; i < unit->limitTouches; i++) {
+  for (unsigned int i = 0; i < NUM_TOUCH; i++) {
     OUT0(i*2+1) = unit->touchLocations[i];
     OUT0(i*2+2) = unit->touchSizes[i];
   }

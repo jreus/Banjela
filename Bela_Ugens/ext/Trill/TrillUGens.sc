@@ -51,29 +51,24 @@ Where:
 loc - is a value from 0.-1. specifying the position on the trill bar.
 size - is a value somewhere in the range of 0-6000 specifying the centroid size.
 
-By default all 5 potential centroids are tracked (for a total of 10 kr outputs),
-but the number of centroids can be limited to a smaller number using the
-limitNumTouches argument.
+By default all 5 potential centroids are tracked (for a total of 10 kr outputs).
 
 i2c_bus          I2C bus to use on BeagleBone
 i2c_address      I2C address of Trill sensor
 thresholdOpt     noise threshold, int: 0-6, 6=highest noise threshold
 prescalerOpt     int: 0-5, lower values=higher sensitivity
-limitNumTouches  int: 1-5, limit number of simultaneous centroids returned
 */
 TrillCentroids : MultiOutUGen {
-  *kr {arg i2c_bus=1, i2c_address=0x18, thresholdOpt=6, prescalerOpt=0, limitNumTouches=5;
+  *kr {arg i2c_bus=1, i2c_address=0x18, thresholdOpt=6, prescalerOpt=0;
     if(thresholdOpt.inclusivelyBetween(0,6).not) { Exception("Threshold option % out of bounds. Must be an index from 0 to 6.".format(thresholdOpt)).throw };
     if(prescalerOpt.inclusivelyBetween(0,5).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 5.".format(prescalerOpt)).throw };
-    if(limitNumTouches.inclusivelyBetween(1,5).not) { Exception("Num touches limited to %. Value must be an integer from 1 to 5.".format(limitNumTouches)).throw };
 
-    ^this.multiNew('control', i2c_bus, i2c_address, thresholdOpt, prescalerOpt, limitNumTouches);
+    ^this.multiNew('control', i2c_bus, i2c_address, thresholdOpt, prescalerOpt);
   }
 
-  // TrillCentroids has a variable number of control rate output channels
   init { arg ... theInputs;
     inputs = theInputs;
-    ^this.initOutputs((theInputs[4] * 2) + 1, rate);
+    ^this.initOutputs(11, rate); // 11 outputs
   }
 }
 
