@@ -87,11 +87,11 @@ if(typeof TrillBar === "undefined") {
 if(typeof WaveForm === "undefined") {
 	WaveForm = class {
 		// orientation: 0 (horizontal), 1 (vertical)
-		constructor(sketch, length, height, position = [50, 50], orientation = 0, bufferSize = 512, amplitudeScale = 1.0) {
+		constructor(sketch, length, height, position = [50, 50], orientation = 0, bufferSize = 512, multiplier = 1.0) {
 			this.s = sketch;
 			this.position = position;
 			this.dimensions = [ length, height ];
-			this.amplitudeScale = amplitudeScale;
+			this.multiplier = multiplier;
 			this.orientation = orientation;
 			this.bufferSize = bufferSize;
 			this.segmentSize = this.dimensions[this.orientation] / this.bufferSize;
@@ -112,9 +112,9 @@ if(typeof WaveForm === "undefined") {
 	       
 	    	let startX = 0.0, startY = 0.0;
 	    	if(this.orientation == 0) { // horizontal
-	    		startY = this.buffer[0] * this.amplitudeScale * (this.dimensions[1] / 2);
+	    		startY = this.buffer[0] * this.multiplier * (this.dimensions[1] / 2);
 	    	} else { // vertical
-	    		startX = this.buffer[0] * this.amplitudeScale * (this.dimensions[0] / 2);
+	    		startX = this.buffer[0] * this.multiplier * (this.dimensions[0] / 2);
 	    	}
 	    	
 			this.s.strokeWeight(1);
@@ -124,10 +124,10 @@ if(typeof WaveForm === "undefined") {
 				
 				if(this.orientation == 0) {
 					destX = startX + this.segmentSize;
-					destY = this.buffer[i] * this.amplitudeScale * (this.dimensions[1] / 2);
+					destY = this.buffer[i] * this.multiplier * (this.dimensions[1] / 2);
 				} else {
 					destY = startY + this.segmentSize;
-					destX = this.buffer[i] * this.amplitudeScale * (this.dimensions[0] / 2);
+					destX = this.buffer[i] * this.multiplier * (this.dimensions[0] / 2);
 				}
 				
 				this.s.line(
@@ -194,24 +194,25 @@ var guiSketch = new p5(function( sketch ) {
         console.log("Slider Length: " + sliderLength);
         sketch.trillBar = new TrillBar(sketch, sliderLength*0.60, sliderHeight, [10,10], 1.25);
         
-        let stringsXpos = 450;
+        let stringsXpos = 500;
         let stringsYpos = 80;
         let stringsWidth = 80;
         let bufSize = 512;
-        let stringsLength = bufSize;
-        let ampScale = 10.0;
-        sketch.sigString5 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos, stringsYpos], 1, bufSize, ampScale);
-        sketch.sigString4 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 110, stringsYpos], 1, bufSize, ampScale);
-        sketch.sigString3 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 220, stringsYpos], 1, bufSize, ampScale);
-        sketch.sigString2 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 330, stringsYpos], 1, bufSize, ampScale);
-        sketch.sigString1 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 440, stringsYpos], 1, bufSize, ampScale);
+        let stringsLength = 550;
+        let stringWaveformScale = 10.0;
+        sketch.sigString5 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos, stringsYpos], 1, bufSize, stringWaveformScale);
+        sketch.sigString4 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 110, stringsYpos], 1, bufSize, stringWaveformScale);
+        sketch.sigString3 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 220, stringsYpos], 1, bufSize, stringWaveformScale);
+        sketch.sigString2 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 330, stringsYpos], 1, bufSize, stringWaveformScale);
+        sketch.sigString1 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 440, stringsYpos], 1, bufSize, stringWaveformScale);
         
         let magYpos = 80;
         let magXpos = 10;
-        let magWidth = 100;
-        let magLength = 400;
-        sketch.magSense1 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos], 0, bufSize, ampScale);
-        sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos + 110], 0, bufSize, ampScale);
+        let magWidth = 250;
+        let magLength = 450;
+        let magWaveformScale = 100.00;
+        sketch.magSense1 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos], 0, bufSize, magWaveformScale);
+        sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos + 300], 0, bufSize, magWaveformScale);
         
     };
 
@@ -226,25 +227,9 @@ var guiSketch = new p5(function( sketch ) {
         let idxNumActiveTouches = 0, idxTouchLocations = 1, idxTouchSizes = 2;
         let idxString1 = 3, idxString2 = 4, idxString3 = 5, idxString4 = 6, idxString5 = 7;
         let idxMag1 = 8, idxMag2 = 9;
-        //console.log(sine);
-    	let sine = Bela.data.buffers[idxString1][0];
         
     
     
-    	/*
-    	
-        // Draw a circle whose size changes with the value received from render.cpp
-        sketch.noFill();
-        sketch.strokeWeight(10);
-        sketch.ellipse(sketch.windowWidth / 2, sketch.windowHeight / 2, (sketch.windowHeight-100)*sine, (sketch.windowHeight-100)*sine);
-        
-        // Draw a circle on the left hand side whose position changes with the values received from render.cpp
-        sketch.ellipse(100, sketch.windowHeight/2 + (((sketch.windowHeight/2)-100)*sine), 50, 50);
-        // Draw the zero crossing line
-        sketch.line(50,sketch.windowHeight/2,150,sketch.windowHeight/2);
-
-		*/
-
 		// Draw the touch gui
         sketch.strokeWeight(1);
         sliderLength = sketch.width-100
@@ -268,9 +253,9 @@ var guiSketch = new p5(function( sketch ) {
         sketch.sigString4.draw();
         sketch.sigString5.draw();
         
+        
         if(verbose && (verboseFrameCounter % verboseEvery == 0)) {
-        	console.log("S1 Segment: " + sketch.sigString1.segmentSize);
-        	console.log("S1 Buffer: " + sketch.sigString1.buffer);
+    		// console.log() // put logging here
         }
         
 		// Draw the MagSense signal guis

@@ -1,44 +1,5 @@
  /**
- * \example Gui/simple
- *
- * GUI simple
- * =========
- *
- * New GUI fuctionality for Bela!
- *
- * Is this project you can find a sketch.js file which is a p5.js file that is rendered
- * in a browser tab. Click the GUI button (next to the Scope button) in the IDE to see the rendering of this file.
- * 
- * This example sends a buffer of data from the Bela render to the browser via a web socket every few milliseconds 
- * containing the value of a sinewave LFO:
- * 	`gui.sendBuffer(0, sineValue);`
- * 
- * The p5.js file displays the position of the sinewave in two different ways.
- * 
- * If you want to edit sketch.js you can do so in the browser but must write your p5.js code in instance mode.
- * 
- * Useful bits from Trill.h
-int rawData[kNumSensors];
-
-
-enum Modes {
-	NORMAL = 0,		// centroid calculation
-	RAW = 1,		// raw values
-	BASELINE = 2,	
-	DIFF = 3		// choses a baseline and gives you raw value differences from that
-};
-
-enum Devices {
-	NONE = 0,
-	ONED = 1,
-	TWOD = 2
-};
-
-int setup(int i2c_bus = 1, int i2c_address = 0x18, int mode = NORMAL);
-
-// threshhold -> sensitivity percentage: 0-100 in multiples of 10
-// prescaler -> sensitivity, a multiple of two > higher it is, the less sensitive
-int setup(int i2c_bus, int i2c_address, int mode, int threshold, int prescaler);
+	Banjo Status Dashboard
 
  * 
  * 
