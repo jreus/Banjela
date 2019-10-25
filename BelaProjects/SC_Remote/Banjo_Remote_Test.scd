@@ -15,29 +15,10 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
-// Trill Raw patch
-(
-Ndef(\trill, {
-  var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
-  var i2c_address = 0x18; // I2C address of Trill sensor
-  var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
-  var prescaler = 0; // sensitvity, int: 0-5 (0=highest sensitivity)
-  var rawvals;
-  var sig;
-
-  rawvals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
-  SendReply.kr(Impulse.kr(0.5), "/trill", rawvals);
-
-  sig = Saw.ar(rawvals.linlin(200, 3000, 100, 2000), mul: Lag.kr(rawvals.linlin(200, 3000, 0.0, 1.0), 0.1)) * 0.1;
-  sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
-  Splay.ar(sig.tanh);
-}).play(out: 0, numChannels: 2, group: s);
-);
-
 // Trill Centroid patch
 (
 
-Ndef(\trill, {
+Ndef(\banjo, {
   var i2c_bus = 1;
   var i2c_address = 0x18;
   var thresh = 6;
@@ -45,34 +26,42 @@ Ndef(\trill, {
   var touchsigs = DC.ar(0).dup(5);
   var centroids;
   var mix, out;
+  var s1, s2, s3, s4, s5;
+  var strings;
+  var mag1, mag2;
+
+  var str_co_hz = 2200;
+  var mag_co_hz = 15;
+  s1 = s3 = s5 = LeakDC.ar(LPF.ar(LPF.ar(LPF.ar(In.ar(4, 1), str_co_hz), str_co_hz), str_co_hz));
+  s2 = s4 = LeakDC.ar(LPF.ar(LPF.ar(LPF.ar(In.ar(5, 1), str_co_hz), str_co_hz), str_co_hz));
+  strings = [s1,s2,s3,s4,s5];
+  //strings = (strings * 15.0).tanh;
+
+  strings = CompanderD.ar(strings, 0.1, 2.0, 1.0, 0.001, 0.01);
+
+  mag1 = LPF.ar(In.ar(7, 1), mag_co_hz, mul: 10.0);
+  mag2 = LPF.ar(In.ar(8, 1), mag_co_hz, mul: 10.0);
 
   centroids = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
 
 
-  /*
+
   // slap tappy
   touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 800, 2400).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
   touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
   touchsigs[2] = EnvGen.ar(Env.perc(0.001, 0.2), (centroids[6] > 0.0)) * SinOsc.ar([40, 45, 60, 61, 100], mul: 1.0).sum;
   touchsigs[3] = Pluck.ar(WhiteNoise.ar, (centroids[8] > 0), 0.2, centroids[7].linexp(0.0, 1.0, 50, 400).reciprocal, 1.0, 0.8);
   touchsigs[4] = Pluck.ar(WhiteNoise.ar, (centroids[10] > 0), 0.2, centroids[9].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
-  out = Splay.ar(touchsigs);
-  */
+  mix = Splay.ar(touchsigs);
 
+  //Pulse.ar([mag1,mag2].linlin(-1.0, 1.0, 50, 1000)) * [mag1.abs, mag2.abs];
 
+  Limiter.ar(mix + (Splay.ar(strings)));
 
-  // synthy
-  touchsigs[0] = Ringz.ar(Trig1.ar(centroids[2] > 0.0, 0.01), centroids[1].linexp(0.0, 1.0, 4000, 1000), 0.1, mul: 0.3).tanh * (centroids[2] > 0.0);
-  touchsigs[1] = PMOsc.ar((centroids[3]+0.001) * 2500, 500, centroids[4].linexp(0.0, 3000, 0.1, 12.0), 0.1) * 0.2 * EnvGen.ar(Env.perc, (centroids[4] > 0.0), timeScale: centroids[4].linexp(500, 3000, 0.3, 5.0));
-
-  mix = Mix([touchsigs[0], touchsigs[1]]);
-  out = GVerb.ar(mix, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + mix;
-
-
-  SendReply.kr(Impulse.kr(1.5), "/trill", centroids);
-  Limiter.ar(out);
 }).play(0, numChannels: 2, group: s);
 
-OSCdef(\trilldata, {|msg| msg[3..].postln}, "/trill");
+//OSCdef(\trilldata, {|msg| msg[3..].postln}, "/trill");
 
 );
+
+
