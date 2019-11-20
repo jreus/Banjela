@@ -37,7 +37,7 @@ Ndef(\banjo, {
   strings = [s1,s2,s3,s4,s5];
   //strings = (strings * 15.0).tanh;
 
-  strings = CompanderD.ar(strings, 0.1, 2.0, 1.0, 0.001, 0.01);
+  strings = CompanderD.ar(strings, 0.01, 2.0, 1.0, 0.001, 0.01);
 
   mag1 = LPF.ar(In.ar(7, 1), mag_co_hz, mul: 10.0);
   mag2 = LPF.ar(In.ar(8, 1), mag_co_hz, mul: 10.0);
