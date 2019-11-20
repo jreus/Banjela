@@ -15,7 +15,7 @@ Scope scope;
 bool setup(BelaContext *context, void *userData)
 {
 	// setup the scope with 4 channels at the analog sample rate
-	scope.setup(8, context->analogSampleRate);
+	scope.setup(10, context->analogSampleRate);
 	
 	if(context->analogInChannels < 8)
 	{
@@ -33,16 +33,20 @@ void render(BelaContext *context, void *userData)
 		// Analog 0/1 are the integrator pre-amps
 		// Analog 4/5 are the audio pre-amps
 		
+
 		// roughly zero-center all the signals by subtracting 0.5
-		scope.log(analogRead(context, n, 0) - 0.5,
-			      analogRead(context, n, 1) - 0.5,
-			      analogRead(context, n, 4) - 0.5,
-			      analogRead(context, n, 5) - 0.5,
-			      analogRead(context, n, 2) - 0.5,
-			      analogRead(context, n, 3) - 0.5,
-			      analogRead(context, n, 6) - 0.5,
-			      analogRead(context, n, 7) - 0.5
-			      );
+		scope.log(
+			audioRead(context, n, 0),
+			audioRead(context, n, 1),
+			analogRead(context, n, 0) - 0.5,
+			analogRead(context, n, 1) - 0.5,
+			analogRead(context, n, 4) - 0.5,
+			analogRead(context, n, 5) - 0.5,
+			analogRead(context, n, 2) - 0.5,
+			analogRead(context, n, 3) - 0.5,
+			analogRead(context, n, 6) - 0.5,
+			analogRead(context, n, 7) - 0.5
+		);
 	}
 }
 

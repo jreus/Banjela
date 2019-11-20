@@ -35,13 +35,8 @@ s.options.adcLevel = 0;       // sets the gain of the analog inputs (+dB)
 
 s.options.blockSize = 16;
 
-// number of audio channels: values greater than 2 will use the first few analog
-// channels as audio channels. Any additional analog channels will be available through the AnalogIn/Out Ugens
-// e.g.:
-// s.options.numInputBusChannels = 4;
-// means that bus in 0/1 are the audio L/R channels and 2/3 are the analog inputs 0/1
 // analog inputs 2-7 will still be available through the AnalogIn Ugen.
-s.options.numInputBusChannels = 2; // Use only the L/R audio channels
+s.options.numInputBusChannels = 10; // Use all analog inputs as audio input channels
 s.options.numOutputBusChannels = 2; // Use only the L/R audio channels
 
 s.options.memSize = 8192 * 32; // the default is 8192 which is quite little
