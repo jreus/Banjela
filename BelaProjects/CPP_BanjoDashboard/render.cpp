@@ -15,10 +15,10 @@
 
 /** Analog Input Channel Mappings **/
 #define STRING1_INCHAN 0
-#define STRING2_INCHAN 0
+#define STRING2_INCHAN 1
 #define STRING3_INCHAN 0
 #define STRING4_INCHAN 1
-#define STRING5_INCHAN 1
+#define STRING5_INCHAN 0
 #define MAG1_INCHAN 2
 #define MAG2_INCHAN 3
 
@@ -56,8 +56,13 @@ float sigString2[GUI_BUFFER_LENGTH];
 float sigString3[GUI_BUFFER_LENGTH];
 float sigString4[GUI_BUFFER_LENGTH];
 float sigString5[GUI_BUFFER_LENGTH];
+
+// compress two mag signals into a single array as a hack around the 10 index limit for GUI data buffers
+float sigMag[GUI_BUFFER_LENGTH * 2];
+/*
 float sigMag1[GUI_BUFFER_LENGTH];
 float sigMag2[GUI_BUFFER_LENGTH];
+*/
 float sigMic[GUI_BUFFER_LENGTH];
 
 
@@ -116,12 +121,14 @@ void updateGui() {
 		
 			
 			// Send mag sensor values
-			gui.sendBuffer(8, sigMag1); // Bela.data.buffers[idx], value (scalar, array, vector)
-			gui.sendBuffer(9, sigMag2); // Bela.data.buffers[idx], value (scalar, array, vector)
+			//gui.sendBuffer(8, sigMag1); // Bela.data.buffers[idx], value (scalar, array, vector)
+			//gui.sendBuffer(9, sigMag2); // Bela.data.buffers[idx], value (scalar, array, vector)
+			gui.sendBuffer(8, sigMag); // hack
 
 			// Send mic input signal
-			gui.sendBuffer(10, sigMic);	
-}
+			//gui.sendBuffer(10, sigMic);	
+			gui.sendBuffer(9, sigMic); // hack
+}	
 
 
 
@@ -141,8 +148,9 @@ bool setup(BelaContext *context, void *userData)
 		sigString3[i] = 0.0;
 		sigString4[i] = 0.0;
 		sigString5[i] = 0.0;
-		sigMag1[i] = 0.0;
-		sigMag2[i] = 0.0;
+		//sigMag1[i] = 0.0;
+		//sigMag2[i] = 0.0;
+		sigMag[i] = 0.0; // hack
 		sigMic[i] = 0.0;
 	}
 	
@@ -172,26 +180,23 @@ bool setup(BelaContext *context, void *userData)
 void render(BelaContext *context, void *userData)
 {	
 	for(unsigned int n = 0; n < context->audioFrames; n++) {
-
-		// GUI feedback
-		static unsigned int count = 0;
+		static unsigned int cg = 0;
 		static unsigned int c = 0;
-
-
-		// every block add a sample to the gui buffer
-		if(n == 0) {
+		if(n == 0) { // every block add a sample to the gui buffers
 			sigString1[c] = analogRead(context, n, STRING1_INCHAN) - 0.5;
 			sigString2[c] = analogRead(context, n, STRING2_INCHAN) - 0.5;
 			sigString3[c] = analogRead(context, n, STRING3_INCHAN) - 0.5;
 			sigString4[c] = analogRead(context, n, STRING4_INCHAN) - 0.5;
 			sigString5[c] = analogRead(context, n, STRING5_INCHAN) - 0.5;
 
+			// hack
+			sigMag[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
+			sigMag[c + GUI_BUFFER_LENGTH] = analogRead(context, n, MAG2_INCHAN) - 0.5;
 
-			sigMag1[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
-			sigMag2[c] = analogRead(context, n, MAG2_INCHAN) - 0.5;
+			//sigMag1[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
+			//sigMag2[c] = analogRead(context, n, MAG2_INCHAN) - 0.5;
 
 			sigMic[c] = audioRead(context, n, MIC_INCHAN);
-
 
 			c++;
 			if(c >= GUI_BUFFER_LENGTH) {
@@ -199,19 +204,14 @@ void render(BelaContext *context, void *userData)
 			}
 		};
 		
-		
-		if(count >= gTimePeriod*context->audioSampleRate) // send data every gTimePeriod seconds
+		if(cg >= gTimePeriod*context->audioSampleRate) // send data every gTimePeriod seconds
 		{
-			count = 0;
+			cg = 0;
 			updateGui();
 		}
-		
-		count++;
-		
-		
+		cg++;
 	}
 }
-
 
 
 void cleanup(BelaContext *context, void *userData)
