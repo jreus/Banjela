@@ -174,6 +174,19 @@ var guiSketch = new p5(function( sketch ) {
 	let verboseEvery = 30; // print feedback every 30 frames
 	let verboseFrameCounter = 0;
 
+	// This must match GUI_BUFFER_LENGTH in render.cpp
+	let bufSize = 256;
+	
+	// This must match GUI_FRAME_RATE in render.cpp
+	let frameRate = 30;
+
+	// Indexes of data buffers coming from the Bela over websockets
+    let idxNumActiveTouches = 0, idxTouchLocations = 1, idxTouchSizes = 2;
+    let idxString1 = 3, idxString2 = 4, idxString3 = 5, idxString4 = 6, idxString5 = 7;
+    let idxMag1 = 8, idxMag2 = 9;
+    let idxMic = 10;
+
+
 	// TOUCH GUI
     let spacing;
     let activeTouches = 0;
@@ -194,25 +207,35 @@ var guiSketch = new p5(function( sketch ) {
         console.log("Slider Length: " + sliderLength);
         sketch.trillBar = new TrillBar(sketch, sliderLength*0.60, sliderHeight, [10,10], 1.25);
         
+        // String waveforms
         let stringsXpos = 500;
         let stringsYpos = 80;
         let stringsWidth = 80;
-        let bufSize = 512;
         let stringsLength = 550;
-        let stringWaveformScale = 10.0;
+        //let stringWaveformScale = 10.0;
+        let stringWaveformScale = 1.0;
         sketch.sigString5 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos, stringsYpos], 1, bufSize, stringWaveformScale);
         sketch.sigString4 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 110, stringsYpos], 1, bufSize, stringWaveformScale);
         sketch.sigString3 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 220, stringsYpos], 1, bufSize, stringWaveformScale);
         sketch.sigString2 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 330, stringsYpos], 1, bufSize, stringWaveformScale);
         sketch.sigString1 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 440, stringsYpos], 1, bufSize, stringWaveformScale);
         
+        
+		// Mag waveforms       
         let magYpos = 80;
         let magXpos = 10;
         let magWidth = 250;
         let magLength = 450;
-        let magWaveformScale = 100.00;
+        //let magWaveformScale = 100.00;
+        let magWaveformScale = 1.00;
         sketch.magSense1 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos], 0, bufSize, magWaveformScale);
         sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos + 300], 0, bufSize, magWaveformScale);
+
+		// Mic in waveform
+		let micXpos = 10, micYpos = 250;
+		let micWidth = 50, micLength = 400;
+		let micWaveformScale = 1.0;
+		sketch.sigMic = new WaveForm(sketch, micWidth, micLength, [micXpos, micYpos], 0, bufSize, micWaveformScale);
         
     };
 
@@ -223,11 +246,11 @@ var guiSketch = new p5(function( sketch ) {
         
         // Retreive the data being sent from render.cpp
 
-		// Indexes of data buffers coming from the Bela over websockets
-        let idxNumActiveTouches = 0, idxTouchLocations = 1, idxTouchSizes = 2;
-        let idxString1 = 3, idxString2 = 4, idxString3 = 5, idxString4 = 6, idxString5 = 7;
-        let idxMag1 = 8, idxMag2 = 9;
         
+        if(verbose && (verboseFrameCounter % verboseEvery == 0)) {
+    		// console.log() // put logging here
+        }
+
     
     
 		// Draw the touch gui
@@ -254,15 +277,15 @@ var guiSketch = new p5(function( sketch ) {
         sketch.sigString5.draw();
         
         
-        if(verbose && (verboseFrameCounter % verboseEvery == 0)) {
-    		// console.log() // put logging here
-        }
-        
 		// Draw the MagSense signal guis
 		sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag1]);
 		sketch.magSense1.draw();
 		sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag2]);
 		sketch.magSense2.draw();
+		
+		// Draw the mic input signal guis
+		//sketch.sigMic.updateBuffer(Bela.data.buffers[idxMic]);
+		sketch.sigMic.draw();
 
 		verboseFrameCounter += 1;
 

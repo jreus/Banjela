@@ -48,8 +48,12 @@ void readCentroids(void*)
 
 bool setup(BelaContext *context, void *userData)
 {
+	int thresh=6, pre=0;
+	
+	pre = 1; // play around with this to optimize for your given capacitance setup
+	
 	// mode=Trill::NORMAL for centroid-tracking behavior
-	if(ts.setup(1, 0x18, Trill::NORMAL, gThresholdOpts[6], gPrescalerOpts[0]) != 0) {
+	if(ts.setup(1, 0x18, Trill::NORMAL, gThresholdOpts[thresh], gPrescalerOpts[pre]) != 0) {
 		fprintf(stderr, "Unable to initialise touch sensor\n");
 		return false;
 	} 

@@ -10,6 +10,9 @@
 #include <libraries/Trill/Trill.h>
 
 
+/** Audio Input Channel Mappings **/
+#define MIC_INCHAN 0
+
 /** Analog Input Channel Mappings **/
 #define STRING1_INCHAN 0
 #define STRING2_INCHAN 0
@@ -42,11 +45,10 @@ int gTaskSleepTime = 1000;
 
 /** GUI **/
 Gui gui;
-int gFrameRate = 30; // gui framerate (in Hz) -> should match framerate of P5 sketch
+#define GUI_FRAME_RATE 30; // gui framerate (in Hz) -> should match framerate of P5 sketch
+#define GUI_BUFFER_LENGTH 256 // this number must match the buffer length in sketch.js
 float gTimePeriod; // period (in seconds) between data sends to the GUI
 
-// this number must match the buffer length in sketch.js
-#define GUI_BUFFER_LENGTH 512
 
 // arrays for sending data to the gui
 float sigString1[GUI_BUFFER_LENGTH];
@@ -56,6 +58,7 @@ float sigString4[GUI_BUFFER_LENGTH];
 float sigString5[GUI_BUFFER_LENGTH];
 float sigMag1[GUI_BUFFER_LENGTH];
 float sigMag2[GUI_BUFFER_LENGTH];
+float sigMic[GUI_BUFFER_LENGTH];
 
 
 
@@ -104,7 +107,7 @@ void updateGui() {
 			gui.sendBuffer(1, gTouchLocation);
 			gui.sendBuffer(2, gTouchSize);
 
-			// Send audio signals
+			// Send string/audio signals
 			gui.sendBuffer(3, sigString1); // Bela.data.buffers[idx], value (scalar, array, vector)
 			gui.sendBuffer(4, sigString2); // Bela.data.buffers[idx], value (scalar, array, vector)
 			gui.sendBuffer(5, sigString3); // Bela.data.buffers[idx], value (scalar, array, vector)
@@ -115,6 +118,9 @@ void updateGui() {
 			// Send mag sensor values
 			gui.sendBuffer(8, sigMag1); // Bela.data.buffers[idx], value (scalar, array, vector)
 			gui.sendBuffer(9, sigMag2); // Bela.data.buffers[idx], value (scalar, array, vector)
+
+			// Send mic input signal
+			gui.sendBuffer(10, sigMic);	
 }
 
 
@@ -124,7 +130,7 @@ bool setup(BelaContext *context, void *userData)
 	// Init signal state vars
 	gInverseSampleRate = 1.0 / context->audioSampleRate;
 	gPhase = 0.0;
-	gTimePeriod = 1.0 / gFrameRate; 
+	gTimePeriod = 1.0 / GUI_FRAME_RATE; 
 	
 	// zero GUI buffers
 	for(int i = 0; i < GUI_BUFFER_LENGTH; i++) {
@@ -135,6 +141,7 @@ bool setup(BelaContext *context, void *userData)
 		sigString5[i] = 0.0;
 		sigMag1[i] = 0.0;
 		sigMag2[i] = 0.0;
+		sigMic[i] = 0.0;
 	}
 	
 	// Init trill state, NORMAL==centroid, DIFF==different from baseline
@@ -163,35 +170,12 @@ bool setup(BelaContext *context, void *userData)
 void render(BelaContext *context, void *userData)
 {	
 	for(unsigned int n = 0; n < context->audioFrames; n++) {
-		/*
-		float in_l = 0;
-        float in_r = 0;
-        float an0, an1, an2;
-        
-        // Read audio inputs
-        in_l = audioRead(context,n,0);
-        in_r = audioRead(context,n,1);
-        
-        an0 = analogRead(context,n,0);
-        an1 = analogRead(context,n,1);
-        an2 = analogRead(context,n,2);
-		*/
-		
+
 		// GUI feedback
 		static unsigned int count = 0;
 		static unsigned int c = 0;
-		// update gui buffers with latest samples (TODO: figure out these indexes by looking at the scope!)
-		
-		/* RANDOM NOISE
-		
-		if(c > 0) {
-			sigString1[c] = sigString1[c-1] + (   (rand() / (float)RAND_MAX) - 0.5  );
-			if(fabs(sigString1[c]) > 1.0) {
-				sigString1[c] = 0.0;
-			}
-		}
-		*/
-		
+
+
 		// every block add a sample to the gui buffer
 		if(n == 0) {
 			sigString1[c] = analogRead(context, n, STRING1_INCHAN) - 0.5;
@@ -204,6 +188,9 @@ void render(BelaContext *context, void *userData)
 			sigMag1[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
 			sigMag2[c] = analogRead(context, n, MAG2_INCHAN) - 0.5;
 
+			//sigMic[c] = audioRead(context, n, MIC_INCHAN);
+
+
 			c++;
 			if(c >= GUI_BUFFER_LENGTH) {
 				c = 0;
@@ -211,14 +198,6 @@ void render(BelaContext *context, void *userData)
 		};
 		
 		
-		
-		/*
-		c++;
-		if(c >= GUI_BUFFER_LENGTH) {
-			c = 0;
-		}
-		*/
-
 		if(count >= gTimePeriod*context->audioSampleRate) // send data every gTimePeriod seconds
 		{
 			count = 0;

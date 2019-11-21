@@ -28,7 +28,10 @@ void readTouch(void*)
 
 bool setup(BelaContext *context, void *userData)
 {
-	ts.setup(1, 0x18, Trill::DIFF, gThresholdOpts[6], gPrescalerOpts[0]);
+	// play with these values until all touch pads register well
+	int thresh = 6, pre = 0;
+	pre = 1; // try a different prescaler value for different capacitances (higher is good for longer cable runs)
+	ts.setup(1, 0x18, Trill::DIFF, gThresholdOpts[thresh], gPrescalerOpts[pre]);
 	i2cReadTask = Bela_createAuxiliaryTask(readTouch, 50, "I2C-read", NULL);
 	readIntervalSamples = context->audioSampleRate * (readInterval/1000);
 	return true;
