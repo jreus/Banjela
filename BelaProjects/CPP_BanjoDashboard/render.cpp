@@ -127,6 +127,8 @@ void updateGui() {
 
 bool setup(BelaContext *context, void *userData)			
 {
+	int optpre = 1, optthresh = 6;
+	
 	// Init signal state vars
 	gInverseSampleRate = 1.0 / context->audioSampleRate;
 	gPhase = 0.0;
@@ -146,7 +148,7 @@ bool setup(BelaContext *context, void *userData)
 	
 	// Init trill state, NORMAL==centroid, DIFF==different from baseline
 	// baseline can be recomputed using touchSensor.updateBaseline()
-	if(touchSensor.setup(1, 0x18, Trill::NORMAL, gThresholdOpts[6], gPrescalerOpts[0]) != 0) {
+	if(touchSensor.setup(1, 0x18, Trill::NORMAL, gThresholdOpts[optthresh], gPrescalerOpts[optpre]) != 0) {
 		fprintf(stderr, "Unable to initialise touch sensor\n");
 		return false;
 	}
@@ -188,7 +190,7 @@ void render(BelaContext *context, void *userData)
 			sigMag1[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
 			sigMag2[c] = analogRead(context, n, MAG2_INCHAN) - 0.5;
 
-			//sigMic[c] = audioRead(context, n, MIC_INCHAN);
+			sigMic[c] = audioRead(context, n, MIC_INCHAN);
 
 
 			c++;

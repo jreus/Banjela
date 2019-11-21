@@ -202,40 +202,42 @@ var guiSketch = new p5(function( sketch ) {
         sketch.createCanvas(canvas_dimensions[0], canvas_dimensions[1]);
         //sketch.frameRate(120);
         sketch.frameRate(30);
+        
+        // Trill Segments (TODO: Refactor this class to display multiple segments of a single trill sensor)
         sliderLength = sketch.width-100;
         sliderHeight = 60.0;
-        console.log("Slider Length: " + sliderLength);
-        sketch.trillBar = new TrillBar(sketch, sliderLength*0.60, sliderHeight, [10,10], 1.25);
+        sketch.trillBar = new TrillBar(sketch, sliderLength*0.60, sliderHeight, [10,120], 1.25);
+        
+    	// Mic in waveform
+		let micXpos = 10, micYpos = 10;
+		let micWidth = 100, micLength = 400;
+		let micWaveformScale = 1.0;
+		sketch.sigMic = new WaveForm(sketch, micLength, micWidth, [micXpos, micYpos], 0, bufSize, micWaveformScale);
+    
         
         // String waveforms
-        let stringsXpos = 500;
-        let stringsYpos = 80;
+        let stringsXpos = 200;
+        let stringsYpos = 80 + micWidth + micYpos;
         let stringsWidth = 80;
         let stringsLength = 550;
-        //let stringWaveformScale = 10.0;
-        let stringWaveformScale = 1.0;
-        sketch.sigString5 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos, stringsYpos], 1, bufSize, stringWaveformScale);
-        sketch.sigString4 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 110, stringsYpos], 1, bufSize, stringWaveformScale);
-        sketch.sigString3 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 220, stringsYpos], 1, bufSize, stringWaveformScale);
-        sketch.sigString2 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 330, stringsYpos], 1, bufSize, stringWaveformScale);
-        sketch.sigString1 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 440, stringsYpos], 1, bufSize, stringWaveformScale);
+        let stringWaveformScale = 10.0;
+        sketch.sigString5 = new WaveForm(sketch, stringsWidth, stringsLength * 0.8, [stringsXpos, stringsYpos + stringsLength * 0.2], 1, bufSize, stringWaveformScale);
+        sketch.sigString4 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 100, stringsYpos], 1, bufSize, stringWaveformScale);
+        sketch.sigString3 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 200, stringsYpos], 1, bufSize, stringWaveformScale);
+        sketch.sigString2 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 300, stringsYpos], 1, bufSize, stringWaveformScale);
+        sketch.sigString1 = new WaveForm(sketch, stringsWidth, stringsLength, [stringsXpos + 400, stringsYpos], 1, bufSize, stringWaveformScale);
         
         
 		// Mag waveforms       
-        let magYpos = 80;
+        let magYpos = 80 + stringsYpos + stringsLength;
         let magXpos = 10;
-        let magWidth = 250;
-        let magLength = 450;
+        let magWidth = 300;
+        let magLength = 300;
         //let magWaveformScale = 100.00;
-        let magWaveformScale = 1.00;
+        let magWaveformScale = 10.00;
         sketch.magSense1 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos], 0, bufSize, magWaveformScale);
         sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos + 300], 0, bufSize, magWaveformScale);
 
-		// Mic in waveform
-		let micXpos = 10, micYpos = 250;
-		let micWidth = 50, micLength = 400;
-		let micWaveformScale = 1.0;
-		sketch.sigMic = new WaveForm(sketch, micWidth, micLength, [micXpos, micYpos], 0, bufSize, micWaveformScale);
         
     };
 
