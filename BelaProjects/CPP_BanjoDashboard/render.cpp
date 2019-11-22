@@ -22,7 +22,7 @@
 #define MAG1_INCHAN 2
 #define MAG2_INCHAN 3
 
-
+int gAudioFramesPerAnalogFrame = 0;
 
 /** Trill Sensor **/
 #define NUM_TOUCH 5 // Number of simultaneous touches detectable on Trill sensor
@@ -67,10 +67,6 @@ float sigMic[GUI_BUFFER_LENGTH];
 
 
 
-// variable for the Low Frequency Oscillator
-float gFrequency = 0.1;
-float gPhase;
-float gInverseSampleRate;
 
 
 /*
@@ -136,10 +132,19 @@ bool setup(BelaContext *context, void *userData)
 {
 	int optpre = 1, optthresh = 6;
 	
-	// Init signal state vars
-	gInverseSampleRate = 1.0 / context->audioSampleRate;
-	gPhase = 0.0;
+	// Check if analog channels are enabled
+	if(context->analogFrames == 0 || context->analogFrames > context->audioFrames) {
+		rt_printf("Error: analog must be enabled with 8 channels\n");
+		return false;
+	}
+
+	// useful calculations
+	if(context->analogFrames)
+		gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
+
 	gTimePeriod = 1.0 / GUI_FRAME_RATE; 
+
+	rt_printf("Audio Frames Per Analog Frame: %d", gAudioFramesPerAnalogFrame);
 	
 	// zero GUI buffers
 	for(int i = 0; i < GUI_BUFFER_LENGTH; i++) {
@@ -179,24 +184,51 @@ bool setup(BelaContext *context, void *userData)
 
 void render(BelaContext *context, void *userData)
 {	
+	static unsigned int cg = 0, c = 0;
+	unsigned int m = 0;
+	float s1 = 0.0, s2 = 0.0, s3 = 0.0, s4 = 0.0, s5 = 0.0, mag1 = 0.0, mag2 = 0.0, mic = 0.0;
+	float mixL = 0.0, mixR = 0.0;
+	
+	float amp = 0.8;
+		
 	for(unsigned int n = 0; n < context->audioFrames; n++) {
-		static unsigned int cg = 0;
-		static unsigned int c = 0;
+		
+		if(gAudioFramesPerAnalogFrame && !(n % gAudioFramesPerAnalogFrame)) {
+			m = n / gAudioFramesPerAnalogFrame;
+			s1 = analogRead(context, m, STRING1_INCHAN) - 0.5;
+			s2 = analogRead(context, m, STRING2_INCHAN) - 0.5;
+			s3 = analogRead(context, m, STRING3_INCHAN) - 0.5;
+			s4 = analogRead(context, m, STRING4_INCHAN) - 0.5;
+			s5 = analogRead(context, m, STRING5_INCHAN) - 0.5;
+			mag1 = analogRead(context, m, MAG1_INCHAN) - 0.5;
+			mag2 = analogRead(context, m, MAG2_INCHAN) - 0.5;
+		}
+		
+		mic = audioRead(context, n, MIC_INCHAN);
+
+		// TODO: Why is this sending out a steady sine tone?
+		mixL = (mic + s1 + s3 + s5) * amp;
+		mixR = (mic + s2 + s4) * amp;
+
+		audioWrite(context, n, 0, mixL);	
+		audioWrite(context, n, 1, mixR);
+		
+		// GUI buffers
 		if(n == 0) { // every block add a sample to the gui buffers
-			sigString1[c] = analogRead(context, n, STRING1_INCHAN) - 0.5;
-			sigString2[c] = analogRead(context, n, STRING2_INCHAN) - 0.5;
-			sigString3[c] = analogRead(context, n, STRING3_INCHAN) - 0.5;
-			sigString4[c] = analogRead(context, n, STRING4_INCHAN) - 0.5;
-			sigString5[c] = analogRead(context, n, STRING5_INCHAN) - 0.5;
+			sigString1[c] = s1;
+			sigString2[c] = s2;
+			sigString3[c] = s3;
+			sigString4[c] = s4;
+			sigString5[c] = s5;
 
 			// hack
-			sigMag[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
-			sigMag[c + GUI_BUFFER_LENGTH] = analogRead(context, n, MAG2_INCHAN) - 0.5;
+			sigMag[c] = mag1;
+			sigMag[c + GUI_BUFFER_LENGTH] = mag2;
 
 			//sigMag1[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
 			//sigMag2[c] = analogRead(context, n, MAG2_INCHAN) - 0.5;
 
-			sigMic[c] = audioRead(context, n, MIC_INCHAN);
+			sigMic[c] = mic;
 
 			c++;
 			if(c >= GUI_BUFFER_LENGTH) {
@@ -204,7 +236,7 @@ void render(BelaContext *context, void *userData)
 			}
 		};
 		
-		if(cg >= gTimePeriod*context->audioSampleRate) // send data every gTimePeriod seconds
+		if(cg >= gTimePeriod*context->audioSampleRate) // send GUI data every gTimePeriod seconds
 		{
 			cg = 0;
 			updateGui();
