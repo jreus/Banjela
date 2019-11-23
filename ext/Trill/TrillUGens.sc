@@ -22,15 +22,15 @@ By default noise threshold is high and sensitivity is high.
 
 i2c_bus        I2C bus to use on BeagleBone
 i2c_address    I2C address of Trill sensor
-thresholdOpt   noise threshold, int: 0-6, 6=highest noise threshold
-prescalerOpt   int: 0-5, lower values=higher sensitivity
+noiseThreshold   noise threshold, int: 5-255, 255=highest noise threshold
+prescalerOpt   int: 0-4, lower values=higher sensitivity
 */
 TrillRaw : MultiOutUGen {
-  *kr {arg i2c_bus=1, i2c_address=0x18, thresholdOpt=6, prescalerOpt=0;
-    if(thresholdOpt.inclusivelyBetween(0,6).not) { Exception("Threshold option % out of bounds. Must be an index from 0 to 6.".format(thresholdOpt)).throw };
-    if(prescalerOpt.inclusivelyBetween(0,5).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 5.".format(thresholdOpt)).throw };
+  *kr {arg i2c_bus=1, i2c_address=0x18, noiseThreshold=100, prescalerOpt=0;
+    if(noiseThreshold.inclusivelyBetween(5,255).not) { Exception("Noise threshold '%' out of bounds. Must be an integer from 5 to 255.".format(noiseThreshold)).throw };
+    if(prescalerOpt.inclusivelyBetween(0,4).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 4.".format(thresholdOpt)).throw };
 
-    ^this.multiNew('control', i2c_bus, i2c_address, thresholdOpt, prescalerOpt);
+    ^this.multiNew('control', i2c_bus, i2c_address, noiseThreshold, prescalerOpt);
   }
 
   // 26 fixed outputs (TODO: should be increased to 30 for latest Trill sensors)
