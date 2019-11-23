@@ -42,8 +42,8 @@ TrillRaw : MultiOutUGen {
 
   // check that trigger is control rate
   checkInputs {
-    if (rate !== inputs.at(4).rate) {
-  			^("t_resetBaseline must be control rate, but is " + inputs.at(4).rate);
+    if ( ( rate !== inputs.at(4).rate ).and { \scalar !== inputs.at(4).rate } ) {
+  			^("t_resetBaseline must be control rate or scalar, but is " + inputs.at(4).rate);
   	};
   	^this.checkValidInputs
   }

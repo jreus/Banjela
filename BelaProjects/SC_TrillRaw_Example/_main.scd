@@ -19,25 +19,34 @@ s.options.dacLevel = 0;       // sets the gain of the analog dac to (dB)
 s.options.adcLevel = 0;       // sets the gain of the analog adc to (dB)
 
 s.options.blockSize = 16;
-s.options.numInputBusChannels = 2;
+s.options.numInputBusChannels = 10;
 s.options.numOutputBusChannels = 2;
 
 
 s.waitForBoot {
-	{
+	~tr = {|t_updateTrill = 0.0|
 	var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
 	var i2c_address = 0x18; // I2C address of Trill sensor
 	var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
 	var prescaler = 1; // sensitvity, int: 0-5 (0=highest sensitivity, play with this for complex Trill Craft setups)
 	var rawvals;
-	var sig;
+	var sig, ping;
 
-	rawvals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
-	SendReply.kr(Impulse.kr(0.5), "/trill", rawvals);
-	//sig = Saw.ar(rawvals.linlin(0.0, 4100, 30, 2000), mul: rawvals.linlin(0.0, 4100, 0.0, 1.0)) * 0.3;
-	//Splay.ar(sig.tanh);
-	Saw.ar(rawvals.sum / 10) * 0.1;
+	rawvals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler, t_updateTrill);
+	SendReply.kr(Impulse.kr(1.0), "/trill", rawvals);
+	sig = Saw.ar(rawvals.linlin(0.0, 1300, 30, 2000), mul: rawvals.linlin(0.0, 1300, 0.0, 1.0)) * 0.5;
+	sig = Splay.ar(sig);
+	ping = EnvGen.ar(Env.perc, t_updateTrill) * SinOsc.ar(440);
+	sig + ping;
 	}.play;
 
-	OSCdef(\trill, {|msg| msg.postln }, "/trill")
+	OSCdef(\trill, {|msg| msg[3..].postln }, "/trill");
+	
+	{
+		loop {
+			20.wait;
+			"Reset Trill baseline".postln;
+			~tr.set(\t_updateTrill, 1);
+		};
+	}.fork;
 };
