@@ -19,6 +19,10 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 // InterfaceTable contains pointers to global functions in the host (scserver).
 static InterfaceTable *ft;
 
+// Track the number of active Trill UGens
+static int numTrillUGens = 0;
+
+
 // These functions are provided by Xenomai
 int rt_printf(const char *format, ...);
 int rt_fprintf(FILE *stream, const char *format, ...);
@@ -121,6 +125,8 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   // task for updating baseline
   unit->updateBaseLineTask = Bela_createAuxiliaryTask(updateTrillSettings, 50, "I2C-write", (void*)unit);
 
+  numTrillUGens++;
+
   // DEFAULT OPTS are defined in TrillUGens.sc
   if(unit->sensor.setup(unit->i2c_bus, unit->i2c_address, unit->mode, gPrescalerOpts[unit->prescalerOpt], unit->noiseThreshold) != 0) {
       fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
@@ -136,9 +142,13 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   // TODO: this doesn't work for some reason?
   // Exit if 2D trill sensor is found
   if(unit->sensor.deviceType() == Trill::TWOD) {
-  	 fprintf(stderr, "TrillRaw UGen cannot be used with a 2D Trill sensor. \n");
-     return;
+  	 fprintf(stderr, "Device Type is Trill::TWOD, this UGen only returns raw values... ignoring... \n");
    }
+
+   if(numTrillUGens != 1) {
+     fprintf(stderr, "Big problem! There are %d active trill ugens!", numTrillUGens);
+   }
+
 
   unit->sensor.readI2C();
 
@@ -158,6 +168,7 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 void TrillRaw_Dtor(TrillRaw* unit)
 {
 	unit->sensor.cleanup();
+  numTrillUGens--;
 }
 
 

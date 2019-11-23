@@ -18,6 +18,9 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 // InterfaceTable contains pointers to global functions in the host (scserver).
 static InterfaceTable *ft;
 
+// Track the number of active Trill UGens
+static int numTrillUGens = 0;
+
 // These functions are provided by Xenomai
 int rt_printf(const char *format, ...);
 int rt_fprintf(FILE *stream, const char *format, ...);
@@ -114,6 +117,8 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
   unit->noiseThreshold = (int)IN0(2);
   unit->prescalerOpt = (int)IN0(3);
 
+  numTrillUGens++;
+
   // zero control rate outputs
   OUT0(0) = 0.f; // num active touches
   for (int j = 0; j < NUM_TOUCH; j++) {
@@ -130,21 +135,24 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
     fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
     return;
   } else {
-    printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion());
+    printf("Trill sensor found: devtype %d, firmware_v %d activeUgens %\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion(), numTrillUGens);
     printf("Initialized with #outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  deviceType: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor.deviceType());
   }
 
   // Exit if using a 2D Trill sensor
-  if(unit->sensor.deviceType() == Trill::TWOD) {
-    fprintf(stderr, "ERROR: You are using a TWOD sensor but TrillCentroids calculates linear position centroids and does not work with two-dimensional trill sensors.\n");
-		return;
+  if(unit->sensor.deviceType() != Trill::ONED) {
+    fprintf(stderr, "ERROR: You are using a sensor of device type % that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor.deviceType());
+  }
+
+  if(numTrillUGens != 1) {
+    fprintf(stderr, "Big problem! There are %d active trill ugens!", numTrillUGens);
   }
 
   unit->centroidReadTask = Bela_createAuxiliaryTask(readSensor, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
   unit->updateBaseLineTask = Bela_createAuxiliaryTask(updateTrillSettings, 50, "I2C-write", (void*)unit);
 
-  //unit->sensor.readLocations();
+  unit->sensor.readLocations();
 
   SETCALC(TrillCentroids_next_k); // Use the same calc function no matter what the input rate is.
   TrillCentroids_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
@@ -153,6 +161,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 void TrillCentroids_Dtor(TrillCentroids* unit)
 {
 	unit->sensor.cleanup();
+  numTrillUGens--;
 }
 
 
