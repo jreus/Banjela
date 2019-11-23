@@ -141,7 +141,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
   // Exit if using a 2D Trill sensor
   if(unit->sensor.deviceType() != Trill::ONED) {
-    fprintf(stderr, "ERROR: You are using a sensor of device type % that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor.deviceType());
+    fprintf(stderr, "ERROR: You are using a sensor of device type %d that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor.deviceType());
   }
 
   if(numTrillUGens != 1) {

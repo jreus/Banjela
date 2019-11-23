@@ -132,7 +132,7 @@ void TrillRaw_Ctor(TrillRaw* unit) {
       fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
       return;
   } else {
-    printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion());
+    printf("Trill sensor found: devtype %d, firmware_v %d numActiveTrillUGens %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion(), numTrillUGens);
     printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  devtype: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor.deviceType());
   }
 
@@ -141,8 +141,8 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
   // TODO: this doesn't work for some reason?
   // Exit if 2D trill sensor is found
-  if(unit->sensor.deviceType() == Trill::TWOD) {
-  	 fprintf(stderr, "Device Type is Trill::TWOD, this UGen only returns raw values... ignoring... \n");
+  if(unit->sensor.deviceType() != Trill::ONED) {
+  	 fprintf(stderr, "Strange Trill Device Type is %d, this UGen only returns raw values... ignoring... \n", unit->sensor.deviceType());
    }
 
    if(numTrillUGens != 1) {

@@ -33,7 +33,7 @@ s.waitForBoot {
 	var sig, ping;
 
 	rawvals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler, t_updateTrill);
-	SendReply.kr(Impulse.kr(1.0), "/trill", rawvals);
+	//SendReply.kr(Impulse.kr(1.0), "/trill", rawvals);
 	sig = Saw.ar(rawvals.linlin(0.0, 1300, 30, 2000), mul: rawvals.linlin(0.0, 1300, 0.0, 1.0)) * 0.5;
 	sig = Splay.ar(sig);
 	ping = EnvGen.ar(Env.perc, t_updateTrill) * SinOsc.ar(440);
