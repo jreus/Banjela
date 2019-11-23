@@ -1,5 +1,6 @@
 /*****
-Test Basic Banjo Functionality Remotely
+Live coding the banjo
+
 *****/
 
 ( // connect to the already-running remote belaserver
@@ -12,27 +13,81 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
-// Trill raw data test
+// Simple passthrough with "magpick" tremolo effect and some light filtering
 (
-Ndef(\test, {
-  var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
-  var i2c_address = 0x18; // I2C address of Trill sensor
-  var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
-  var prescaler = 1; // sensitvity, int: 0-5 (0=highest sensitivity, might have issues with complex craft setups)
-  var rawvals;
-  var sig;
+Ndef(\jo, {
+  var mixL, mixR;
+  var s1, s2, s3, s4, s5;
+  var mag1, mag2;
+  var mic;
+  var amp = 1.0;
 
-  rawvals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
-  SendReply.kr(Impulse.kr(1.0), "/trill", rawvals);
+  var str_co_hz = 12000;
+  var mag_co_hz = 20;
 
-  sig = Saw.ar(rawvals.linlin(0.0, 4100, 30, 2000), mul: Lag.kr(rawvals.linlin(0.0, 4100, 0.0, 1.0), 0.1)) * 0.3;
-  //sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
-  Splay.ar(sig.tanh);
-}).play(0, numChannels: 2, group:s);
+  mic = In.ar(2, 1) * 3.0;
+
+  mag1 = Lag.ar(In.ar(7, 1), 0.1) * 100.0;
+  mag2 = Lag.ar(In.ar(8, 1), 0.1) * 100.0;
+
+  s1 = s3 = s5 = LPF.ar(In.ar(4, 1), str_co_hz);
+  s2 = s4 = LPF.ar(In.ar(5, 1), str_co_hz);
+
+  mic = FreeVerb.ar(mic, 0.7, 0.95, 0.1) * (mag1 * 20.0).abs;
+  mixL = Mix([s1,s3,s5,mic]);
+  mixR = Mix([s2,s4,mic]);
+  Limiter.ar(LeakDC.ar([mixL, mixR] * amp), 1.0, 0.001);
+}).play(0, numChannels: 2, group: s);
 
 );
 
-OSCdef(\trill, {|msg| msg.postln }, "/trill");
+
+// Separation of trill segments into different sounds
+(
+Ndef(\jo, {
+  var i2c_bus = 1;
+  var i2c_address = 0x18;
+  var thresh = 6;
+  var prescaler = 1; // 1 or 2 needed for long cable runs up banjo neck
+  var touchsigs = DC.ar(0).dup(5);
+  var centroids, numTouches, touch1, touch2, touch3, touch4, touch5;
+
+  var mixL, mixR;
+  var s1, s2, s3, s4, s5;
+  var mag1, mag2;
+  var mic;
+  var amp = 1.0;
+
+  var str_co_hz = 13200;
+  var mag_co_hz = 20;
+
+  mic = In.ar(2, 1) * 3.0;
+
+  mag1 = Lag.ar(In.ar(7, 1), 0.1) * 100.0;
+  mag2 = Lag.ar(In.ar(8, 1), 0.1) * 100.0;
+
+
+
+  s1 = s3 = s5 = LPF.ar(In.ar(4, 1), str_co_hz);
+  s2 = s4 = LPF.ar(In.ar(5, 1), str_co_hz);
+
+
+  centroids = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
+
+  // Let's just look at one touch point
+  numTouches = centroids[0];
+  touch1 = [centroids[1], centroids[2]];
+  centroids[1..].poll(1);
+
+
+  mic = FreeVerb.ar(mic, 0.7, 0.95, 0.1) * (mag1 * 20.0).abs;
+  mixL = Mix([s1,s3,s5,mic]);
+  mixR = Mix([s2,s4,mic]);
+  Limiter.ar(LeakDC.ar([mixL, mixR] * amp), 1.0, 0.001);
+}).play(0, numChannels: 2, group: s);
+
+);
+
 
 
 
