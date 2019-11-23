@@ -55,7 +55,7 @@ s.waitForBoot {
   out = GVerb.ar(mix, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + mix;
 	*/
 	
-  centroids.poll(0.5);
+  centroids.poll(1.0);
   out;
 	}.play;
 
