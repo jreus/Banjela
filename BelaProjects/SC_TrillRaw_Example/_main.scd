@@ -28,7 +28,7 @@ s.waitForBoot {
   var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
   var i2c_address = 0x18; // I2C address of Trill sensor
   var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
-  var prescaler = 0; // sensitvity, int: 0-5 (0=highest sensitivity)
+  var prescaler = 0; // sensitvity, int: 0-5 (0=highest sensitivity, might have issues with complex craft setups)
   var rawvals;
   var sig;
 

@@ -14,9 +14,9 @@
 #define MIC_INCHAN 0
 
 /** Analog Input Channel Mappings **/
-#define STRING1_INCHAN 0
+#define STRING1_INCHAN 1
 #define STRING2_INCHAN 1
-#define STRING3_INCHAN 0
+#define STRING3_INCHAN 1
 #define STRING4_INCHAN 1
 #define STRING5_INCHAN 0
 #define MAG1_INCHAN 2
