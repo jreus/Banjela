@@ -34,8 +34,9 @@ s.waitForBoot {
 		var centroids;
 		var mix, out, ping;
 
-		centroids = TrillCentroids.kr(i2c_bus, i2c_address, noiseThreshold, prescalerOpt);
+		centroids = TrillCentroids.kr(i2c_bus, i2c_address, noiseThreshold, prescalerOpt, t_recalibrate);
 
+/*
 		// slap tappy
 		touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 800, 2400).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
 		touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
@@ -49,14 +50,16 @@ s.waitForBoot {
 
 		//out = Mix([touchsigs[0], touchsigs[1]]);
 		//out = GVerb.ar(out, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + out;
+		*/
+		
 		out = [touchsigs[0], touchsigs[1]];
-		SendReply.kr(Impulse.kr(1.0), "/trill", centroids);
+		SendReply.kr(Impulse.kr(2.0), "/trill", centroids);
 		ping = EnvGen.ar(Env.perc, t_recalibrate) * SinOsc.ar(440);
 		out + ping;
 	}.play;
 
 
-	OSCdef(\trill, {|msg| msg[3..].postln }, "/trill");
+	OSCdef(\trill, {|msg| msg.postln }, "/trill");
 	
 	{
 		loop {

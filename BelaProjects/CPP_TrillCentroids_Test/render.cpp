@@ -39,25 +39,29 @@ void readCentroids(void*)
 		gTouchLocations[i] = 0.f;
 		gTouchSizes[i] = 0.f;
 	 }
-	 
+	
+	/* print feedback 
 	printf("#%d: ", gNumActiveTouches);
 	for(unsigned int i=0; i < NUM_TOUCH; i++) {
 		printf("(%1.5f,%4.f) ", gTouchLocations[i], gTouchSizes[i]);			
 	}
 	printf("\n");
+	*/
 }
 
 bool setup(BelaContext *context, void *userData)
 {
-	int thresh=6, pre=0;
-	
-	pre = 1; // play around with this to optimize for your given capacitance setup
+	int thresh=6;
+	int pre=1; // should be 0 for Trill Bar, adjust this value when using Trill Craft to work with your setup 
 	
 	// mode=Trill::NORMAL for centroid-tracking behavior
 	if(ts.setup(1, 0x18, Trill::NORMAL, gThresholdOpts[thresh], gPrescalerOpts[pre]) != 0) {
 		fprintf(stderr, "Unable to initialise touch sensor\n");
 		return false;
-	} 
+	} else {
+		printf("Trill sensor found: devtype %d, firmware_v %d\n", ts.deviceType(), ts.firmwareVersion());
+    	printf("Initialized with i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d\n", 1, 0x18, Trill::NORMAL, gThresholdOpts[thresh], gPrescalerOpts[pre]);
+	}
 	
 	 // Exit program if sensor is a Trill 2D
 	if(ts.deviceType() == Trill::TWOD) {
@@ -67,6 +71,7 @@ bool setup(BelaContext *context, void *userData)
 	
 	centroidReadTask = Bela_createAuxiliaryTask(readCentroids, 50, "I2C-read", NULL);
 	readIntervalSamples = context->audioSampleRate * (readInterval/1000);
+
 	return true;
 }
 
