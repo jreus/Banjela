@@ -20,17 +20,18 @@ for more details.
 Default values are chosen which are viable for most usage scenarios.
 By default noise threshold is high and sensitivity is high.
 
-i2c_bus        I2C bus to use on BeagleBone
-i2c_address    I2C address of Trill sensor
-noiseThreshold   noise threshold, int: 5-255, 255=highest noise threshold
-prescalerOpt   int: 0-4, lower values=higher sensitivity
+i2c_bus           I2C bus to use on BeagleBone
+i2c_address       I2C address of Trill sensor
+noiseThreshold    noise threshold, int: 5-255, 255=highest noise threshold
+prescalerOpt      int: 0-4, lower values=higher sensitivity
+t_resetBaseline   trigger: 0->1 transition recalculates capacitive baseline value
 */
 TrillRaw : MultiOutUGen {
-  *kr {arg i2c_bus=1, i2c_address=0x18, noiseThreshold=100, prescalerOpt=0;
+  *kr {arg i2c_bus=1, i2c_address=0x18, noiseThreshold=100, prescalerOpt=0, t_resetBaseline=0.0;
     if(noiseThreshold.inclusivelyBetween(5,255).not) { Exception("Noise threshold '%' out of bounds. Must be an integer from 5 to 255.".format(noiseThreshold)).throw };
-    if(prescalerOpt.inclusivelyBetween(0,4).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 4.".format(thresholdOpt)).throw };
+    if(prescalerOpt.inclusivelyBetween(0,4).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 4.".format(prescalerOpt)).throw };
 
-    ^this.multiNew('control', i2c_bus, i2c_address, noiseThreshold, prescalerOpt);
+    ^this.multiNew('control', i2c_bus, i2c_address, noiseThreshold, prescalerOpt, t_resetBaseline);
   }
 
   // 26 fixed outputs (TODO: should be increased to 30 for latest Trill sensors)
@@ -38,6 +39,15 @@ TrillRaw : MultiOutUGen {
     inputs = theInputs;
     ^this.initOutputs(26, rate);
   }
+
+  // check that trigger is control rate
+  checkInputs {
+    if (rate !== inputs.at(4).rate) {
+  			^("t_resetBaseline must be control rate, but is " + inputs.at(4).rate);
+  	};
+  	^this.checkValidInputs
+  }
+
 }
 
 /*
@@ -75,6 +85,7 @@ TrillCentroids : MultiOutUGen {
 
 
 /* USEFUL EXAMPLES OF MULTI-OUT UGENS
+https://github.com/supercollider/supercollider/tree/develop/server/plugins
 
 // MFCC has a variable number of control rate output channels
 // specified at instantiation.
@@ -89,8 +100,6 @@ inputs = theInputs;
 }
 }
 
-
-
 // BeatTrack2 has 6 fixed control rate output channels
 BeatTrack2 : MultiOutUGen {
 *kr { arg busindex, numfeatures, windowsize=2.0, phaseaccuracy=0.02, lock=0, weightingscheme;
@@ -102,4 +111,50 @@ inputs = theInputs;
 ^this.initOutputs(6, rate);
 }
 }
+
+// EXAMPLES OF TRIGGER-INPUT UGENS
+https://github.com/supercollider/supercollider/blob/develop/SCClassLibrary/Common/Audio/UGen.sc
+https://github.com/supercollider/supercollider/blob/develop/server/plugins/TriggerUGens.cpp
+https://github.com/supercollider/supercollider/blob/develop/SCClassLibrary/Common/Audio/Trig.sc
+
+SendTrig : UGen {
+	*ar { arg in = 0.0, id = 0, value = 0.0;
+		this.multiNew('audio', in, id, value);
+		^0.0		// SendTrig has no output
+	}
+	*kr { arg in = 0.0, id = 0, value = 0.0;
+		this.multiNew('control', in, id, value);
+		^0.0		// SendTrig has no output
+	}
+	checkInputs {
+  ^this.checkSameRateAsFirstInput
+  }
+	numOutputs { ^0 }
+	writeOutputSpecs {}
+}
+
+SendReply : SendTrig {
+	*kr { arg trig = 0.0, cmdName = '/reply', values, replyID = -1;
+		if(values.containsSeqColl.not) { values = values.bubble };
+		[trig, cmdName, values, replyID].flop.do { |args|
+			this.new1('control', *args);
+		};
+		^0.0		// SendReply has no output
+	}
+
+	*ar { arg trig = 0.0, cmdName = '/reply', values, replyID = -1;
+		if(values.containsSeqColl.not) { values = values.bubble };
+		[trig, cmdName, values, replyID].flop.do { |args|
+			this.new1('audio', *args);
+		};
+		^0.0		// SendReply has no output
+	}
+
+	*new1 { arg rate, trig = 0.0, cmdName = '/reply', values, replyID = -1;
+		var ascii = cmdName.ascii;
+		^super.new1(*[rate, trig, replyID, ascii.size].addAll(ascii).addAll(values));
+	}
+}
+
+
 */
