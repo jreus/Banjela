@@ -5,7 +5,7 @@ remote="root@192.168.7.2:~/banjer"
 dryrun=1
 
 lineargs1="-auz"
-lineargs2="-e ssh --exclude .git --exclude .gitignore --exclude build --progress"
+lineargs2="-e ssh --exclude .git --exclude .gitignore --exclude build --exclude .DS_Store --progress"
 
 # argument parsing
 PARAMS=""
