@@ -29,20 +29,26 @@ s.waitForBoot {
 		var i2c_bus = 1;
 		var i2c_address = 0x18;
 		var noiseThreshold = 80; // int: 5-255 with 255 being the highest noise thresh
-		var prescalerOpt = 1; // int: 0-4 with 0 being the highest sensitivity
+		var prescalerOpt = 0; // int: 0-4 with 0 being the highest sensitivity
 		var touchsigs = DC.ar(0).dup(2);
 		var centroids;
 		var mix, out, ping;
 
 		centroids = TrillCentroids.kr(i2c_bus, i2c_address, noiseThreshold, prescalerOpt, t_recalibrate);
 
-/*
+
 		// slap tappy
-		touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 800, 2400).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
+		touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 60, 2000).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
 		touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
-		//touchsigs[0] = EnvGen.ar(Env.perc(0.001, 0.2), (centroids[6] > 0.0)) * SinOsc.ar([40, 45, 60, 61, 100], mul: 1.0).sum;
-		//touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[8] > 0), 0.2, centroids[7].linexp(0.0, 1.0, 50, 400).reciprocal, 1.0, 0.8);
-		//touchsigs[0] = Pluck.ar(WhiteNoise.ar, (centroids[10] > 0), 0.2, centroids[9].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
+		
+		// plucks on pulloff
+		//touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 60, 2000).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
+		
+		
+		
+		//touchsigs[0] = EnvGen.ar(Env.perc(0.001, 0.2), (centroids[2] > 0.0)) * SinOsc.ar([40, 45, 60, 61, 100], mul: 1.0).sum;
+		//touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 50, 400).reciprocal, 1.0, 0.8);
+		//touchsigs[0] = Pluck.ar(WhiteNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
 		
 		// synthy
 		//touchsigs[0] = Ringz.ar(Trig1.ar(centroids[2] > 0.0, 0.01), centroids[1].linexp(0.0, 1.0, 4000, 1000), 0.1, mul: 1.0).tanh * (centroids[2] > 0.0);
@@ -50,7 +56,6 @@ s.waitForBoot {
 
 		//out = Mix([touchsigs[0], touchsigs[1]]);
 		//out = GVerb.ar(out, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + out;
-		*/
 		
 		out = [touchsigs[0], touchsigs[1]];
 		SendReply.kr(Impulse.kr(2.0), "/trill", centroids);

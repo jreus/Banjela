@@ -135,7 +135,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
     fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
     return;
   } else {
-    printf("Trill sensor found: devtype %d, firmware_v %d activeUgens %\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion(), numTrillUGens);
+    printf("Trill sensor found: devtype %d, firmware_v %d activeUgens %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion(), numTrillUGens);
     printf("Initialized with #outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  deviceType: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor.deviceType());
   }
 
