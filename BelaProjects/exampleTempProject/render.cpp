@@ -1,118 +1,129 @@
-/*
- ____  _____ _        _    
-| __ )| ____| |      / \   
-|  _ \|  _| | |     / _ \  
-| |_) | |___| |___ / ___ \ 
-|____/|_____|_____/_/   \_\
-
-The platform for ultra-low latency audio and sensor processing
-
-http://bela.io
-
-A project of the Augmented Instruments Laboratory within the
-Centre for Digital Music at Queen Mary University of London.
-http://www.eecs.qmul.ac.uk/~andrewm
-
-(c) 2016 Augmented Instruments Laboratory: Andrew McPherson,
-  Astrid Bin, Liam Donovan, Christian Heinrichs, Robert Jack,
-  Giulio Moro, Laurel Pardue, Victor Zappi. All rights reserved.
-
-The Bela software is distributed under the GNU Lesser General Public License
-(LGPL 3.0), available here: https://www.gnu.org/licenses/lgpl-3.0.txt
-*/
-
+/**
+ * \example Trill/trill-bar-gui
+ *
+ * Trill Bar GUI
+ * ================
+ * 
+ * New GUI fuctionality for Bela! 
+ *
+ * This project showcases an example of how to communicate with the Trill Bar
+ * sensor using the Trill library and visualise position of different touches
+ * in real time via the integrated Bela p5.js GUI.
+ *
+ * The Trill sensor is scanned in an AuxiliaryTask running in parallel with the
+ * audio thread and the number of active touches, their position and size are
+ * stored in global variables.
+ *
+ * A p5.js sketch is included in this example with a p5 class representation of
+ * the Trill Bar sensor and the different touches. Touch position and size are
+ * displayed in the sketch.
+ *
+ **/
 
 #include <Bela.h>
 #include <cmath>
+#include <libraries/Trill/Trill.h>
+#include <libraries/Gui/Gui.h>
 
-float gPhase;
-float gInverseSampleRate;
-int gAudioFramesPerAnalogFrame = 0;
+#define NUM_TOUCH 5 // Number of touches on Trill sensor
 
-// Set the analog channels to read from
-int gSensorInputFrequency = 0;
-int gSensorInputAmplitude = 1;
+// Gui object declaration
+Gui gui;
+
+// Trill object declaration
+Trill touchSensor;
+
+// Prescaler options for Trill sensor
+int gPrescalerOpts[6] = {1, 2, 4, 8, 16, 32};
+// Threshold options for Trill sensor
+int gThresholdOpts[7] = {0, 10, 20, 30, 40, 50, 60};
+
+// Location of touches on Trill Bar
+float gTouchLocation[NUM_TOUCH] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+// Size of touches on Trill bar
+float gTouchSize[NUM_TOUCH] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+// Number of active touches
+int gNumActiveTouches = 0;
+// Touch range on which the re-mapping will be done
+int gTouchSizeRange[2] = { 100, 6000 };
+
+// Sleep time for auxiliary task
+int gTaskSleepTime = 100;
+// Time period (in seconds) after which data will be sent to the GUI
+float gTimePeriod = 0.015;
+
+/*
+* Function to be run on an auxiliary task that reads data from the Trill sensor.
+* Here, a loop is defined so that the task runs recurrently for as long as the
+* audio thread is running.
+*/
+void loop(void*)
+{
+ // loop
+ while(!gShouldStop)
+ {
+	 // Read locations from Trill sensor
+	 touchSensor.readLocations();
+	 // Remap location and size so that they are expressed in a 0-1 range
+	 for(int i = 0; i <  touchSensor.numberOfTouches(); i++) {
+		 gTouchLocation[i] = map(touchSensor.touchLocation(i), 0, 3200, 0, 1);
+		 gTouchLocation[i] = constrain(gTouchLocation[i], 0, 1);
+		 gTouchSize[i] = map(touchSensor.touchSize(i), gTouchSizeRange[0], gTouchSizeRange[1], 0, 1);
+		 gTouchSize[i] = constrain(gTouchSize[i], 0, 1);
+	 }
+	 gNumActiveTouches = touchSensor.numberOfTouches();
+	 // For all innactive touches, set location and size to 0
+	 for(int i = gNumActiveTouches; i <  NUM_TOUCH; i++) {
+		 gTouchLocation[i] = 0.0;
+		 gTouchSize[i] = 0.0;
+	 }
+
+	 // Sleep for ... milliseconds
+	 usleep(gTaskSleepTime);
+ }
+}
 
 bool setup(BelaContext *context, void *userData)
 {
-	
-	// Check if analog channels are enabled
-	if(context->analogFrames == 0 || context->analogFrames > context->audioFrames) {
-		rt_printf("Error: this example needs analog enabled, with 4 or 8 channels\n");
-		return false;
-	}
 
-	// Useful calculations
-	if(context->analogFrames)
-		gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
-	gInverseSampleRate = 1.0 / context->audioSampleRate;
-	gPhase = 0.0;
+ if(touchSensor.setup(1, 0x18, Trill::NORMAL, gThresholdOpts[6], gPrescalerOpts[0]) != 0) {
+	 fprintf(stderr, "Unable to initialise touch sensor\n");
+	 return false;
+ }
 
-	return true;
+ touchSensor.printDetails();
+
+ // Exit program if sensor is not a Trill Bar
+ if(touchSensor.deviceType() != Trill::ONED) {
+	 fprintf(stderr, "This example is supposed to work only with the Trill BAR. \n You may have to adapt it to make it work with other Trill devices.\n");
+	 return false;
+ }
+
+ // Set and schedule auxiliary task for reading sensor data from the I2C bus
+ Bela_scheduleAuxiliaryTask(Bela_createAuxiliaryTask(loop, 50, "I2C-read", NULL));
+
+ // Setup GUI
+ gui.setup(context->projectName);
+ return true;
 }
 
 void render(BelaContext *context, void *userData)
 {
-	float frequency = 440.0;
-	float amplitude = 0.8;
+ static unsigned int count = 0;
+ for(unsigned int n = 0; n < context->audioFrames; n++) {
+	 // Send number of touches, touch location and size to the GUI
+	 // after some time has elapsed.
+	 if(count >= gTimePeriod*context->audioSampleRate)
+	 {
+		 gui.sendBuffer(0, gNumActiveTouches);
+		 gui.sendBuffer(1, gTouchLocation);
+		 gui.sendBuffer(2, gTouchSize);
 
-	for(unsigned int n = 0; n < context->audioFrames; n++) {
-		if(gAudioFramesPerAnalogFrame && !(n % gAudioFramesPerAnalogFrame)) {
-			// read analog inputs and update frequency and amplitude
-			// Depending on the sampling rate of the analog inputs, this will
-			// happen every audio frame (if it is 44100)
-			// or every two audio frames (if it is 22050)
-			frequency = map(analogRead(context, n/gAudioFramesPerAnalogFrame, gSensorInputFrequency), 0, 1, 100, 1000);
-			amplitude = analogRead(context, n/gAudioFramesPerAnalogFrame, gSensorInputAmplitude);
-		}
-
-		float out = amplitude * sinf(gPhase);
-
-		for(unsigned int channel = 0; channel < context->audioOutChannels; channel++) {
-			audioWrite(context, n, channel, out);
-		}
-
-		// Update and wrap phase of sine tone
-		gPhase += 2.0f * (float)M_PI * frequency * gInverseSampleRate;
-		if(gPhase > M_PI)
-			gPhase -= 2.0f * (float)M_PI;
-	}
+		 count = 0;
+	 }
+	 count++;
+ }
 }
 
 void cleanup(BelaContext *context, void *userData)
-{
-
-}
-
-
-/**
-\example analog-input/render.cpp
-
-Connecting potentiometers
--------------------------
-
-This sketch produces a sine tone, the frequency and amplitude of which are 
-modulated by data received on the analog input pins. Before looping through each audio 
-frame, we declare a value for the `frequency` and `amplitude` of our sine tone; 
-we adjust these values by taking in data from analog sensors (for example potentiometers)
-with `analogRead()`.
-
-- connect a 10K pot to 3.3V and GND on its 1st and 3rd pins.
-- connect the 2nd middle pin of the pot to analogIn 0.
-- connect another 10K pot in the same way but with the middle pin connected to analogIn 1.
-
-The important thing to notice is that audio is sampled twice as often as analog 
-data. The audio sampling rate is 44.1kHz (44100 frames per second) and the 
-analog sampling rate is 22.05kHz (22050 frames per second). Notice that we are 
-processing the analog data and updating frequency and amplitude only on every 
-second audio sample, since the analog sampling rate is half that of the audio.
-
-````
-if(!(n % gAudioFramesPerAnalogFrame)) {
-    // Even audio samples: update frequency and amplitude from the analog inputs
-    frequency = map(analogRead(context, n/gAudioFramesPerAnalogFrame, gSensorInputFrequency), 0, 1, 100, 1000);
-    amplitude = analogRead(context, n/gAudioFramesPerAnalogFrame, gSensorInputAmplitude);
-}
-````
-
-*/
+{}

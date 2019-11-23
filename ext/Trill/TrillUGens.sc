@@ -27,7 +27,7 @@ prescalerOpt      int: 0-4, lower values=higher sensitivity
 t_resetBaseline   trigger: 0->1 transition recalculates capacitive baseline value
 */
 TrillRaw : MultiOutUGen {
-  *kr {arg i2c_bus=1, i2c_address=0x18, noiseThreshold=100, prescalerOpt=0, t_resetBaseline=0.0;
+  *kr {arg i2c_bus=1, i2c_address=0x18, noiseThreshold=80, prescalerOpt=0, t_resetBaseline=0.0;
     if(noiseThreshold.inclusivelyBetween(5,255).not) { Exception("Noise threshold '%' out of bounds. Must be an integer from 5 to 255.".format(noiseThreshold)).throw };
     if(prescalerOpt.inclusivelyBetween(0,4).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 4.".format(prescalerOpt)).throw };
 
@@ -43,11 +43,10 @@ TrillRaw : MultiOutUGen {
   // check that trigger is control rate
   checkInputs {
     if ( ( rate !== inputs.at(4).rate ).and { \scalar !== inputs.at(4).rate } ) {
-  			^("t_resetBaseline must be control rate or scalar, but is " + inputs.at(4).rate);
+  			^("TrillRaw: t_resetBaseline must be control rate or scalar, but is " + inputs.at(4).rate);
   	};
   	^this.checkValidInputs
   }
-
 }
 
 /*
@@ -65,20 +64,29 @@ By default all 5 potential centroids are tracked (for a total of 10 kr outputs).
 
 i2c_bus          I2C bus to use on BeagleBone
 i2c_address      I2C address of Trill sensor
-thresholdOpt     noise threshold, int: 0-6, 6=highest noise threshold
-prescalerOpt     int: 0-5, lower values=higher sensitivity
+noiseThreshold    noise threshold, int: 5-255, 255=highest noise threshold
+prescalerOpt      int: 0-4, lower values=higher sensitivity
+t_resetBaseline   trigger: 0->1 transition recalculates capacitive baseline value
 */
 TrillCentroids : MultiOutUGen {
-  *kr {arg i2c_bus=1, i2c_address=0x18, thresholdOpt=6, prescalerOpt=0;
-    if(thresholdOpt.inclusivelyBetween(0,6).not) { Exception("Threshold option % out of bounds. Must be an index from 0 to 6.".format(thresholdOpt)).throw };
-    if(prescalerOpt.inclusivelyBetween(0,5).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 5.".format(prescalerOpt)).throw };
+  *kr {arg i2c_bus=1, i2c_address=0x18, noiseThreshold=80, prescalerOpt=0, t_resetBaseline=0.0;
+    if(noiseThreshold.inclusivelyBetween(5,255).not) { Exception("Noise threshold '%' out of bounds. Must be an integer from 5 to 255.".format(noiseThreshold)).throw };
+    if(prescalerOpt.inclusivelyBetween(0,4).not) { Exception("Prescaler option % out of bounds. Must be an index from 0 to 4.".format(prescalerOpt)).throw };
 
-    ^this.multiNew('control', i2c_bus, i2c_address, thresholdOpt, prescalerOpt);
+    ^this.multiNew('control', i2c_bus, i2c_address, noiseThreshold, prescalerOpt, t_resetBaseline);
   }
 
   init { arg ... theInputs;
     inputs = theInputs;
     ^this.initOutputs(11, rate); // 11 outputs
+  }
+
+  // check that trigger is control rate
+  checkInputs {
+    if ( ( rate !== inputs.at(4).rate ).and { \scalar !== inputs.at(4).rate } ) {
+  			^("TrillCentroids: t_resetBaseline must be control rate or scalar, but is " + inputs.at(4).rate);
+  	};
+  	^this.checkValidInputs
   }
 }
 
