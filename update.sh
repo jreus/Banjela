@@ -4,9 +4,8 @@ local=.
 remote="root@192.168.7.2:~/banjer"
 dryrun=1
 
-# example of using arguments to a script
 lineargs1="-auz"
-lineargs2="-e ssh --exclude .git --exclude .gitignore --exclude build --progress --delete"
+lineargs2="-e ssh --exclude .git --exclude .gitignore --exclude build --progress"
 
 # argument parsing
 PARAMS=""
@@ -40,6 +39,7 @@ done
 if [ "$action" == "push" ]; then
   src=$local
   dest=$remote
+  lineargs2=$lineargs2" --delete" # delete files on push, but not on pull
 elif [ "$action" == "pull" ]; then
   src=$remote
   dest=$local
