@@ -33,13 +33,15 @@ struct TrillCentroids : public Unit {
   int noiseThreshold;
   int prescalerOpt;
 
-  AuxiliaryTask centroidReadTask;
-  AuxiliaryTask updateBaseLineTask;
+  AuxiliaryTask i2cTask;
   unsigned int readInterval; // read interval in ms
   unsigned int readIntervalSamples;
   unsigned int readCount;
+
+  bool updateNeeded = false;
   bool updateNoiseThreshold = false;
   bool updatePrescalerOpt = false;
+  bool updateBaseLine = false;
 
   // trigger
   float prevtrig = 0.0;
@@ -68,10 +70,36 @@ static void TrillCentroids_Ctor(TrillCentroids* unit); // constructor
 static void TrillCentroids_Dtor(TrillCentroids* unit); // destructor
 static void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples); // audio callback
 
-// I2C read function executed in an auxiliary task
-void readSensor(void* data)
+// I2C read/write function executed in an auxiliary task
+// all I2C communications are enapsulated into a single thread to avoid
+// colliding read/writes
+// NO I2C reads or writes should happen in the audio thread!
+void updateTrill(void* data)
 {
   TrillCentroids *unit = (TrillCentroids*)data;
+
+  // 1. First update any settings that have been flagged for updating...
+  if(unit->updateNeeded) {
+    if(unit->updateNoiseThreshold && (unit->sensor.setNoiseThreshold(unit->noiseThreshold) != 0)) {
+  		fprintf(stderr, "ERROR: Unable to set noise threshold on Trill Sensor!\n");
+  	}
+  	if(unit->updatePrescalerOpt && (unit->sensor.setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
+  		fprintf(stderr, "ERROR: Unable to set prescaler on Trill Sensor!\n");
+  	}
+    if(unit->updateBaseLine && (unit->sensor.updateBaseLine() != 0)) {
+  		fprintf(stderr, "ERROR: Unable to update baseline on Trill Sensor!\n");
+  	}
+    if(unit->sensor.prepareForDataRead() != 0) {
+  		fprintf(stderr, "ERROR: Unable to prepare Trill Sensor for reading data\n");
+  	}
+    unit->updateNoiseThreshold = false;
+    unit->updatePrescalerOpt = false;
+    unit->updateBaseLine = false;
+    unit->updateNeeded = false;
+  }
+
+
+  // 2. Update the sensor data
   unit->sensor.readLocations(); // read latest i2c data & calculate centroids
   // Remap locations so that they are expressed in a 0-1 range
 	for(int i = 0; i <  unit->sensor.numberOfTouches(); i++) {
@@ -87,26 +115,6 @@ void readSensor(void* data)
 	 }
 }
 
-// I2C write function executed in an auxiliary task
-void updateTrillSettings(void* data) {
-  TrillCentroids *unit = (TrillCentroids*)data;
-
-  if(unit->updateNoiseThreshold && (unit->sensor.setNoiseThreshold(unit->noiseThreshold) != 0)) {
-		fprintf(stderr, "ERROR: Unable to set noise threshold on Trill Sensor!\n");
-	}
-	if(unit->updatePrescalerOpt && (unit->sensor.setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
-		fprintf(stderr, "ERROR: Unable to set prescaler on Trill Sensor!\n");
-	}
-  unit->updateNoiseThreshold = false;
-  unit->updatePrescalerOpt = false;
-
-  if(unit->sensor.updateBaseLine() != 0) {
-		fprintf(stderr, "ERROR: Unable to update baseline on Trill Sensor!\n");
-	}
-  if(unit->sensor.prepareForDataRead() != 0) {
-		fprintf(stderr, "ERROR: Unable to prepare Trill Sensor for reading data\n");
-	}
-}
 
 
 void TrillCentroids_Ctor(TrillCentroids* unit) {
@@ -145,14 +153,12 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
   }
 
   if(numTrillUGens != 1) {
-    fprintf(stderr, "Big problem! There are %d active trill ugens!", numTrillUGens);
+    fprintf(stderr, "Big problem! There are %d active trill ugens! You may only have 1 Trill UGen active at a time.", numTrillUGens);
   }
 
-  unit->centroidReadTask = Bela_createAuxiliaryTask(readSensor, 50, "I2C-read", (void*)unit);
+  unit->i2cTask = Bela_createAuxiliaryTask(updateTrill, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
-  unit->updateBaseLineTask = Bela_createAuxiliaryTask(updateTrillSettings, 50, "I2C-write", (void*)unit);
-
-  unit->sensor.readLocations();
+  //unit->sensor.readLocations(); I2C operation should not happen here..
 
   SETCALC(TrillCentroids_next_k); // Use the same calc function no matter what the input rate is.
   TrillCentroids_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
@@ -160,7 +166,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
 void TrillCentroids_Dtor(TrillCentroids* unit)
 {
-	unit->sensor.cleanup();
+	unit->sensor.cleanup(); // maybe this needs to happen on another thread?
   numTrillUGens--;
 }
 
@@ -193,7 +199,7 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
     unit->readCount += 1;
     if(unit->readCount >= unit->readIntervalSamples) {
       unit->readCount = 0;
-      Bela_scheduleAuxiliaryTask(unit->centroidReadTask); // run the i2c read every so many samples
+      Bela_scheduleAuxiliaryTask(unit->i2cTask); // run the i2c thread every so many samples
     }
   }
 
@@ -210,7 +216,8 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
       unit->prescalerOpt = prescalerOpt;
       unit->updatePrescalerOpt = true;
     }
-    Bela_scheduleAuxiliaryTask(unit->updateBaseLineTask);
+    unit->updateBaseLine = true;
+    unit->updateNeeded = true;
   }
   unit->prevtrig = curtrig;
 

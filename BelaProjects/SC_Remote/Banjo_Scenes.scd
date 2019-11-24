@@ -16,7 +16,7 @@ s.freeAll;
 // Simple passthrough with "magpick" tremolo effect on mic and Bela noise removal
 (
 Ndef(\jo, {
-  var mixL, mixR;
+  var mix;
   var insig;
   var s1, s2, s3, s4, s5;
   var mag1, mag2;
@@ -33,22 +33,20 @@ Ndef(\jo, {
   mag2 = Lag.ar(In.ar(8, 1), mag_lag) * 100.0;
 
   // Bela Noise removal
-  insig = [In.ar(4,1), In.ar(5,1)] * 1.0;
+  insig = [In.ar(4,1), In.ar(5,1)];
   insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
   insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
   insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
   insig = SVF.ar(insig, nastynoise_hz*28, 0.01 ,0,0,0,1,0);
   insig = LPF.ar(insig, noise_co_hz);
 
-  s5 = insig[0]; // drone
-  s1 = s2 = s3 = s4 = insig[1] * 2.0;
+  s5 = insig[0] * 5.0; // drone
+  s1 = s2 = s3 = s4 = insig[1] * 11.0;
 
   mic = FreeVerb.ar(mic, 0.7, 0.95, 0.1) * (mag1 * 20.0).abs;
-  mixL = Mix([s5,mic]);
-  mixR = Mix([s1,mic]);
-  //mixL = Mix([s1,s2,s3,s4,s5]);
-  //mixR = s5;
-  Limiter.ar(LeakDC.ar([mixL, mixR] * amp), 1.0, 0.001);
+  mix = [s5+mic, s1+mic];
+  Amplitude.kr(mix.sum).poll(2);
+  Limiter.ar(LeakDC.ar(mix * amp), 1.0, 0.001);
 }).play(0, numChannels: 2, group: s);
 
 );
