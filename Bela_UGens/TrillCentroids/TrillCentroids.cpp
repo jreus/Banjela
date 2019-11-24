@@ -171,6 +171,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
 void TrillCentroids_Dtor(TrillCentroids* unit)
 {
+  fprintf(stderr, "I am the DTOR of TrillCentroids");
   printf("TrillCentroids DTOR id: %p\n", pthread_self());
 	unit->sensor.cleanup(); // maybe this needs to happen on another thread?
   numTrillUGens--;
