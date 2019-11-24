@@ -16,8 +16,8 @@ s.options.pgaGainLeft = 5;     // sets the pregain for the left audio input (dB)
 s.options.pgaGainRight = 5;    // sets the pregain for the right audio input (dB)
 s.options.headphoneLevel = -1; // sets the headphone level (-dB)
 s.options.speakerMuted = 1;    // set true to mute the speaker amp and draw a little less power
-s.options.dacLevel = 0;       // sets the gain of the analog dac to (dB)
-s.options.adcLevel = 0;       // sets the gain of the analog adc to (dB)
+s.options.dacLevel = 0;       // sets the gain of the stereo audio dac (+dB)
+s.options.adcLevel = 0;       // sets the gain of the stereo audio adc (+dB)
 
 s.options.blockSize = 16;
 s.options.numInputBusChannels = 10;
@@ -29,7 +29,7 @@ s.waitForBoot {
 		var i2c_bus = 1;
 		var i2c_address = 0x18;
 		var noiseThreshold = 50; // int: 5-255 with 255 being the highest noise thresh
-		var prescalerOpt = 4; // int: 0-4 with 0 being the highest sensitivity
+		var prescalerOpt = 1; // int: 0-4 with 0 being the highest sensitivity
 		var touchsigs = DC.ar(0).dup(2);
 		var centroids;
 		var mix, out, ping;
@@ -51,9 +51,10 @@ s.waitForBoot {
 		//touchsigs[0] = Pluck.ar(WhiteNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
 		
 		// synthy
-		touchsigs[0] = Ringz.ar(Trig1.ar(centroids[2] > 0.0, 0.01), centroids[1].linexp(0.0, 1.0, 4000, 1000), 0.1, mul: 1.0).tanh;// * (centroids[2] > 0.0);
-		touchsigs[1] = PMOsc.ar((centroids[3]+0.001) * 2500, 500, centroids[4].linexp(0.0, 3000, 0.1, 12.0), 0.1, mul: 0.5) 
-			* EnvGen.ar(Env.perc, (centroids[4] > 0.0), timeScale: centroids[4].linexp(500, 3000, 0.3, 5.0));
+		touchsigs[0] = PMOsc.ar((centroids[1]+0.001) * 2500, 500, centroids[2].linexp(0.0, 2000, 0.1, 12.0), 0.1, mul: 0.5) 
+			* EnvGen.ar(Env.perc, (centroids[2] > 0.0), timeScale: centroids[2].linexp(50, 1000, 0.3, 5.0));
+
+		touchsigs[1] = Ringz.ar(Trig1.ar(centroids[4] > 0.0, 0.01), centroids[3].linexp(0.0, 1.0, 4000, 700), 0.1, mul: 1.0).tanh * (centroids[4] > 0.0);
 
 		//out = Mix([touchsigs[0], touchsigs[1]]);
 		//out = GVerb.ar(out, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + out;
