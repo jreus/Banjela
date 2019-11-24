@@ -136,6 +136,7 @@ x = {
 b.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_magsense.wav", "WAV", "float");
 c.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_audio.wav", "WAV", "float");
 
+Synth
 
 
 ( // Simple mag pitch
