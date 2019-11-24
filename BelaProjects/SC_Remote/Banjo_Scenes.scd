@@ -13,131 +13,106 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
-// Simple passthrough with "magpick" tremolo effect and some light filtering
+// Simple passthrough with "magpick" tremolo effect on mic and Bela noise removal
 (
 Ndef(\jo, {
   var mixL, mixR;
+  var insig;
   var s1, s2, s3, s4, s5;
   var mag1, mag2;
   var mic;
   var amp = 1.0;
 
-  var str_co_hz = 12000;
-  var mag_co_hz = 20;
+  var mag_lag = 0.1;
+  var nastynoise_hz = 230;
+  var noise_co_hz = 4000;
 
-  mic = In.ar(2, 1) * 3.0;
+  mic = In.ar(2, 1) * 2.0;
 
-  mag1 = Lag.ar(In.ar(7, 1), 0.1) * 100.0;
-  mag2 = Lag.ar(In.ar(8, 1), 0.1) * 100.0;
+  mag1 = Lag.ar(In.ar(7, 1), mag_lag) * 100.0;
+  mag2 = Lag.ar(In.ar(8, 1), mag_lag) * 100.0;
 
-  s1 = s3 = s5 = LPF.ar(In.ar(4, 1), str_co_hz);
-  s2 = s4 = LPF.ar(In.ar(5, 1), str_co_hz);
+  // Bela Noise removal
+  insig = [In.ar(4,1), In.ar(5,1)] * 1.0;
+  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*28, 0.01 ,0,0,0,1,0);
+  insig = LPF.ar(insig, noise_co_hz);
+
+  s5 = insig[0]; // drone
+  s1 = s2 = s3 = s4 = insig[1] * 2.0;
 
   mic = FreeVerb.ar(mic, 0.7, 0.95, 0.1) * (mag1 * 20.0).abs;
-  mixL = Mix([s1,s3,s5,mic]);
-  mixR = Mix([s2,s4,mic]);
+  mixL = Mix([s5,mic]);
+  mixR = Mix([s1,mic]);
+  //mixL = Mix([s1,s2,s3,s4,s5]);
+  //mixR = s5;
   Limiter.ar(LeakDC.ar([mixL, mixR] * amp), 1.0, 0.001);
 }).play(0, numChannels: 2, group: s);
 
 );
 
 
-// Separation of trill segments into different sounds
-(
+( // Expansion on the drone string
 Ndef(\jo, {
-  var i2c_bus = 1;
-  var i2c_address = 0x18;
-  var thresh = 6;
-  var prescaler = 1; // 1 or 2 needed for long cable runs up banjo neck
-  var touchsigs = DC.ar(0).dup(5);
-  var centroids, numTouches, touch1, touch2, touch3, touch4, touch5;
-
-  var mixL, mixR;
+  var mix;
+  var insig;
   var s1, s2, s3, s4, s5;
+  var s_amp, s_pitch1, s_pitch2, s_haspitch;
   var mag1, mag2;
   var mic;
+  var beat1 = 8, beat2 = 8;
   var amp = 1.0;
+  var mag_lag = 0.1;
+  var nastynoise_hz = 230;
+  var noise_co_hz = 7000;
+  mic = In.ar(2, 1) * 2.0;
+  mag1 = Lag.ar(In.ar(7, 1).abs * 100.0, mag_lag) * 10.0;
+  mag1 = (mag1 > 0.25) * (mag1 - 0.25);
+  mag2 = Lag.ar(In.ar(8, 1).abs * 100.0, mag_lag) * 10.0;
+  mag2 = (mag2 > 0.25) * (mag2 - 0.25);
+  insig = [In.ar(4,1), In.ar(5,1)] * 1.0;
+  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*28, 0.01 ,0,0,0,1,0);
+  insig = LPF.ar(insig, noise_co_hz);
+  s5 = insig[0] * 6.0; // drone
+  s1 = s2 = s3 = s4 = insig[1] * 9.0; // other four strings
 
-  var str_co_hz = 13200;
-  var mag_co_hz = 20;
-
-  mic = In.ar(2, 1) * 3.0;
-
-  mag1 = Lag.ar(In.ar(7, 1), 0.1) * 100.0;
-  mag2 = Lag.ar(In.ar(8, 1), 0.1) * 100.0;
-
-
-
-  s1 = s3 = s5 = LPF.ar(In.ar(4, 1), str_co_hz);
-  s2 = s4 = LPF.ar(In.ar(5, 1), str_co_hz);
+  // Start your code here
+  // slopebelow > 1.0 (noise gating), slopeabove > 1.0 (expansion)
+  s5 = Compander.ar(s5, s5, 0.05, 2.0, 1.0, 0.005, 0.01, mul: 1.0);
+  s1 = Compander.ar(s1, s1, 0.05, 2.0, 1.0, 0.005, 0.01, mul: 3.0);
+  //Amplitude.kr(s5).poll(2);
+  //Amplitude.kr(s1).poll(2);
+  s_amp = Amplitude.kr(s5);
+  //# s_pitch, s_haspitch = Pitch.kr(s5, ampThreshold: 0.02, median: 7);
+  //s5 = Pluck.ar(PinkNoise.ar(), (s_amp > 0.1), 0.02, 0.2, 1.0) * 0.1;
 
 
-  centroids = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
+  beat1 = 12 * s_amp;
+  beat2 = 50 * s_amp;
+  s_pitch2 = 391.95; // G5
 
-  // Let's just look at one touch point
-  numTouches = centroids[0];
-  touch1 = [centroids[1], centroids[2]];
-  centroids[1..].poll(1);
+  s_pitch1 = mag1.linlin(0.00, 1.0, 0.0007, 0.003);
+  s_pitch2 = mag2.linlin(0.00, 1.0, 391.95.reciprocal, 0.005);
+  mag2.poll(2);
+  //BeatTrack2
+  s5 = s5 +
+  [Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat1), 0.2, s_pitch1, 0.2, 0.5, mul: 2.0),
+    Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat2), 0.2, s_pitch2, 0.2, 0.5, mul: 2.0)];
+  //s1 = CombL.ar(s1, 0.2, 0.001, 0.1);
+
+  mix = FreeVerb.ar(s1+s5);
 
 
-  mic = FreeVerb.ar(mic, 0.7, 0.95, 0.1) * (mag1 * 20.0).abs;
-  mixL = Mix([s1,s3,s5,mic]);
-  mixR = Mix([s2,s4,mic]);
-  Limiter.ar(LeakDC.ar([mixL, mixR] * amp), 1.0, 0.001);
+  Limiter.ar(LeakDC.ar(mix * amp), 1.0, 0.001);
 }).play(0, numChannels: 2, group: s);
 
 );
 
 
-
-
-// Trill Centroid patch
-(
-
-Ndef(\banjo, {
-  var i2c_bus = 1;
-  var i2c_address = 0x18;
-  var thresh = 6;
-  var prescaler = 0;
-  var touchsigs = DC.ar(0).dup(5);
-  var centroids;
-  var mix, out;
-  var s1, s2, s3, s4, s5;
-  var strings;
-  var mag1, mag2;
-
-  var str_co_hz = 2200;
-  var mag_co_hz = 15;
-  s1 = s3 = s5 = LeakDC.ar(LPF.ar(LPF.ar(LPF.ar(In.ar(4, 1), str_co_hz), str_co_hz), str_co_hz));
-  s2 = s4 = LeakDC.ar(LPF.ar(LPF.ar(LPF.ar(In.ar(5, 1), str_co_hz), str_co_hz), str_co_hz));
-  strings = [s1,s2,s3,s4,s5];
-  //strings = (strings * 15.0).tanh;
-
-  strings = CompanderD.ar(strings, 0.01, 2.0, 1.0, 0.001, 0.01);
-
-  mag1 = LPF.ar(In.ar(7, 1), mag_co_hz, mul: 10.0);
-  mag2 = LPF.ar(In.ar(8, 1), mag_co_hz, mul: 10.0);
-
-  centroids = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
-
-
-
-  // slap tappy
-  touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 800, 2400).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
-  touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
-  touchsigs[2] = EnvGen.ar(Env.perc(0.001, 0.2), (centroids[6] > 0.0)) * SinOsc.ar([40, 45, 60, 61, 100], mul: 1.0).sum;
-  touchsigs[3] = Pluck.ar(WhiteNoise.ar, (centroids[8] > 0), 0.2, centroids[7].linexp(0.0, 1.0, 50, 400).reciprocal, 1.0, 0.8);
-  touchsigs[4] = Pluck.ar(WhiteNoise.ar, (centroids[10] > 0), 0.2, centroids[9].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
-  mix = Splay.ar(touchsigs);
-
-  //Pulse.ar([mag1,mag2].linlin(-1.0, 1.0, 50, 1000)) * [mag1.abs, mag2.abs];
-
-  Limiter.ar(mix + (Splay.ar(strings)));
-
-}).play(0, numChannels: 2, group: s);
-
-//OSCdef(\trilldata, {|msg| msg[3..].postln}, "/trill");
-
-);
 
 

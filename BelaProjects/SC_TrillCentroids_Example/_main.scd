@@ -28,8 +28,8 @@ s.waitForBoot {
 	~tr = {|t_recalibrate=0.0|
 		var i2c_bus = 1;
 		var i2c_address = 0x18;
-		var noiseThreshold = 80; // int: 5-255 with 255 being the highest noise thresh
-		var prescalerOpt = 0; // int: 0-4 with 0 being the highest sensitivity
+		var noiseThreshold = 50; // int: 5-255 with 255 being the highest noise thresh
+		var prescalerOpt = 4; // int: 0-4 with 0 being the highest sensitivity
 		var touchsigs = DC.ar(0).dup(2);
 		var centroids;
 		var mix, out, ping;
@@ -38,10 +38,10 @@ s.waitForBoot {
 
 
 		// slap tappy
-		touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 60, 2000).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
-		touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
+		//touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 60, 2000).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
+		//touchsigs[1] = Pluck.ar(WhiteNoise.ar, (centroids[4] > 0), 0.2, centroids[3].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
 		
-		// plucks on pulloff
+		// plucks on pulloff ?
 		//touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 60, 2000).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
 		
 		
@@ -51,8 +51,9 @@ s.waitForBoot {
 		//touchsigs[0] = Pluck.ar(WhiteNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
 		
 		// synthy
-		//touchsigs[0] = Ringz.ar(Trig1.ar(centroids[2] > 0.0, 0.01), centroids[1].linexp(0.0, 1.0, 4000, 1000), 0.1, mul: 1.0).tanh * (centroids[2] > 0.0);
-		//touchsigs[1] = PMOsc.ar((centroids[3]+0.001) * 2500, 500, centroids[4].linexp(0.0, 3000, 0.1, 12.0), 0.1) * 0.2 * EnvGen.ar(Env.perc, (centroids[4] > 0.0), timeScale: centroids[4].linexp(500, 3000, 0.3, 5.0));
+		touchsigs[0] = Ringz.ar(Trig1.ar(centroids[2] > 0.0, 0.01), centroids[1].linexp(0.0, 1.0, 4000, 1000), 0.1, mul: 1.0).tanh;// * (centroids[2] > 0.0);
+		touchsigs[1] = PMOsc.ar((centroids[3]+0.001) * 2500, 500, centroids[4].linexp(0.0, 3000, 0.1, 12.0), 0.1, mul: 0.5) 
+			* EnvGen.ar(Env.perc, (centroids[4] > 0.0), timeScale: centroids[4].linexp(500, 3000, 0.3, 5.0));
 
 		//out = Mix([touchsigs[0], touchsigs[1]]);
 		//out = GVerb.ar(out, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + out;

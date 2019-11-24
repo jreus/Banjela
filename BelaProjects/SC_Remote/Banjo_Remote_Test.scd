@@ -9,6 +9,7 @@ s.initTree;
 s.startAliveThread;
 );
 
+
 s.plotTree;
 s.freeAll;
 
