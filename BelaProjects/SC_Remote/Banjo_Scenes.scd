@@ -114,20 +114,27 @@ Ndef(\jo, {
 
 // Mag sensor sonifications
 //
+Ndef(\jo).clear;
+
 b = Buffer.alloc(s, s.sampleRate * 10.0, 2); // 10 seconds of data, 2 channels
-
-( // Record Mag Signal
+c = Buffer.alloc(s, s.sampleRate * 10.0, 1); // 10 seconds of string audio, mono
+( // Record 10 seconds of Mag Signals alongside string audio
 x = {
-  var mag1, mag2;
-
-
-  RecordBuf.ar([mag1, mag2], b, loop: 0, doneAction: 2);
+  var mix, insig, s5, strings, mag1, mag2, mic, amp=1.0;
+  s5 = In.ar(4,1);
+  strings = In.ar(5,1);
+  mag1 = In.ar(7,1);
+  mag2 = In.ar(8,1);
+  RecordBuf.ar([mag1, mag2], b, loop: 0, doneAction: 2); // record mag signals
+  RecordBuf.ar(strings+s5, c, loop: 0); // record string audio
+  [strings, s5];
 }.play(s, outbus: 0);
 
 );
 
 // write buffer to file in project data directory on the bela
-b.write("/root/banjer/data/magsense_gestures_" ++ Date.getDate.stamp ++ ".wav", "WAV", "float");
+b.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_magsense.wav", "WAV", "float");
+c.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_audio.wav", "WAV", "float");
 
 
 

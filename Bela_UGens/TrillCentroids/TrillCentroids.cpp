@@ -11,6 +11,7 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 #include <Bela.h>
 #include <libraries/Trill/Trill.h>
 #include "SC_PlugIn.h"
+#include <pthread.h>
 
 // maximum number of touch centroids
 #define NUM_TOUCH 5
@@ -138,6 +139,10 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
   unit->readIntervalSamples = 0; // launch I2C aux task every X samples
   unit->readCount = 0;
 
+  // DEBUG: What thread am I?
+  printf("TrillCentroids CTOR id: %p\n", pthread_self());
+
+
   // initialize / setup the Trill sensor
   if(unit->sensor.setup(unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt]) != 0) {
     fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
@@ -166,6 +171,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
 void TrillCentroids_Dtor(TrillCentroids* unit)
 {
+  printf("TrillCentroids DTOR id: %p\n", pthread_self());
 	unit->sensor.cleanup(); // maybe this needs to happen on another thread?
   numTrillUGens--;
 }
@@ -202,6 +208,12 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
       Bela_scheduleAuxiliaryTask(unit->i2cTask); // run the i2c thread every so many samples
     }
   }
+
+  {
+		static int xxx = 0;
+		if(0 == xxx++)
+			printf("Audio thread id: %p\n", pthread_self());
+	};
 
   // CHECK FOR A NONPOSITIVE->POSITIVE TRIGGER TO RECALCULATE THE BASELINE AND PRESCALER/NOISE THRESH
   float curtrig = IN0(4);
