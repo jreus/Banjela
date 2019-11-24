@@ -25,7 +25,7 @@ s.options.numOutputBusChannels = 2;
 
 
 s.waitForBoot {
-	~tr = {|t_recalibrate=0.0|
+	SynthDef(\sketch, {|t_recalibrate=0.0|
 		var i2c_bus = 1;
 		var i2c_address = 0x18;
 		var noiseThreshold = 50; // int: 5-255 with 255 being the highest noise thresh
@@ -60,14 +60,26 @@ s.waitForBoot {
 		//out = GVerb.ar(out, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + out;
 		
 		out = [touchsigs[0], touchsigs[1]];
-		SendReply.kr(Impulse.kr(2.0), "/trill", centroids);
+		SendReply.kr(Impulse.kr(0.2), "/trill", centroids);
 		ping = EnvGen.ar(Env.perc, t_recalibrate) * SinOsc.ar(440);
-		out + ping;
-	}.play;
-
-
-	OSCdef(\trill, {|msg| msg.postln }, "/trill");
+		Out.ar(0, out + ping);
+	}).add;
 	
+	s.sync;
+	
+	~tr = Synth(\sketch);
+	~tr.class.postln;
+
+	//OSCdef(\trill, {|msg| msg.postln }, "/trill");
+	
+	{
+		5.wait;
+		"Freeing synth...".postln;
+		~tr.free;
+		s.sync;
+		"Synth freed".postln;
+	}.fork;
+/*	
 	{
 		loop {
 			20.wait;
@@ -75,4 +87,6 @@ s.waitForBoot {
 			~tr.set(\t_recalibrate, 1);
 		};
 	}.fork;
+*/
+
 };

@@ -12,6 +12,7 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 #include "Bela.h"
 #include "Trill.h"
 #include "SC_PlugIn.h"
+#include <pthread.h>
 
 // number of sensors per Trill device
 #define NUM_SENSORS 26
@@ -133,6 +134,8 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
   numTrillUGens++;
 
+  printf("TrillRaw CTOR id: %p\n", pthread_self());
+
   // DEFAULT OPTS are defined in TrillUGens.sc
   if(unit->sensor.setup(unit->i2c_bus, unit->i2c_address, unit->mode, gPrescalerOpts[unit->prescalerOpt], unit->noiseThreshold) != 0) {
       fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
@@ -166,6 +169,8 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
 void TrillRaw_Dtor(TrillRaw* unit)
 {
+  printf("TrillRaw DTOR id: %p\n", pthread_self());
+
 	unit->sensor.cleanup();
   numTrillUGens--;
 }
@@ -190,6 +195,12 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
     DEBUG = true;
   }
   //*** END DEBUGGING ***/
+
+  {
+		static int xxx = 0;
+		if(0 == xxx++)
+			printf("TrillRaw Audio thread id: %p\n", pthread_self());
+	};
 
 
   // DO THINGS AT AUDIO RATE
@@ -237,5 +248,5 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
 
 PluginLoad(TrillRaw) {
     ft = inTable; // store pointer to InterfaceTable
-    DefineSimpleUnit(TrillRaw);
+    DefineDtorCantAliasUnit(TrillRaw);
 }

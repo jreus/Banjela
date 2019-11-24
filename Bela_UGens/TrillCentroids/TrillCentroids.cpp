@@ -171,7 +171,6 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
 void TrillCentroids_Dtor(TrillCentroids* unit)
 {
-  fprintf(stderr, "I am the DTOR of TrillCentroids");
   printf("TrillCentroids DTOR id: %p\n", pthread_self());
 	unit->sensor.cleanup(); // maybe this needs to happen on another thread?
   numTrillUGens--;
@@ -213,7 +212,7 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
   {
 		static int xxx = 0;
 		if(0 == xxx++)
-			printf("Audio thread id: %p\n", pthread_self());
+			printf("TrillCentroids Audio thread id: %p\n", pthread_self());
 	};
 
   // CHECK FOR A NONPOSITIVE->POSITIVE TRIGGER TO RECALCULATE THE BASELINE AND PRESCALER/NOISE THRESH
@@ -245,5 +244,5 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
 
 PluginLoad(TrillCentroids) {
     ft = inTable; // store pointer to InterfaceTable
-    DefineSimpleUnit(TrillCentroids);
+    DefineDtorCantAliasUnit(TrillCentroids);
 }
