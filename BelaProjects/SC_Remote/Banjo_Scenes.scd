@@ -94,8 +94,8 @@ Ndef(\jo, {
   beat2 = 50 * s_amp;
   s_pitch2 = 391.95; // G5
 
-  s_pitch1 = mag1.linlin(0.00, 1.0, 0.0007, 0.003);
-  s_pitch2 = mag2.linlin(0.00, 1.0, 391.95.reciprocal, 0.005);
+  s_pitch1 = mag1.linlin(0.00, 1.0, 0.0007, 0.005);
+  s_pitch2 = mag2.linlin(0.00, 1.0, 391.95.reciprocal, 0.01);
   mag2.poll(2);
   //BeatTrack2
   s5 = s5 +
@@ -110,6 +110,57 @@ Ndef(\jo, {
 }).play(0, numChannels: 2, group: s);
 
 );
+
+
+// Mag sensor sonifications
+//
+b = Buffer.alloc(s, s.sampleRate * 10.0, 2); // 10 seconds of data, 2 channels
+
+( // Record Mag Signal
+x = {
+  var mag1, mag2;
+
+
+  RecordBuf.ar([mag1, mag2], b, loop: 0, doneAction: 2);
+}.play(s, outbus: 0);
+
+);
+
+// write buffer to file in project data directory on the bela
+b.write("/root/banjer/data/magsense_gestures_" ++ Date.getDate.stamp ++ ".wav", "WAV", "float");
+
+
+
+( // Simple mag pitch
+Ndef(\jo, {
+  var mix, insig, s1, s2, s3, s4, s5, mag1, mag2, mic, amp=1.0;
+  var s_amp, s_pitch1, s_pitch2, s_haspitch, beat1 = 8, beat2 = 8;
+  var mag_lag = 0.1;
+  var nastynoise_hz = 230, noise_co_hz = 7000;
+  mic = In.ar(2, 1) * 2.0;
+  mag1 = Lag.ar(In.ar(7, 1).abs * 100.0, mag_lag) * 10.0;
+  mag1 = (mag1 > 0.25) * (mag1 - 0.25);
+  mag2 = Lag.ar(In.ar(8, 1).abs * 100.0, mag_lag) * 10.0;
+  mag2 = (mag2 > 0.25) * (mag2 - 0.25);
+  insig = [In.ar(4,1), In.ar(5,1)] * 1.0;
+  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*28, 0.01 ,0,0,0,1,0);
+  insig = LPF.ar(insig, noise_co_hz);
+  s5 = insig[0] * 6.0; // drone
+  s1 = s2 = s3 = s4 = insig[1] * 9.0; // other four strings
+
+  // Start your code here
+
+
+
+  Limiter.ar(LeakDC.ar(mix * amp), 1.0, 0.001);
+}).play(0, numChannels: 2, group: s);
+
+);
+
+
 
 
 
