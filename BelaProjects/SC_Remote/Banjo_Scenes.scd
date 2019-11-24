@@ -118,6 +118,7 @@ Ndef(\jo).clear;
 
 b = Buffer.alloc(s, s.sampleRate * 10.0, 2); // 10 seconds of data, 2 channels
 c = Buffer.alloc(s, s.sampleRate * 10.0, 1); // 10 seconds of string audio, mono
+
 ( // Record 10 seconds of Mag Signals alongside string audio
 x = {
   var mix, insig, s5, strings, mag1, mag2, mic, amp=1.0;
@@ -137,34 +138,35 @@ b.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_magsense.wav", "WAV", "
 c.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_audio.wav", "WAV", "float");
 
 
-Synth
+Ndef.clear; // clear all
 
-
-( // Simple mag pitch
+( // Simple mag pitch mapping
 Ndef(\jo, {
-  var mix, insig, s1, s2, s3, s4, s5, mag1, mag2, mic, amp=1.0;
+  var magMax = 0.05, magMin = -0.05;
+  var mix, insig, s1, s2, s3, s4, s5, mag1, mag2, mic;
   var s_amp, s_pitch1, s_pitch2, s_haspitch, beat1 = 8, beat2 = 8;
-  var mag_lag = 0.1;
+  var mapped1, mapped2;
   var nastynoise_hz = 230, noise_co_hz = 7000;
   mic = In.ar(2, 1) * 2.0;
-  mag1 = Lag.ar(In.ar(7, 1).abs * 100.0, mag_lag) * 10.0;
-  mag1 = (mag1 > 0.25) * (mag1 - 0.25);
-  mag2 = Lag.ar(In.ar(8, 1).abs * 100.0, mag_lag) * 10.0;
-  mag2 = (mag2 > 0.25) * (mag2 - 0.25);
-  insig = [In.ar(4,1), In.ar(5,1)] * 1.0;
-  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
-  insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
-  insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
-  insig = SVF.ar(insig, nastynoise_hz*28, 0.01 ,0,0,0,1,0);
-  insig = LPF.ar(insig, noise_co_hz);
-  s5 = insig[0] * 6.0; // drone
-  s1 = s2 = s3 = s4 = insig[1] * 9.0; // other four strings
+  mag1 = In.ar(7,1);
+  mag2 = In.ar(8,1);
+
+  s5 = In.ar(4,1) * 6.0; // drone
+  s1 = s2 = s3 = s4 = In.ar(5,1) * 9.0; // other four strings
 
   // Start your code here
+  mag1 = Lag2.ar(mag1, 0.2);
+  mag1 = mag1.linlin(-0.001, 0.001, -1.0, 1.0);
+
+  mag2 = Lag2.ar(mag2, 0.2);
+  mag2 = mag2.linlin(-0.001, 0.001, -1.0, 1.0);
 
 
+  mapped1 = mag1.linlin(-1,1,50,2000);
+  mapped2 = mag2.linlin(-1,1,50,3000);
+  mix = [Pulse.ar(mapped1), BLowPass4.ar(WhiteNoise.ar, mapped2, 0.1)];
 
-  Limiter.ar(LeakDC.ar(mix * amp), 1.0, 0.001);
+  Limiter.ar(LeakDC.ar(mix * 0.2), 1.0, 0.001);
 }).play(0, numChannels: 2, group: s);
 
 );
