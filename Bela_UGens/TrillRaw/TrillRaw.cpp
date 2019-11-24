@@ -35,13 +35,15 @@ struct TrillRaw : public Unit {
   int noiseThreshold;
   int prescalerOpt;
 
-  AuxiliaryTask i2cReadTask;
-  AuxiliaryTask updateBaseLineTask;
+  AuxiliaryTask i2cTask;
   unsigned int readInterval; // read interval in ms
   unsigned int readIntervalSamples;
   unsigned int readCount;
+
+  bool updateNeeded = false;
   bool updateNoiseThreshold = false;
   bool updatePrescalerOpt = false;
+  bool updateBaseLine = false;
 
   // Readins for all the different pads on the Trill Craft
   float sensorReading[NUM_SENSORS] = { 0.0 };
@@ -69,9 +71,35 @@ static void TrillRaw_Ctor(TrillRaw* unit); // constructor
 static void TrillRaw_Dtor(TrillRaw* unit); // destructor
 static void TrillRaw_next_k(TrillRaw* unit, int inNumSamples); // audio callback
 
-// I2C read function executed in an auxiliary task
-void readSensor(void* data) {
+// I2C read/write function executed in an auxiliary task
+// all I2C communications are enapsulated into a single thread to avoid
+// colliding read/writes
+// NO I2C reads or writes should happen in the audio thread!
+void updateTrill(void* data) {
   TrillRaw *unit = (TrillRaw*)data;
+
+  // 1. First update any settings that have been flagged for updating...
+  if(unit->updateNeeded) {
+    if(unit->updateNoiseThreshold && (unit->sensor.setNoiseThreshold(unit->noiseThreshold) != 0)) {
+  		fprintf(stderr, "ERROR: Unable to set noise threshold on Trill Sensor!\n");
+  	}
+  	if(unit->updatePrescalerOpt && (unit->sensor.setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
+  		fprintf(stderr, "ERROR: Unable to set prescaler on Trill Sensor!\n");
+  	}
+    if(unit->updateBaseLine && (unit->sensor.updateBaseLine() != 0)) {
+  		fprintf(stderr, "ERROR: Unable to update baseline on Trill Sensor!\n");
+  	}
+    if(unit->sensor.prepareForDataRead() != 0) {
+  		fprintf(stderr, "ERROR: Unable to prepare Trill Sensor for reading data\n");
+  	}
+    unit->updateNoiseThreshold = false;
+    unit->updatePrescalerOpt = false;
+    unit->updateBaseLine = false;
+    unit->updateNeeded = false;
+  }
+
+
+  // 2. Update the sensor data
 	if(unit->sensor.isReady()) {
 		unit->sensor.readI2C();
     for(unsigned int i=0; i < NUM_SENSORS; i++) {
@@ -83,26 +111,7 @@ void readSensor(void* data) {
   }
 }
 
-// I2C write function executed in an auxiliary task
-void updateTrillSettings(void* data) {
-  TrillRaw *unit = (TrillRaw*)data;
 
-  if(unit->updateNoiseThreshold && (unit->sensor.setNoiseThreshold(unit->noiseThreshold) != 0)) {
-		fprintf(stderr, "ERROR: Unable to set noise threshold on Trill Sensor!\n");
-	}
-	if(unit->updatePrescalerOpt && (unit->sensor.setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
-		fprintf(stderr, "ERROR: Unable to set prescaler on Trill Sensor!\n");
-	}
-  unit->updateNoiseThreshold = false;
-  unit->updatePrescalerOpt = false;
-
-  if(unit->sensor.updateBaseLine() != 0) {
-		fprintf(stderr, "ERROR: Unable to update baseline on Trill Sensor!\n");
-	}
-  if(unit->sensor.prepareForDataRead() != 0) {
-		fprintf(stderr, "ERROR: Unable to prepare Trill Sensor for reading data\n");
-	}
-}
 
 void TrillRaw_Ctor(TrillRaw* unit) {
   // Get initial arguments to UGen for I2C setup
@@ -119,11 +128,8 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   unit->readInterval = 500; // launch I2C aux task every 500ms
   unit->readIntervalSamples = 0; // launch I2C aux task every X samples
   unit->readCount = 0;
-  unit->i2cReadTask = Bela_createAuxiliaryTask(readSensor, 50, "I2C-read", (void*)unit);
+  unit->i2cTask = Bela_createAuxiliaryTask(updateTrill, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
-
-  // task for updating baseline
-  unit->updateBaseLineTask = Bela_createAuxiliaryTask(updateTrillSettings, 50, "I2C-write", (void*)unit);
 
   numTrillUGens++;
 
@@ -136,30 +142,23 @@ void TrillRaw_Ctor(TrillRaw* unit) {
     printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  devtype: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor.deviceType());
   }
 
-  // TODO:: Provide a trigger input to UPDATE BASELINE
-  // unit->sensor.updateBaseLine();
-
-  // TODO: this doesn't work for some reason?
-  // Exit if 2D trill sensor is found
   if(unit->sensor.deviceType() != Trill::ONED) {
   	 fprintf(stderr, "Strange Trill Device Type is %d, this UGen only returns raw values... ignoring... \n", unit->sensor.deviceType());
    }
 
    if(numTrillUGens != 1) {
-     fprintf(stderr, "Big problem! There are %d active trill ugens!", numTrillUGens);
+     fprintf(stderr, "Big problem! There are %d active trill ugens! Only one is allowed!", numTrillUGens);
    }
 
-
-  unit->sensor.readI2C();
-
-/* Throwing errors for some reason...
+   // Don't do I2C reads/writes in the audio thread!
+  /*unit->sensor.readI2C(); ... don't do this in the audio thread!
   if(unit->sensor.isReady()) {
     unit->sensor.readI2C();
   } else {
     fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
     return;
   }
-*/
+  */
 
   SETCALC(TrillRaw_next_k); // Use the same calc function no matter what the input rate is.
   TrillRaw_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
@@ -204,7 +203,7 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
     unit->readCount += 1;
     if(unit->readCount >= unit->readIntervalSamples) {
       unit->readCount = 0;
-      Bela_scheduleAuxiliaryTask(unit->i2cReadTask); // run the i2c read every so many samples
+      Bela_scheduleAuxiliaryTask(unit->i2cTask); // run the i2c read every so many samples
     }
   }
 
@@ -221,8 +220,9 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
       unit->prescalerOpt = prescalerOpt;
       unit->updatePrescalerOpt = true;
     }
+    unit->updateBaseLine = true;
+    unit->updateNeeded = true;
 
-    Bela_scheduleAuxiliaryTask(unit->updateBaseLineTask);
   }
   unit->prevtrig = curtrig;
 
