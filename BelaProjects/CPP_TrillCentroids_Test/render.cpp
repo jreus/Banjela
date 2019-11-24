@@ -40,13 +40,13 @@ void readCentroids(void*)
 		gTouchSizes[i] = 0.f;
 	 }
 	
-	/* print feedback 
+	// print feedback 
 	printf("#%d: ", gNumActiveTouches);
 	for(unsigned int i=0; i < NUM_TOUCH; i++) {
 		printf("(%1.5f,%4.f) ", gTouchLocations[i], gTouchSizes[i]);			
 	}
 	printf("\n");
-	*/
+	
 }
 
 bool setup(BelaContext *context, void *userData)

@@ -60,7 +60,7 @@ s.waitForBoot {
 		//out = GVerb.ar(out, 20, centroids[5].linlin(0.0, 1.0, 2,5),  mul: (centroids[6] > 0) * 0.5) + out;
 		
 		out = [touchsigs[0], touchsigs[1]];
-		SendReply.kr(Impulse.kr(0.2), "/trill", centroids);
+		SendReply.kr(Impulse.kr(1), "/trill", centroids);
 		ping = EnvGen.ar(Env.perc, t_recalibrate) * SinOsc.ar(440);
 		Out.ar(0, out + ping);
 	}).add;
@@ -70,16 +70,9 @@ s.waitForBoot {
 	~tr = Synth(\sketch);
 	~tr.class.postln;
 
-	//OSCdef(\trill, {|msg| msg.postln }, "/trill");
+	OSCdef(\trill, {|msg| msg.postln }, "/trill");
 	
-	{
-		5.wait;
-		"Freeing synth...".postln;
-		~tr.free;
-		s.sync;
-		"Synth freed".postln;
-	}.fork;
-/*	
+
 	{
 		loop {
 			20.wait;
@@ -87,6 +80,5 @@ s.waitForBoot {
 			~tr.set(\t_recalibrate, 1);
 		};
 	}.fork;
-*/
 
 };
