@@ -7,7 +7,7 @@
 Trill ts;
 
 AuxiliaryTask centroidReadTask;
-int readInterval = 100; // every 100ms
+int readInterval = 100; // read sensor every 100ms
 int readIntervalSamples = 0;
 
 // Allowable prescaler values for Trill sensor
@@ -70,7 +70,7 @@ bool setup(BelaContext *context, void *userData)
 	}
 	
 	centroidReadTask = Bela_createAuxiliaryTask(readCentroids, 50, "I2C-read", NULL);
-	readIntervalSamples = context->audioSampleRate * (readInterval/1000);
+	readIntervalSamples = context->audioSampleRate * (readInterval/1000.f);
 
 	return true;
 }

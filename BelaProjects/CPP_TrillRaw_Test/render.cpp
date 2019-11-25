@@ -6,13 +6,13 @@
 Trill ts;
 
 AuxiliaryTask i2cReadTask;
-int readInterval = 500; // every 500ms
+int readInterval = 100; // read sensor every 100ms
 int readIntervalSamples = 0;
 
 // Prescaler options for Trill sensor
 int gPrescalerOpts[6] = {1, 2, 4, 8, 16, 32};
-// Threshold options for Trill sensor
-int gThresholdOpts[7] = {0, 10, 20, 30, 40, 50, 60};
+// Threshold options for Trill sensor, int: 5-255
+int gNoiseThreshold = 60;
 
 
 void readTouch(void*) 
@@ -28,12 +28,12 @@ void readTouch(void*)
 
 bool setup(BelaContext *context, void *userData)
 {
-	// play with these values until all touch pads register well
-	int thresh = 6, pre = 0;
-	pre = 1; // try a different prescaler value for different capacitances (higher is good for longer cable runs)
-	ts.setup(1, 0x18, Trill::DIFF, gThresholdOpts[thresh], gPrescalerOpts[pre]);
+	// try a different prescaler value for different capacitances (higher is good for longer cable runs)
+	// option 0 gives the highest sensitivity
+	int pre = 1; 
+	ts.setup(1, 0x18, Trill::DIFF, gNoiseThreshold, gPrescalerOpts[pre]);
 	i2cReadTask = Bela_createAuxiliaryTask(readTouch, 50, "I2C-read", NULL);
-	readIntervalSamples = context->audioSampleRate * (readInterval/1000);
+	readIntervalSamples = context->audioSampleRate * (readInterval/1000.f);
 	return true;
 }
 
