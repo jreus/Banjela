@@ -30,7 +30,7 @@ int rt_fprintf(FILE *stream, const char *format, ...);
 
 // Holds UGen state variables
 struct TrillRaw : public Unit {
-  Trill sensor;
+  Trill* sensor;
   int i2c_bus, i2c_address;
   int mode;
   int noiseThreshold;
@@ -81,16 +81,16 @@ void updateTrill(void* data) {
 
   // 1. First update any settings that have been flagged for updating...
   if(unit->updateNeeded) {
-    if(unit->updateNoiseThreshold && (unit->sensor.setNoiseThreshold(unit->noiseThreshold) != 0)) {
+    if(unit->updateNoiseThreshold && (unit->sensor->setNoiseThreshold(unit->noiseThreshold) != 0)) {
   		fprintf(stderr, "ERROR: Unable to set noise threshold on Trill Sensor!\n");
   	}
-  	if(unit->updatePrescalerOpt && (unit->sensor.setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
+  	if(unit->updatePrescalerOpt && (unit->sensor->setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
   		fprintf(stderr, "ERROR: Unable to set prescaler on Trill Sensor!\n");
   	}
-    if(unit->updateBaseLine && (unit->sensor.updateBaseLine() != 0)) {
+    if(unit->updateBaseLine && (unit->sensor->updateBaseLine() != 0)) {
   		fprintf(stderr, "ERROR: Unable to update baseline on Trill Sensor!\n");
   	}
-    if(unit->sensor.prepareForDataRead() != 0) {
+    if(unit->sensor->prepareForDataRead() != 0) {
   		fprintf(stderr, "ERROR: Unable to prepare Trill Sensor for reading data\n");
   	}
     unit->updateNoiseThreshold = false;
@@ -101,11 +101,11 @@ void updateTrill(void* data) {
 
 
   // 2. Update the sensor data
-	if(unit->sensor.isReady()) {
-		unit->sensor.readI2C();
+	if(unit->sensor->isReady()) {
+		unit->sensor->readI2C();
     for(unsigned int i=0; i < NUM_SENSORS; i++) {
-      //unit->sensorReading[i] = map(unit->sensor.rawData[i], 200, 2000, 0.0, 1.0);
-      unit->sensorReading[i] = unit->sensor.rawData[i];
+      //unit->sensorReading[i] = map(unit->sensor->rawData[i], 200, 2000, 0.0, 1.0);
+      unit->sensorReading[i] = unit->sensor->rawData[i];
     }
   } else {
       fprintf(stderr, "ERROR: Trill Sensor is not ready to read!\n");
@@ -115,6 +115,7 @@ void updateTrill(void* data) {
 
 
 void TrillRaw_Ctor(TrillRaw* unit) {
+  unit->sensor = new Trill();
   // Get initial arguments to UGen for I2C setup
   unit->i2c_bus = (int)IN0(0);
   unit->i2c_address = (int)IN0(1);
@@ -130,23 +131,23 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   unit->readIntervalSamples = 0; // launch I2C aux task every X samples
   unit->readCount = 0;
   unit->i2cTask = Bela_createAuxiliaryTask(updateTrill, 50, "I2C-read", (void*)unit);
-  unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
+  unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000.f);
 
   numTrillUGens++;
 
   printf("TrillRaw CTOR id: %p\n", pthread_self());
 
   // DEFAULT OPTS are defined in TrillUGens.sc
-  if(unit->sensor.setup(unit->i2c_bus, unit->i2c_address, unit->mode, gPrescalerOpts[unit->prescalerOpt], unit->noiseThreshold) != 0) {
+	  if(unit->sensor->setup(unit->i2c_bus, unit->i2c_address, unit->mode, gPrescalerOpts[unit->prescalerOpt], unit->noiseThreshold) != 0) {
       fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
       return;
   } else {
-    printf("Trill sensor found: devtype %d, firmware_v %d numActiveTrillUGens %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion(), numTrillUGens);
-    printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  devtype: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor.deviceType());
+    printf("Trill sensor found: devtype %d, firmware_v %d numActiveTrillUGens %d\n", unit->sensor->deviceType(), unit->sensor->firmwareVersion(), numTrillUGens);
+    printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  devtype: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor->deviceType());
   }
 
-  if(unit->sensor.deviceType() != Trill::ONED) {
-  	 fprintf(stderr, "Strange Trill Device Type is %d, this UGen only returns raw values... ignoring... \n", unit->sensor.deviceType());
+  if(unit->sensor->deviceType() != Trill::ONED) {
+  	 fprintf(stderr, "Strange Trill Device Type is %d, this UGen only returns raw values... ignoring... \n", unit->sensor->deviceType());
    }
 
    if(numTrillUGens != 1) {
@@ -154,9 +155,9 @@ void TrillRaw_Ctor(TrillRaw* unit) {
    }
 
    // Don't do I2C reads/writes in the audio thread!
-  /*unit->sensor.readI2C(); ... don't do this in the audio thread!
-  if(unit->sensor.isReady()) {
-    unit->sensor.readI2C();
+  /*unit->sensor->readI2C(); ... don't do this in the audio thread!
+  if(unit->sensor->isReady()) {
+    unit->sensor->readI2C();
   } else {
     fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
     return;
@@ -169,9 +170,7 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
 void TrillRaw_Dtor(TrillRaw* unit)
 {
-  printf("TrillRaw DTOR id: %p\n", pthread_self());
-
-	unit->sensor.cleanup();
+  delete unit->sensor;
   numTrillUGens--;
 }
 
@@ -239,7 +238,7 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
 
 
 
-  // TODO: maybe use unit->sensor.numSensors() instead
+  // TODO: maybe use unit->sensor->numSensors() instead
   //       and modify TrillRaw.sc to specify a variable number of sensors
   for (int i = 0; i < unit->mNumOutputs; i++) {
     OUT0(i) = unit->sensorReading[i];
