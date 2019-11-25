@@ -1,3 +1,5 @@
+// Hacked by JC Reus & Giulio Moro, Nov 25 2019
+
 #include <libraries/Trill/Trill.h>
 
 #define MAX_TOUCH_1D_OR_2D ((device_type_ == TWOD ? kMaxTouchNum2D : kMaxTouchNum1D))
@@ -83,7 +85,7 @@ void Trill::cleanup() {
 }
 
 Trill::~Trill() {
-	cleanup();
+	//cleanup(); // hack allows client code to choose whether or not to close the I2C connection
 }
 
 int Trill::identify() {
@@ -111,8 +113,7 @@ int Trill::identify() {
 	}
 
 	device_type_ = dataBuffer[1];
-	fprintf(stderr, "device_type as read: %d\n", device_type_); 
-	device_type_ = 1;
+	fprintf(stderr, "device_type as read: %d\n", device_type_); // hack to see what is really coming in over the pipe
 	firmware_version_ = dataBuffer[2];
 
 	return 0;

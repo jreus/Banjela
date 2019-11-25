@@ -141,7 +141,7 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
   numTrillUGens++;
 
-  //printf("TrillRaw CTOR id: %p\n", pthread_self());
+  printf("TrillRaw CTOR id: %p\n", pthread_self());
 
   // DEFAULT OPTS are defined in TrillUGens.sc
 	  if(unit->sensor->setup(unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt]) != 0) {
@@ -157,7 +157,7 @@ void TrillRaw_Ctor(TrillRaw* unit) {
    }
 
    if(numTrillUGens != 1) {
-     fprintf(stderr, "Big problem! There are %d active trill ugens! Only one is allowed!", numTrillUGens);
+     fprintf(stderr, "Big problem! There are %d active trill ugens! This may cause unpredictable behavior as only one I2C connection is allowed at a time!", numTrillUGens);
    }
 
   if(unit->sensor->isReady()) {
@@ -173,7 +173,8 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
 void TrillRaw_Dtor(TrillRaw* unit)
 {
-  //printf("TrillRaw DTOR id: %p\n", pthread_self());
+  printf("TrillRaw DTOR id: %p\n", pthread_self());
+  unit->sensor->cleanup();
   delete unit->sensor; // make sure to use delete here and remove your allocations
   numTrillUGens--;
 }
