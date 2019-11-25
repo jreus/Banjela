@@ -20,6 +20,8 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 static InterfaceTable *ft;
 
 // Track the number of active Trill UGens
+// NOTE: this does not show up in TrillRaw? (check for I2C management)
+//  how to export static variables into the global context?
 static int numTrillUGens = 0;
 
 // These functions are provided by Xenomai
@@ -131,7 +133,6 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
   unit->noiseThreshold = (int)IN0(2);
   unit->prescalerOpt = (int)IN0(3);
 
-  numTrillUGens++;
 
   // zero control rate outputs
   OUT0(0) = 0.f; // num active touches
@@ -144,25 +145,36 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
   unit->readIntervalSamples = 0; // launch I2C aux task every X samples
   unit->readCount = 0;
 
+  printf("TrillCentroids CTOR id: %p\n", pthread_self());
 
   // initialize / setup the Trill sensor
   if(unit->sensor->setup(unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt]) != 0) {
     fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
     return;
   } else {
-    printf("Trill sensor found: devtype %d, firmware_v %d activeUgens %d\n", unit->sensor->deviceType(), unit->sensor->firmwareVersion(), numTrillUGens);
+    printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor->deviceType(), unit->sensor->firmwareVersion());
+    printf("Also found %d active Trill UGens\n", numTrillUGens);
     printf("Initialized with #outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  deviceType: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor->deviceType());
   }
   if(unit->sensor->deviceType() != Trill::ONED) {
-    fprintf(stderr, "ERROR: You are using a sensor of device type %d that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor->deviceType());
+    fprintf(stderr, "WARNING! You are using a sensor of device type %d that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor->deviceType());
   }
+
+  numTrillUGens++;
   if(numTrillUGens != 1) {
-    fprintf(stderr, "Big problem! There are %d active trill ugens! You may only have 1 Trill UGen active at a time.", numTrillUGens);
+    fprintf(stderr, "WARNING! Found %d active Trill UGens when there should be a maximum of 1! The UGen may not function properly.\n", numTrillUGens);
   }
 
   unit->i2cTask = Bela_createAuxiliaryTask(updateTrill, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000.f);
-  //unit->sensor.readLocations(); I2C operation should not happen here..
+
+  if(unit->sensor->isReady()) {
+    unit->sensor->readLocations();
+  } else {
+    fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
+    return;
+  }
+
 
   SETCALC(TrillCentroids_next_k); // Use the same calc function no matter what the input rate is.
   TrillCentroids_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
@@ -170,8 +182,11 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
 void TrillCentroids_Dtor(TrillCentroids* unit)
 {
-	unit->sensor->cleanup(); // maybe this needs to happen on another thread?
   numTrillUGens--;
+  printf("TrillCentroids DTOR id: %p // there are still %d active Trill UGens\n", pthread_self(), numTrillUGens);
+  if(numTrillUGens == 0)
+    unit->sensor->cleanup();
+  delete unit->sensor; // make sure to use delete here and remove your allocations
 }
 
 

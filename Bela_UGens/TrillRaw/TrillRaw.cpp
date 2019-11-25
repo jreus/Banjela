@@ -139,7 +139,6 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   unit->i2cTask = Bela_createAuxiliaryTask(updateTrill, 50, "I2C-read", (void*)unit);
   unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000.f);
 
-  numTrillUGens++;
 
   printf("TrillRaw CTOR id: %p\n", pthread_self());
 
@@ -148,16 +147,18 @@ void TrillRaw_Ctor(TrillRaw* unit) {
       fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
       return;
   } else {
-    printf("Trill sensor found: devtype %d, firmware_v %d numActiveTrillUGens %d\n", unit->sensor->deviceType(), unit->sensor->firmwareVersion(), numTrillUGens);
+    printf("Trill sensor found: devtype %d, firmware_v %d\n", unit->sensor->deviceType(), unit->sensor->firmwareVersion());
+    printf("Found %d active Trill UGens\n", numTrillUGens);
     printf("Initialized with outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  devtype: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor->deviceType());
   }
 
   if(unit->sensor->deviceType() != Trill::ONED) {
-  	 fprintf(stderr, "Strange Trill Device Type is %d, this UGen only returns raw values... ignoring... \n", unit->sensor->deviceType());
+  	 fprintf(stderr, "WARNING! Trill Device Type is %d... ignoring... \n", unit->sensor->deviceType());
    }
 
+   numTrillUGens++;
    if(numTrillUGens != 1) {
-     fprintf(stderr, "Big problem! There are %d active trill ugens! This may cause unpredictable behavior as only one I2C connection is allowed at a time!", numTrillUGens);
+     fprintf(stderr, "WARNING! There are now %d active Trill UGens! This may cause unpredictable behavior as only one I2C connection is allowed at a time!", numTrillUGens);
    }
 
   if(unit->sensor->isReady()) {
@@ -173,10 +174,11 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
 void TrillRaw_Dtor(TrillRaw* unit)
 {
-  printf("TrillRaw DTOR id: %p\n", pthread_self());
-  unit->sensor->cleanup();
-  delete unit->sensor; // make sure to use delete here and remove your allocations
   numTrillUGens--;
+  printf("TrillRaw DTOR id: %p // %d active ugens remain\n", pthread_self(), numTrillUGens);
+  if(numTrillUGens == 0)
+    unit->sensor->cleanup();
+  delete unit->sensor; // make sure to use delete here and remove your allocations
 }
 
 
