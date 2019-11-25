@@ -15,6 +15,7 @@ http://doc.sccode.org/Reference/ServerPluginAPI.html
 #include <pthread.h>
 
 // number of sensors per Trill device
+// TODO: update this once the 30-sensor Trill Sensors go into production
 #define NUM_SENSORS 26
 
 // InterfaceTable contains pointers to global functions in the host (scserver).
@@ -23,13 +24,15 @@ static InterfaceTable *ft;
 // Track the number of active Trill UGens
 static int numTrillUGens = 0;
 
-
 // These functions are provided by Xenomai
 int rt_printf(const char *format, ...);
 int rt_fprintf(FILE *stream, const char *format, ...);
 
 // Holds UGen state variables
 struct TrillRaw : public Unit {
+  // object constructors will not be called automatically
+  // so all objects in the UGen struct must be pointers
+  // and then allocated in the UGen constructor
   Trill* sensor;
   int i2c_bus, i2c_address;
   int mode;
@@ -115,7 +118,10 @@ void updateTrill(void* data) {
 
 
 void TrillRaw_Ctor(TrillRaw* unit) {
+
+  // all objects must be allocated in the constructor
   unit->sensor = new Trill();
+
   // Get initial arguments to UGen for I2C setup
   unit->i2c_bus = (int)IN0(0);
   unit->i2c_address = (int)IN0(1);
@@ -135,10 +141,10 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
   numTrillUGens++;
 
-  printf("TrillRaw CTOR id: %p\n", pthread_self());
+  //printf("TrillRaw CTOR id: %p\n", pthread_self());
 
   // DEFAULT OPTS are defined in TrillUGens.sc
-	  if(unit->sensor->setup(unit->i2c_bus, unit->i2c_address, unit->mode, gPrescalerOpts[unit->prescalerOpt], unit->noiseThreshold) != 0) {
+	  if(unit->sensor->setup(unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt]) != 0) {
       fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
       return;
   } else {
@@ -154,15 +160,12 @@ void TrillRaw_Ctor(TrillRaw* unit) {
      fprintf(stderr, "Big problem! There are %d active trill ugens! Only one is allowed!", numTrillUGens);
    }
 
-   // Don't do I2C reads/writes in the audio thread!
-  /*unit->sensor->readI2C(); ... don't do this in the audio thread!
   if(unit->sensor->isReady()) {
     unit->sensor->readI2C();
   } else {
     fprintf(stderr, "Trill Sensor is not ready for I2C read.\n");
     return;
   }
-  */
 
   SETCALC(TrillRaw_next_k); // Use the same calc function no matter what the input rate is.
   TrillRaw_next_k(unit, 1); // calc 1 sample of output so that downstream UGens don't access garbage memory
@@ -170,7 +173,8 @@ void TrillRaw_Ctor(TrillRaw* unit) {
 
 void TrillRaw_Dtor(TrillRaw* unit)
 {
-  delete unit->sensor;
+  //printf("TrillRaw DTOR id: %p\n", pthread_self());
+  delete unit->sensor; // make sure to use delete here and remove your allocations
   numTrillUGens--;
 }
 
@@ -195,11 +199,13 @@ void TrillRaw_next_k(TrillRaw* unit, int inNumSamples) {
   }
   //*** END DEBUGGING ***/
 
+  /*
   {
 		static int xxx = 0;
 		if(0 == xxx++)
 			printf("TrillRaw Audio thread id: %p\n", pthread_self());
 	};
+  */
 
 
   // DO THINGS AT AUDIO RATE
