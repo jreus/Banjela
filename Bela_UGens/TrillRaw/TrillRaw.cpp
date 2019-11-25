@@ -133,7 +133,7 @@ void TrillRaw_Ctor(TrillRaw* unit) {
   for (int j = 0; j < unit->mNumOutputs; j++)
     OUT0(j) = 0.f;
 
-  unit->readInterval = 10; // sensor read / launch I2C aux task every 10ms
+  unit->readInterval = 5; // sensor read / launch I2C aux task in ms
   unit->readIntervalSamples = 0; // launch I2C aux task every X samples
   unit->readCount = 0;
   unit->i2cTask = Bela_createAuxiliaryTask(updateTrill, 50, "I2C-read", (void*)unit);

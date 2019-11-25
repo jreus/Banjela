@@ -84,16 +84,16 @@ void updateTrill(void* data)
 
   // 1. First update any settings that have been flagged for updating...
   if(unit->updateNeeded) {
-    if(unit->updateNoiseThreshold && (unit->sensor.setNoiseThreshold(unit->noiseThreshold) != 0)) {
+    if(unit->updateNoiseThreshold && (unit->sensor->setNoiseThreshold(unit->noiseThreshold) != 0)) {
   		fprintf(stderr, "ERROR: Unable to set noise threshold on Trill Sensor!\n");
   	}
-  	if(unit->updatePrescalerOpt && (unit->sensor.setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
+  	if(unit->updatePrescalerOpt && (unit->sensor->setPrescaler(gPrescalerOpts[unit->prescalerOpt]) != 0)) {
   		fprintf(stderr, "ERROR: Unable to set prescaler on Trill Sensor!\n");
   	}
-    if(unit->updateBaseLine && (unit->sensor.updateBaseLine() != 0)) {
+    if(unit->updateBaseLine && (unit->sensor->updateBaseLine() != 0)) {
   		fprintf(stderr, "ERROR: Unable to update baseline on Trill Sensor!\n");
   	}
-    if(unit->sensor.prepareForDataRead() != 0) {
+    if(unit->sensor->prepareForDataRead() != 0) {
   		fprintf(stderr, "ERROR: Unable to prepare Trill Sensor for reading data\n");
   	}
     unit->updateNoiseThreshold = false;
@@ -104,13 +104,13 @@ void updateTrill(void* data)
 
 
   // 2. Update the sensor data
-  unit->sensor.readLocations(); // read latest i2c data & calculate centroids
+  unit->sensor->readLocations(); // read latest i2c data & calculate centroids
   // Remap locations so that they are expressed in a 0-1 range
-	for(int i = 0; i <  unit->sensor.numberOfTouches(); i++) {
-		unit->touchLocations[i] = map(unit->sensor.touchLocation(i), 0, 3200, 0.f, 1.f);
-		unit->touchSizes[i] = unit->sensor.touchSize(i);
+	for(int i = 0; i <  unit->sensor->numberOfTouches(); i++) {
+		unit->touchLocations[i] = map(unit->sensor->touchLocation(i), 0, 3200, 0.f, 1.f);
+		unit->touchSizes[i] = unit->sensor->touchSize(i);
 	 }
-	 unit->numActiveTouches = unit->sensor.numberOfTouches();
+	 unit->numActiveTouches = unit->sensor->numberOfTouches();
 
 	 // For all inactive touches, set location and size to 0
 	 for(int i = unit->numActiveTouches; i <  NUM_TOUCH; i++) {
@@ -140,7 +140,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
     OUT0((j*2)+2) = 0.f;  // size i
   }
 
-  unit->readInterval = 10; // (MAGIC NUMBER) sensor update/launch I2C aux task every 10ms
+  unit->readInterval = 5; // (MAGIC NUMBER) sensor update/launch I2C aux task every 5ms
   unit->readIntervalSamples = 0; // launch I2C aux task every X samples
   unit->readCount = 0;
 
@@ -151,10 +151,10 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
     return;
   } else {
     printf("Trill sensor found: devtype %d, firmware_v %d activeUgens %d\n", unit->sensor->deviceType(), unit->sensor->firmwareVersion(), numTrillUGens);
-    printf("Initialized with #outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  deviceType: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor.deviceType());
+    printf("Initialized with #outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  deviceType: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor->deviceType());
   }
   if(unit->sensor->deviceType() != Trill::ONED) {
-    fprintf(stderr, "ERROR: You are using a sensor of device type %d that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor.deviceType());
+    fprintf(stderr, "ERROR: You are using a sensor of device type %d that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor->deviceType());
   }
   if(numTrillUGens != 1) {
     fprintf(stderr, "Big problem! There are %d active trill ugens! You may only have 1 Trill UGen active at a time.", numTrillUGens);

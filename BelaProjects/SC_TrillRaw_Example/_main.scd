@@ -29,24 +29,27 @@ s.waitForBoot {
 	var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
 	var i2c_address = 0x18; // I2C address of Trill sensor
 	var noiseThresh = 40; // noise threshold, int: 5-255 (255=highest threshold)
-	var prescalerOpt = 1; // sensitvity, int: 0-4 (0=highest sensitivity, play with this for complex Trill Craft setups)
+	var prescalerOpt = 1; // sensitivity option, int: 0-4 (0=highest sensitivity, play with this for complex Trill Craft setups)
 	var rawvals;
 	var sig, ping;
 
 	rawvals = TrillRaw.kr(i2c_bus, i2c_address, noiseThresh, prescalerOpt, t_updateTrill);
 	SendReply.kr(Impulse.kr(0.5), "/trill", rawvals);
-	sig = Pulse.ar((1..numTouchPads) * 100, mul: rawvals.linlin(0.0, 800, 0.0, 1.0)) * 0.6;
+	sig = SinOsc.ar((1..numTouchPads) * 50, mul: Lag.kr(rawvals.linlin(0.0, 300, 0.0, 1.0), 0.1)) * 0.6;
 	sig = Splay.ar(sig);
+	sig = CombL.ar(sig.sum, 0.2, 0.2, 3.0, mul: 0.4) + sig;
 	ping = EnvGen.ar(Env.perc, t_updateTrill) * SinOsc.ar(440);
 	sig + ping;
 	}.play;
 
 	OSCdef(\trill, {|msg| msg[3..].postln }, "/trill");
 	
-	{
+	{ // Illustrates updating the baseline should the configuration change while the sketch is running
 		loop {
-			20.wait;
-			"Reset Trill baseline".postln;
+			55.wait;
+			"Reset Trill baseline in 10s...".postln;
+			5.wait;
+			"Baseline Reset".postln;
 			~tr.set(\t_updateTrill, 1);
 		};
 	}.fork;
