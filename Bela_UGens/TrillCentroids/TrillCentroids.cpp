@@ -28,7 +28,10 @@ int rt_fprintf(FILE *stream, const char *format, ...);
 
 // Holds UGen state variables
 struct TrillCentroids : public Unit {
-  Trill sensor;
+  // object constructors will not be called automatically
+  // so all objects in the UGen struct must be pointers
+  // and then allocated in the UGen constructor
+  Trill* sensor;
   int i2c_bus, i2c_address;
   int mode;
   int noiseThreshold;
@@ -119,6 +122,8 @@ void updateTrill(void* data)
 
 
 void TrillCentroids_Ctor(TrillCentroids* unit) {
+  unit->sensor = new Trill();   // all objects must be allocated in the constructor
+
   // Get initial arguments to UGen for I2C setup
   unit->i2c_bus = (int)IN0(0);
   unit->i2c_address = (int)IN0(1);
@@ -135,34 +140,28 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
     OUT0((j*2)+2) = 0.f;  // size i
   }
 
-  unit->readInterval = 100; // (MAGIC NUMBER) launch I2C aux task every 100ms
+  unit->readInterval = 10; // (MAGIC NUMBER) sensor update/launch I2C aux task every 10ms
   unit->readIntervalSamples = 0; // launch I2C aux task every X samples
   unit->readCount = 0;
 
-  // DEBUG: What thread am I?
-  printf("TrillCentroids CTOR id: %p\n", pthread_self());
-
 
   // initialize / setup the Trill sensor
-  if(unit->sensor.setup(unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt]) != 0) {
+  if(unit->sensor->setup(unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt]) != 0) {
     fprintf(stderr, "ERROR: Unable to initialize touch sensor\n");
     return;
   } else {
-    printf("Trill sensor found: devtype %d, firmware_v %d activeUgens %d\n", unit->sensor.deviceType(), unit->sensor.firmwareVersion(), numTrillUGens);
+    printf("Trill sensor found: devtype %d, firmware_v %d activeUgens %d\n", unit->sensor->deviceType(), unit->sensor->firmwareVersion(), numTrillUGens);
     printf("Initialized with #outputs: %d  i2c_bus: %d  i2c_addr: %d  mode: %d  thresh: %d  pre: %d  deviceType: %d\n", unit->mNumOutputs, unit->i2c_bus, unit->i2c_address, unit->mode, unit->noiseThreshold, gPrescalerOpts[unit->prescalerOpt], unit->sensor.deviceType());
   }
-
-  // Exit if using a 2D Trill sensor
-  if(unit->sensor.deviceType() != Trill::ONED) {
+  if(unit->sensor->deviceType() != Trill::ONED) {
     fprintf(stderr, "ERROR: You are using a sensor of device type %d that is not a Trill Bar. The UGen may not function properly.\n", unit->sensor.deviceType());
   }
-
   if(numTrillUGens != 1) {
     fprintf(stderr, "Big problem! There are %d active trill ugens! You may only have 1 Trill UGen active at a time.", numTrillUGens);
   }
 
   unit->i2cTask = Bela_createAuxiliaryTask(updateTrill, 50, "I2C-read", (void*)unit);
-  unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000);
+  unit->readIntervalSamples = SAMPLERATE * (unit->readInterval / 1000.f);
   //unit->sensor.readLocations(); I2C operation should not happen here..
 
   SETCALC(TrillCentroids_next_k); // Use the same calc function no matter what the input rate is.
@@ -171,8 +170,7 @@ void TrillCentroids_Ctor(TrillCentroids* unit) {
 
 void TrillCentroids_Dtor(TrillCentroids* unit)
 {
-  printf("TrillCentroids DTOR id: %p\n", pthread_self());
-	unit->sensor.cleanup(); // maybe this needs to happen on another thread?
+	unit->sensor->cleanup(); // maybe this needs to happen on another thread?
   numTrillUGens--;
 }
 
@@ -208,12 +206,6 @@ void TrillCentroids_next_k(TrillCentroids* unit, int inNumSamples) {
       Bela_scheduleAuxiliaryTask(unit->i2cTask); // run the i2c thread every so many samples
     }
   }
-
-  {
-		static int xxx = 0;
-		if(0 == xxx++)
-			printf("TrillCentroids Audio thread id: %p\n", pthread_self());
-	};
 
   // CHECK FOR A NONPOSITIVE->POSITIVE TRIGGER TO RECALCULATE THE BASELINE AND PRESCALER/NOISE THRESH
   float curtrig = IN0(4);
