@@ -142,7 +142,7 @@ Ndef(\jo, {
 
 
 ( // All SoundFiles...
-var spath = "/root/banjer/samples/";
+~spath = "/root/banjer/samples/";
 ~soundfiles = Dictionary.new;
 PathName("../../samples".resolveRelative).filesDo {|path|
   var category, label = path.folderName;
@@ -153,9 +153,11 @@ PathName("../../samples".resolveRelative).filesDo {|path|
   };
   category.put(path.fileNameWithoutExtension, path);
 };
+);
 
+(
 // Let's load a couple samples in buffers
-~loadfiles = [~soundfiles["voice"]["Ahhhs"], ~soundfiles["voice"]["Moonshiner"]]; ~samplebufs = ~loadfiles.collect {|it| spath +/+ it.folderName +/+ it.fileName };
+~loadfiles = [~soundfiles["voice"]["Ahhhs"], ~soundfiles["voice"]["Moonshiner"]]; ~samplebufs = ~loadfiles.collect {|it| ~spath +/+ it.folderName +/+ it.fileName };
 
 // one at a time... slowly...
 {
@@ -240,12 +242,63 @@ Ndef(\jo, {
   //mix = mix + FreeVerb.ar(mic, 1.0, 0.8, 0.4);
 
   mix = Limiter.ar(LeakDC.ar(mix * 0.8), 1.0, 0.001);
-  RecordBuf.ar(mix, b, loop: 0); // record first 10 seconds of audio
+  //RecordBuf.ar(mix, b, loop: 0); // record first 10 seconds of audio
   mix;
 }).play(0, numChannels: 2, group: s);
 
+);
 
 
+(
+~bufpaths = [~soundfiles["voice"]["Ahhhs"], ~soundfiles["voice"]["Moonshiner"]].collect {|it,idx|
+  ~spath +/+ it.folderName +/+ it.fileName;
+};
+);
+
+Ndef.clear;
+c.free; c.free;
+c = Buffer.read(s, ~bufpaths[0]);
+d = Buffer.read(s, ~bufpaths[1]);
+
+
+( // Magsensor Sample Envelope/Triggering
+Ndef(\jo, {
+  var magMax = 0.001, magMin = -0.001, magSmooth = 0.2; // magic numbers
+  var mix, insig, s1, s2, s3, s4, s5, mag1, mag2, mic;
+  var buf1, buf2, b1frames, b2frames, smpl1, smpl2, spos1, spos2;
+  var mapped1, mapped2;
+  var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
+  mic = In.ar(2, 1) * 2.0;
+  mag1 = In.ar(7,1);
+  mag2 = In.ar(8,1);
+
+  s5 = In.ar(4,1) * 6.0; // drone
+  s1 = s2 = s3 = s4 = In.ar(5,1) * 9.0; // other four strings
+
+  // Start your code here
+  mag1 = Lag2.ar(mag1, magSmooth);
+  mag1 = mag1.linlin(magMin, magMax, -1.0, 1.0);
+
+  mag2 = Lag2.ar(mag2, magSmooth);
+  mag2 = mag2.linlin(magMin, magMax, -1.0, 1.0);
+
+
+  buf1 = c;
+  buf2 = d;
+  b1frames = BufFrames.kr(buf1);
+  b2frames = BufFrames.kr(buf2);
+
+  mapped1 = mag1.linlin(-1,1,0,b1frames);
+  //mapped2 = mag2.linlin(-1,1,50,3000);
+  //mix = [Pulse.ar(mapped1), BLowPass4.ar(WhiteNoise.ar, mapped2, 0.1)];
+
+  spos1 = mapped1;
+  smpl1 = BufRd.ar(2, buf1, spos1, 0.0, 2);
+
+
+  mix = smpl1;
+  Limiter.ar(LeakDC.ar(mix * 0.2), 1.0, 0.001);
+}).play(0, numChannels: 2, group: s);
 
 );
 
