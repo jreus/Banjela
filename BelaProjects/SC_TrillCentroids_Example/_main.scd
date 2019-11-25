@@ -32,19 +32,24 @@ s.waitForBoot {
 		var prescalerOpt = 1; // int: 0-4 with 0 being the highest sensitivity
 		var touchsigs = DC.ar(0).dup(3); // use 3 touches
 		var centroids;
-		var mix, out, ping;
+		var out, ping;
 
 		// returns an array with format: [num_active_touches, t1_pos, t1_size, t2_pos, t2_size, t3_pos, t3_size, t4_pos, t4_size, t5_pos, t5_size]
 		centroids = TrillCentroids.kr(i2c_bus, i2c_address, noiseThreshold, prescalerOpt, t_recalibrate);
 		
 
-		// the first touch is a bendy PM synth
-		touchsigs[0] = PMOsc.ar((centroids[1]+0.001) * 2500, 500, centroids[2].linexp(0.0, 2000, 0.1, 12.0), 0.1, mul: 0.5) 
-			* EnvGen.ar(Env.perc, (centroids[2] > 0.0), timeScale: centroids[2].linexp(50, 1000, 0.3, 5.0));
+		// touch1 is a percussive pluck
+		touchsigs[0] = Pluck.ar(WhiteNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
+		
+		// touch2 is a bendy PM synth
+		touchsigs[1] = PMOsc.ar((centroids[3]+0.001) * 2500, 500, centroids[4].linexp(0.0, 2000, 0.1, 12.0), 0.1, mul: 0.5) 
+			* EnvGen.ar(Env.perc, (centroids[4] > 0.0), timeScale: centroids[4].linexp(50, 500, 0.3, 5.0));
 
-		// touch 2 and 3 are more percussive synths
-		touchsigs[1] = Ringz.ar(Trig1.ar(centroids[4] > 0.0, 0.01), centroids[3].linexp(0.0, 1.0, 4000, 700), 0.1, mul: 1.0).tanh * (centroids[4] > 0.0);
-		touchsigs[2] = Ringz.ar(Trig1.ar(centroids[6] > 0.0, 0.01), centroids[5].linexp(0.0, 1.0, 150, 40), 0.07, mul: 10.0).tanh * (centroids[6] > 0.0);
+		// touch3 another percussive plucky sound with pull-off behavior
+		touchsigs[2] = Resonz.ar(
+			Pluck.ar(PinkNoise.ar, (centroids[6] < 10), 0.2, centroids[5].linexp(0.0, 1.0, 80, 1000).reciprocal, 3, 0.5, mul: 6.0), 
+			centroids[5].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
+		
 		
 		out = Splay.ar(touchsigs);
 		SendReply.kr(Impulse.kr(1), "/trill", centroids);
