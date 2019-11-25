@@ -8,6 +8,21 @@ Server.default = s = Server("belaServer", NetAddr("192.168.7.2", 57110));
 s.options.maxLogins = 8; // should match the settings on the Bela
 s.initTree;
 s.startAliveThread;
+
+// fill ~sf with a graph of available sample files
+~readSounds = {
+  ~spath = "/root/banjer/samples/";
+  ~sf = Dictionary.new;
+  PathName("../../samples".resolveRelative).filesDo {|path|
+    var category, label = path.folderName;
+    category = ~sf[label];
+    if(category.isNil) {
+      category = Dictionary.new;
+      ~sf.put(label, category);
+    };
+    category.put(path.fileNameWithoutExtension, path);
+  };
+};
 );
 
 s.plotTree;
@@ -141,30 +156,24 @@ Ndef(\jo, {
 );
 
 
-( // All SoundFiles...
-~spath = "/root/banjer/samples/";
-~soundfiles = Dictionary.new;
-PathName("../../samples".resolveRelative).filesDo {|path|
-  var category, label = path.folderName;
-  category = ~soundfiles[label];
-  if(category.isNil) {
-    category = Dictionary.new;
-    ~soundfiles.put(label, category);
-  };
-  category.put(path.fileNameWithoutExtension, path);
-};
-);
+
+~readSounds.();
 
 (
+Ndef.clear;
+
 // Let's load a couple samples in buffers
-~loadfiles = [~soundfiles["voice"]["Ahhhs"], ~soundfiles["voice"]["Moonshiner"]]; ~samplebufs = ~loadfiles.collect {|it| ~spath +/+ it.folderName +/+ it.fileName };
+~bufs = [~sf["voice"]["Ahhhs"], ~sf["voice"]["Moonshiner"]].collect {|it|
+  ~spath +/+ it.folderName +/+ it.fileName
+};
 
 // one at a time... slowly...
 {
-  ~samplebufs.do {|it, idx|
-    ~samplebufs[idx] = Buffer.read(s, ~samplebufs[idx]);
+  ~bufs = ~bufs.collect {|it, idx|
+    var buf = Buffer.read(s, ~samplebufs[idx]);
     "Loading %".format(~samplebufs[idx]).postln;
-    5.wait;
+    6.wait;
+    buf;
   };
   "Done...".postln;
 }.fork;
@@ -249,38 +258,45 @@ Ndef(\jo, {
 );
 
 
+
+~sf["banjo"].keys
+
 (
-~bufpaths = [~soundfiles["voice"]["Ahhhs"], ~soundfiles["voice"]["Moonshiner"]].collect {|it,idx|
+Ndef.clear;
+~readSounds.();
+~bufpaths = [~sf["percussive"]["Chinga_002"], ~sf["percussive"]["JapaDrum1_13"]];
+~bufpaths = ~bufpaths.collect {|it,idx|
   ~spath +/+ it.folderName +/+ it.fileName;
 };
-);
-
-Ndef.clear;
-c.free; c.free;
+c.free; d.free;
 c = Buffer.read(s, ~bufpaths[0]);
 d = Buffer.read(s, ~bufpaths[1]);
+);
+
+// Check that these look good
+[c,d];
 
 
-( // Magsensor Sample Envelope/Triggering
+//***** MAGSENSOR SAMPLE TRIGGERING / SCRUBBING *****//
+(
 Ndef(\jo, {
-  var magMax = 0.001, magMin = -0.001, magSmooth = 0.2; // magic numbers
   var mix, insig, s1, s2, s3, s4, s5, mag1, mag2, mic;
   var buf1, buf2, b1frames, b2frames, smpl1, smpl2, spos1, spos2;
-  var mapped1, mapped2;
+  var t_mag1, t_mag2, magmap1, magmap2, mt1, mt2, seq1, seq2;
   var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
   mic = In.ar(2, 1) * 2.0;
-  mag1 = In.ar(7,1);
-  mag2 = In.ar(8,1);
+  mag1 = In.ar(6,1);
+  mag2 = In.ar(7,1);
 
   s5 = In.ar(4,1) * 6.0; // drone
   s1 = s2 = s3 = s4 = In.ar(5,1) * 9.0; // other four strings
 
   // Start your code here
-  mag1 = Lag2.ar(mag1, magSmooth);
-  mag1 = mag1.linlin(magMin, magMax, -1.0, 1.0);
+  mag1 = Lag2.ar(mag1, 0.1);
+  mag1 = mag1.linlin(-0.002, 0.002, -1.0, 1.0);
 
-  mag2 = Lag2.ar(mag2, magSmooth);
-  mag2 = mag2.linlin(magMin, magMax, -1.0, 1.0);
+  mag2 = Lag2.ar(mag2, 0.1);
+  mag2 = mag2.linlin(-0.002, 0.002, -1.0, 1.0);
 
 
   buf1 = c;
@@ -288,16 +304,37 @@ Ndef(\jo, {
   b1frames = BufFrames.kr(buf1);
   b2frames = BufFrames.kr(buf2);
 
-  mapped1 = mag1.linlin(-1,1,0,b1frames);
   //mapped2 = mag2.linlin(-1,1,50,3000);
   //mix = [Pulse.ar(mapped1), BLowPass4.ar(WhiteNoise.ar, mapped2, 0.1)];
 
-  spos1 = mapped1;
-  smpl1 = BufRd.ar(2, buf1, spos1, 0.0, 2);
+  // magsense trigger thresholds
+  mt1 = 0.4;
+  mt2 = 0.4;
+  t_mag1 = Trig1.kr(mag1.abs > mt1, 0.1);
+  t_mag2 = Trig1.kr(mag2.abs > mt2, 0.1);
+  magmap1 = mag1.abs.explin(mt1, 1, 0.2, 0.05); // map to sample playback speed on approach
+  magmap2 = mag2.abs.explin(mt2, 1, 0.2, 0.05);
 
+  seq1 = (1..10) / 10.0; // drum pitches
+  seq1 = Select.kr(Stepper.kr(t_mag1, 0, 0, 10), seq1);
+  // drum
+  spos1 = EnvGen.ar(Env.new([0, 0, 1], [magmap1, seq1], \lin), t_mag1, b1frames, 0, BufDur.kr(buf1));
 
-  mix = smpl1;
-  Limiter.ar(LeakDC.ar(mix * 0.2), 1.0, 0.001);
+  // rattle
+  spos2 = EnvGen.ar(Env.new([0, 0, 1], [magmap2, 1.0], \lin), t_mag2, b2frames, 0, BufDur.kr(buf2));
+  //mag1.poll(4);
+
+  //spos1 = Phasor.ar(1, BufRateScale.kr(buf1), 0, b1frames);
+  //smpl1 = BufRd.ar(1, buf1, spos1, 0.0, 2) + BufRd.ar(1, buf1, b1frames - spos1, 0.0, 2);
+
+  smpl1 = BufRd.ar(1, buf1, spos1, 0.0, 2);
+  smpl2 = BufRd.ar(1, buf2, spos2, 0.0, 2);
+
+  mix = (smpl1+smpl2)!2;
+
+  //mix = SinOsc.ar() * 0.3 * EnvGen.ar(Env.perc, t_mag1, timeScale: 0.2);
+
+  Limiter.ar(LeakDC.ar(mix * 0.5), 1.0, 0.001);
 }).play(0, numChannels: 2, group: s);
 
 );

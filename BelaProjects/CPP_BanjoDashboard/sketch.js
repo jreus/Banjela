@@ -231,7 +231,7 @@ var guiSketch = new p5(function( sketch ) {
         
         // String waveforms
         let stringsWidth = 300;
-        let stringsLength = 400;
+        let stringsLength = 300;
         let stringsXpos = 150;
         let stringsYpos = 10 + sliderYpos + sliderHeight;
         let stringGap = 10;
@@ -244,11 +244,11 @@ var guiSketch = new p5(function( sketch ) {
         sketch.sigString1 = new WaveForm(sketch, stringWidth, stringsLength, [stringsXpos + ((stringWidth + stringGap)*4), stringsYpos], 1, bufSize, stringWaveformScale);
         
 		// Mag waveforms       
-        let magXpos = 195, magYpos = 10 + stringsYpos + stringsLength;
-        let magWidth = 100, magLength = 100;
+        let magXpos = 10, magYpos = 10 + stringsYpos + stringsLength;
+        let magWidth = 300, magLength = 300;
         let magWaveformScale = 100.00;
         sketch.magSense1 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos], 1, bufSize, magWaveformScale);
-        sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos + magWidth + 10, magYpos], 1, bufSize, magWaveformScale);
+        sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos + magLength + 10, magYpos], 1, bufSize, magWaveformScale);
 
         
     };
@@ -307,12 +307,12 @@ var guiSketch = new p5(function( sketch ) {
         
 		// Draw the MagSense signal guis
 		//sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag1]);
-		sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag].slice(0, bufSize)); // hack
-		sketch.magSense1.feedbackText = Bela.data.buffers[idxMag][0].toFixed(5);
+		sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize)); // hack
+		sketch.magSense1.feedbackText = Bela.data.buffers[idxMag][bufSize].toFixed(5);
 		sketch.magSense1.draw();
 		//sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag2]);
-		sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize)); // hack
-		sketch.magSense2.feedbackText = Bela.data.buffers[idxMag][bufSize].toFixed(5);
+		sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag].slice(0,bufSize)); // hack
+		sketch.magSense2.feedbackText = Bela.data.buffers[idxMag][0].toFixed(5);
 		sketch.magSense2.draw();
 		
 

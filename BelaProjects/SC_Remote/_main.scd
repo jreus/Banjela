@@ -23,8 +23,8 @@ s.options.maxLogins = 8; // NOTE: does this actually do anything? - I get the fo
 // belaServer: server process has maxLogins 8 - adjusting my options accordingly.
 
 
-s.options.pgaGainLeft = 5;     // pregain for left / right audio inputs (+dB)
-s.options.pgaGainRight = 5;    
+s.options.pgaGainLeft = 0;     // pregain for left / right audio inputs (+dB)
+s.options.pgaGainRight = 0;    
 s.options.headphoneLevel = 0; // headphone output (main stereo out) level (-dB)
 s.options.speakerMuted = 1;    // 1=mute the speaker amp
 s.options.dacLevel = 0;       // sets the gain of the analog outputs (+dB)

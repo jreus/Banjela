@@ -13,33 +13,58 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
+// In channel listing
+// 0- ??
+// 1- ??
+// 2- AUDIO IN L
+// 3- AUDIO IN R?
+// 4- DIFF PICKUP 1 ON PREBOARD 1 (drone string)
+// 5- DIFF PICKUP 2 ON PREBOARD 1 (4 strings)
+// 6- MAG PICKUP 1 ON PREBOARD 2 (RIGHT INPUT COIL)
+// 7- MAG PICKUP 2 ON PREBOARD 2 (LEFT INPUT COIL)
+// 8- MAG PICKUP 1 ON PREBOARD 1 (drone string)
+// 9- MAG PICKUP 2 ON PREBOARD 1 (4 strings)
 
+// The Mag Sensor is a hard one to grokk..
+//   it basically causes perturbations
+//   what you can measure is the size and
+//   shape of the perturbation
+
+// One option would be to sample it as a
+//    control waveform and then
+//    stretch that control gesture
+//    over the shape of a buffer?
+Ndef.clear;
 ( // Simple mag sensor pitch mapping with optimal range
 Ndef(\jo, {
-  var magMax = 0.001, magMin = -0.001, magSmooth = 0.2; // magic numbers
   var mix, insig, s1, s2, s3, s4, s5, mag1, mag2, mic;
   var s_amp, s_pitch1, s_pitch2, s_haspitch, beat1 = 8, beat2 = 8;
   var mapped1, mapped2;
   var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
-  mic = In.ar(2, 1) * 2.0;
-  mag1 = In.ar(7,1);
-  mag2 = In.ar(8,1);
+  //mic = In.ar(2, 1) * 2.0;
+  mag1 = In.ar(6,1);
+  mag2 = In.ar(7,1);
 
-  s5 = In.ar(4,1) * 6.0; // drone
-  s1 = s2 = s3 = s4 = In.ar(5,1) * 9.0; // other four strings
+  //s5 = In.ar(4,1) * 6.0; // drone
+  //s1 = s2 = s3 = s4 = In.ar(5,1) * 9.0; // other four strings
+
 
   // Start your code here
-  mag1 = Lag2.ar(mag1, magSmooth);
-  mag1 = mag1.linlin(magMin, magMax, -1.0, 1.0);
+  mag1 = Lag2.ar(mag1, 0.1);
+  mag1 = mag1.linlin(-0.002, 0.002, -1.0, 1.0);
 
-  mag2 = Lag2.ar(mag2, magSmooth);
-  mag2 = mag2.linlin(magMin, magMax, -1.0, 1.0);
+  mag2 = Lag2.ar(mag2, 0.2);
+  mag2 = mag2.linlin(-0.0019, 0.0017, -1.0, 1.0);
+
+  // testing max/min values
+  RunningMax.ar(mag1, Impulse.ar(0.5)).poll(1);
+  //RunningMin.ar(mag2, Impulse.ar(1)).poll(4);
 
 
-  mapped1 = mag1.linlin(-1,1,50,2000);
-  mapped2 = mag2.linlin(-1,1,50,3000);
+  mapped1 = mag1.linlin(-1,1,50,3000);
+  mapped2 = mag2.linexp(-1,1,50,8000);
   mix = [Pulse.ar(mapped1), BLowPass4.ar(WhiteNoise.ar, mapped2, 0.1)];
-
+  mix = mix * 0.05;
   Limiter.ar(LeakDC.ar(mix * 0.2), 1.0, 0.001);
 }).play(0, numChannels: 2, group: s);
 
