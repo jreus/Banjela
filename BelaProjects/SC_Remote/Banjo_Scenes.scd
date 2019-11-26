@@ -35,7 +35,31 @@ b.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_snip.wav", "WAV", "floa
 
 Ndef.clear;
 
-// ONSET DRIVEN PITCH SEQUENCER - Amaj open tuning
+
+
+//********************** WEAVE 1 ***************//
+ \  /  \  /  /  \  /  /  \  \  /  /  \  /  \  /
+\ \/ /\ \/ // /\ \/ // /\ \\ \/ // /\ \/ /\ \/ /
+ \  /  \  /  /  \  /  /  \  \  /  /  \  /  \  /
+ \  /  \  /  /  /  \  /  /  \  /  \  /  \  /  /
+\ \/ /\ \/ // // /\ \/ // /\ \/ /\ \/ /\ \/ // /
+ \  /  \  /  /  /  \  /  /  \  /  \  /  \  /  /
+ /  \  /  \  /  \  /  \  /  /  \  /  /  \  /  \
+/ /\ \/ /\ \/ /\ \/ /\ \/ // /\ \/ // /\ \/ /\ \
+ /  \  /  \  /  \  /  \  /  /  \  /  /  \  /  \
+ \  /  /  /  /  \  /  /  /  \  /  /  \  /  \  \
+\ \/ // // // /\ \/ // // /\ \/ // /\ \/ /\ \\ \
+ \  /  /  /  /  \  /  /  /  \  /  /  \  /  \  \
+ /  \  /  \  /  /  \  /  /  \  /  \  \  \  /  \
+/ /\ \/ /\ \/ // /\ \/ // /\ \/ /\ \\ \\ \/ /\ \
+ /  \  /  \  /  /  \  /  /  \  /  \  \  \  /  \
+ \  \  \  /  /  \  \  /  \  /  /  \  /  /  \  /
+\ \\ \\ \/ // /\ \\ \/ /\ \/ // /\ \/ // /\ \/ /
+ \  \  \  /  /  \  \  /  \  /  /  \  /  /  \  /
+ /  \  /  \  /  /  /  /  \  /  /  \  /  \  \  /
+/ /\ \/ /\ \/ // // // /\ \/ // /\ \/ /\ \\ \/ /
+ /  \  /  \  /  /  /  /  \  /  /  \  /  \  \  /
+//********************* WEAVE 1 ***************//
 ( // c+pplc+
 
 Ndef(\jo, {
@@ -82,7 +106,7 @@ Ndef(\jo, {
   // amp for output
   s5=s5*4.0;
   s1=s1*1.0;
-  s1 = Compander.ar(s1, s1, 0.5, 1.0, 0.2, 0.01, 0.1, mul: 5.0);
+  s1 = Compander.ar(s1, s1, 0.5, 1.0, 0.2, 0.01, 0.1, mul: 10.0);
 
   // Drone string
   pitches1 = [[\a4.f, \e5.f], [\gs4.f, \d4.f], [\fs3.f, \a4.f]];
@@ -121,16 +145,28 @@ Ndef(\jo, {
 
 
 
+/************ LOAD ME ************/
+███████╗██╗  ██╗ ██╗███╗   ██╗███████╗
+██╔════╝██║  ██║███║████╗  ██║██╔════╝
+███████╗███████║╚██║██╔██╗ ██║█████╗
+╚════██║██╔══██║ ██║██║╚██╗██║██╔══╝
+███████║██║  ██║ ██║██║ ╚████║███████╗
+╚══════╝╚═╝  ╚═╝ ╚═╝╚═╝  ╚═══╝╚══════╝
 
+
+/************ LOAD ME ************/
+/************ LOAD ME ************/
 (
 Ndef.clear;
 ~readSounds.();
 if(~bufs.notNil) { ~bufs.keysValuesDo {|key,val| val.free } }; // free up any existing buffers
 ~bufs = Dictionary.new;
 // Let's load a couple samples in buffers
-[~sf["voice"]["Ahhhs"], ~sf["voice"]["Moonshiner"]].do {|it,idx|
-  ~bufs[it.fileNameWithoutExtension] = ~spath +/+ it.folderName +/+ it.fileName;
-};
+[
+  ~sf["voice"]["Ahhhs"], ~sf["voice"]["Moonshiner"], ~sf["percussive"]["Chinga_002"], ~sf["percussive"]["JapaDrum1_13"],
+  ~sf["voice"]["Hallelujah_Amazing_Grace_001"],
+].do {|it,idx| ~bufs[it.fileNameWithoutExtension] = ~spath +/+ it.folderName +/+ it.fileName };
+
 ~offsets = Dictionary.with(*[
   "Moonshiner" -> [1.503, 4.043, 6.738, 10.1, 19.0, 31.007, 28.6, 37.44],
   "Moonshiner_verses" -> [1.503, 13.726, 25.414, 37.428, 48.943, 60.96, 71.9, 83.89, 96.23, 108.4],
@@ -149,6 +185,16 @@ if(~bufs.notNil) { ~bufs.keysValuesDo {|key,val| val.free } }; // free up any ex
 );
 ~bufs; // check if this looks ok! If all data has been updated...
 
+//********** M00ncyn ***************//
+███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗
+████╗ ████║██╔═████╗██╔═████╗████╗  ██║
+██╔████╔██║██║██╔██║██║██╔██║██╔██╗ ██║
+██║╚██╔╝██║████╔╝██║████╔╝██║██║╚██╗██║
+██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║
+╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝
+
+//********** M00ncyn ***************//
+//********** M00ncyn ***************//
 //********** M00ncyn ***************//
 // ONSET DRIVEN SAMPLE PATTERN PLAYER
 ( // MOONSHINER
@@ -175,14 +221,14 @@ Ndef(\jo, {
   insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
   insig = Compander.ar(insig, insig, 0.1, 3.0, 1.0, 0.005, 0.01); // get rid of low noise
   s5 = insig[0] * 1; // drone
-  strings = insig[1] * 7.0; // other four strings
+  strings = insig[1] * 3.0; // other four strings
 
   // *ANALYSIS*
   // strings: onset detection before processing string signal further
   chain1 = FFT(LocalBuf(512), s5, 0.5, 1); // drone
   chain2 = FFT(LocalBuf(512), strings, 0.5, 1); // other strings
   onsets1 = Onsets.kr(chain1, 0.5, \power); // try different algorithms for CPU
-  onsets2 = Onsets.kr(chain2, 0.5, \power); // try different algorithms for CPU
+  onsets2 = Onsets.kr(chain2, 0.2, \power); // try different algorithms for CPU
 
   // SEQUENCER 1 > Ahhhs, drone string (evenly spaced sample offsets - could also be algorithmic)
   b1frames = BufFrames.kr(buf1);
@@ -191,7 +237,7 @@ Ndef(\jo, {
   boffset1 = Stepper.kr(onsets1, 0, 0, noffsets1-1);
   boffset1 = Select.kr(boffset1, b1offsets);
   bpos1 = Phasor.ar(onsets1, BufRateScale.kr(buf1), 0, b1frames, boffset1);
-  seq1 = BufRd.ar(2, buf1, bpos1, 0.0, 2) * EnvGen.ar(Env.perc, onsets1, timeScale: 2.0);
+  seq1 = BufRd.ar(2, buf1, bpos1, 0.0, 2) * EnvGen.ar(Env.perc, onsets1, timeScale: 2.0) * 1.0;
 
   // SEQUENCER 2 > Moonshiner, other strings (use pre-calculated offsets)
   b2frames = BufFrames.kr(buf2);
@@ -204,62 +250,89 @@ Ndef(\jo, {
   boffset2 = boffset2 * BufSampleRate.kr(buf2); // CONVERT OFFSET IN SECONDS TO OFFSET IN FRAMES!
 
   bpos2 = Phasor.ar(onsets2, BufRateScale.kr(buf2), 0, b2frames, boffset2);
-  seq2 = BufRd.ar(2, buf2, bpos2, 0.0, 2) * EnvGen.ar(Env.perc, onsets2, timeScale: 10.0);
+  seq2 = BufRd.ar(2, buf2, bpos2, 0.0, 2) * EnvGen.ar(Env.perc, onsets2, timeScale: 10.0) * 1.0;
 
 
   // *STRING SIGNAL POST PRODUCTION* output processing
-  s5=s5*2.0; strings=strings*1.0; // boost
-  strings = Compander.ar(strings, strings, 0.8, 1.0, 0.6, 0.01, 0.1, mul: 4.0);
-  stringsmix = GVerb.ar(s5+strings, 15, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4);
+  s5=s5*4.0; strings=strings*6.0; // boost
+  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.1, 0.001, 0.1, mul: 10.0);
+  s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 3.0);
+  stringsmix = GVerb.ar(s5+strings, 45, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4);
 
 
   //mix = seq1 + seq2 + stringsmix;
 
-  mix = FreeVerb.ar(seq1+seq2, 0.3, 0.8, 0.3, mul: 2.0) + stringsmix;
+  mix = FreeVerb.ar(seq1+seq2, 0.5, 0.8, 0.3, mul: 1.0) + stringsmix;
   //mic = Compander.ar(mic, mic, 0.6, 1.5, 0.1, 0.01, 0.1, mul: 20.0);
   //mix = mix + FreeVerb.ar(mic, 1.0, 0.8, 0.4);
 
-  mix = Limiter.ar(LeakDC.ar(mix * 0.8), 1.0, 0.001);
-  RecordBuf.ar(mix, b, loop: 0); // record first 10 seconds of audio
+  mix = Limiter.ar(LeakDC.ar(mix * 1.0), 1.0, 0.001);
+  //RecordBuf.ar(mix, b, loop: 0); // record first 10 seconds of audio
   mix;
 }).play(0, numChannels: 2, group: s);
 
 );
 
 
-
-~sf["banjo"].keys
-
-(
-Ndef.clear;
-~readSounds.();
-~bufpaths = [~sf["percussive"]["Chinga_002"], ~sf["percussive"]["JapaDrum1_13"]];
-~bufpaths = ~bufpaths.collect {|it,idx|
-  ~spath +/+ it.folderName +/+ it.fileName;
-};
-c.free; d.free;
-c = Buffer.read(s, ~bufpaths[0]);
-d = Buffer.read(s, ~bufpaths[1]);
-);
+/******* WEAVE 2 ****************/
+/************** MAGGIE TAKE THE BUS_LINE *************/
+/************** No, Ai Ai. ***************************/
 
 // Check that these look good
-[c,d];
+~bufs["Chinga_002"];
+~bufs["JapaDrum1_13"]
+~bufs;
 
-
-//***** MAGSENSOR SAMPLE TRIGGERING / SCRUBBING *****//
+//***** DRUM JAM *****//
 (
 Ndef(\jo, {
-  var mix, insig, s1, s2, s3, s4, s5, mag1, mag2, mic;
-  var buf1, buf2, b1frames, b2frames, smpl1, smpl2, spos1, spos2;
+  var mix, insig, s5, strings, stringsmix, thumbsig, slidesig, mag1, mag2, mic;
+  var buf1, buf2, buf3, b1frames, b2frames, b3frames, smpl1, smpl2, spos1, spos2, spos3, b3dur, pos3var;
   var t_mag1, t_mag2, magmap1, magmap2, mt1, mt2, seq1, seq2;
+  var centroids, range_bottom=[0.4, 0.44], range_top=[0.48, 0.56], range_necktop=[0.0, 0.36], range_neckbottom=[0.88, 1.0], range_slide = [0.6, 0.84];
+  var t_bottom, t_top, t_necktop, t_slide, mode = 0, t1, t2, t3;
+
   var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
   mic = In.ar(2, 1) * 2.0;
   mag1 = In.ar(6,1);
   mag2 = In.ar(7,1);
 
-  s5 = In.ar(4,1) * 6.0; // drone
-  s1 = s2 = s3 = s4 = In.ar(5,1) * 9.0; // other four strings
+  // STRINGS INPUT
+  insig = [In.ar(4,1), In.ar(5,1)];
+  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
+  insig = Compander.ar(insig, insig, 0.1, 3.0, 1.0, 0.005, 0.01); // get rid of low noise
+  s5 = insig[0] * 1; // drone
+  strings = insig[1] * 3.0; // other four strings
 
+  // TRILL INPUT
+  centroids = TrillCentroids.kr(1, 0x18, 60, 1);
+
+  // MODE TOGGLE: 0.4-0.44 bottom segment bounds
+  t_bottom = (centroids[1] >= range_bottom[0]) * (centroids[1] <= range_bottom[1]);
+  mode = Stepper.kr(t_bottom,0,0,1);
+  //t_bottom.poll(1);
+
+  // THUMB TAPS ON NECK TOPSIDE
+  // for the 0.0 segment you need an extra test that there is indeed a touch recognized, because all touches default to 0!
+  t_necktop = (centroids[2] > 10) * (centroids[1] >= range_necktop[0]) * (centroids[1] <= range_necktop[1]);
+  t2 = [Gate.kr(centroids[1], t_necktop), centroids[2]];// pos, size
+  thumbsig = Resonz.ar(Pluck.ar(PinkNoise.ar, Changed.kr(t_necktop), 0.2, t2[0].linexp(0.0, 0.36, 50, 1000).reciprocal, 15.8, 0.8, mul: 6.0), [60, 300,2200], 0.1, 10.0).sum.clip; // mode0
+
+  // SAMPLE DRAG ON SLIDER
+  buf3 = ~bufs["JapaDrum1_13"];
+  b3frames = BufFrames.kr(buf3);
+  t_slide = (centroids[2] > 10) * (centroids[1] >= range_slide[0]) * (centroids[1] <= range_slide[1]);
+  t3 = [Gate.kr(centroids[1], t_slide), centroids[2]]; // pos, size
+  b3dur = BufDur.kr(buf3);
+  pos3var = b3dur * t3[1].linlin(10, 1000, 0.05, 0.4);
+  b3dur = b3dur - pos3var + LFNoise1.ar(50).range(-1 * pos3var, pos3var);
+  spos3 = t3[0].linlin(range_slide[0], range_slide[1], 0, b3dur);
+  spos3 = Lag.ar(K2A.ar(spos3), 0.1);
+  b3dur = t3[1].linlin(10, 1000, 0.1, 0.6);
+  slidesig = TGrains.ar(2, Impulse.ar(10), buf3, 1.0, spos3, b3dur, 0.0, 0.2);
+  t_slide.poll(1);
+
+  // mag signals
   // Start your code here
   mag1 = Lag2.ar(mag1, 0.1);
   mag1 = mag1.linlin(-0.002, 0.002, -1.0, 1.0);
@@ -267,14 +340,11 @@ Ndef(\jo, {
   mag2 = Lag2.ar(mag2, 0.1);
   mag2 = mag2.linlin(-0.002, 0.002, -1.0, 1.0);
 
-
-  buf1 = c;
-  buf2 = d;
+  buf1 = ~bufs["Chinga_002"];
+  buf2 = ~bufs["JapaDrum1_13"];
   b1frames = BufFrames.kr(buf1);
   b2frames = BufFrames.kr(buf2);
 
-  //mapped2 = mag2.linlin(-1,1,50,3000);
-  //mix = [Pulse.ar(mapped1), BLowPass4.ar(WhiteNoise.ar, mapped2, 0.1)];
 
   // magsense trigger thresholds
   mt1 = 0.4;
@@ -286,20 +356,25 @@ Ndef(\jo, {
 
   seq1 = (1..10) / 10.0; // drum pitches
   seq1 = Select.kr(Stepper.kr(t_mag1, 0, 0, 10), seq1);
-  // drum
+  // chinga
   spos1 = EnvGen.ar(Env.new([0, 0, 1], [magmap1, seq1], \lin), t_mag1, b1frames, 0, BufDur.kr(buf1));
 
-  // rattle
+  // japanese drum
   spos2 = EnvGen.ar(Env.new([0, 0, 1], [magmap2, 1.0], \lin), t_mag2, b2frames, 0, BufDur.kr(buf2));
   //mag1.poll(4);
-
-  //spos1 = Phasor.ar(1, BufRateScale.kr(buf1), 0, b1frames);
-  //smpl1 = BufRd.ar(1, buf1, spos1, 0.0, 2) + BufRd.ar(1, buf1, b1frames - spos1, 0.0, 2);
 
   smpl1 = BufRd.ar(1, buf1, spos1, 0.0, 2);
   smpl2 = BufRd.ar(1, buf2, spos2, 0.0, 2);
 
-  mix = (smpl1+smpl2)!2;
+  // *STRING SIGNAL POST PRODUCTION* output processing
+  s5=s5*4.0; strings=strings*6.0; // boost
+  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.1, 0.001, 0.1, mul: 10.0);
+  //s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 3.0);
+  stringsmix = AllpassC.ar(s5+strings, 0.2, 0.01, 2.0);
+  stringsmix = GVerb.ar(stringsmix+s5+strings+thumbsig, 65, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4) * 2.0;
+
+
+  mix = smpl1+smpl2+stringsmix+slidesig;
 
   //mix = SinOsc.ar() * 0.3 * EnvGen.ar(Env.perc, t_mag1, timeScale: 0.2);
 
