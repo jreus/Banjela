@@ -98,23 +98,27 @@ c.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_audio.wav", "WAV", "flo
 
 Ndef.clear; // clear all
 
-
+//******************
 // **** DEMONSTRATION OF TRILL CRAFT SEGMENTATION & TOUCH POSITION LATCHING **** //
 /****
-Trill sensor is segmented into three sections:
- * one controls synth parameters
- * one is a separate synth (triggered envelope)
- * one functions as a toggle switch between two synth models
+Trill sensor is segmented into four sections:
+ * slide and bottom neck controls synth parameters
+ * bottom is a mode switch
+ * top is ignored
+ * top neck is a plucky triggered synth
 *****/
 (
-Ndef(\banjo, {
+Ndef(\jo, {
   var i2c_bus = 1, i2c_address = 0x18, noiseThresh = 60, prescalerOpt = 1;
-  var centroids, t1, t_t1on, t_t1off;
-  var insig, mix, out;
-  var sig1, sig2, sig3, sig4;
-  var mode = 0;
-  var seg_thumb, seg_slide, seg_bar, seg_top, seg_bottom;
-  var t_thumb, t_slide, t_bar, t_top, t_bottom;
+  var centroids, t1, t_t1on, t_t1off, t2, t3;
+  var insig, mix, out, sig1, sig2, sig3, sig4;
+  var mode = 0, seg_necktop, seg_slide, seg_neckbottom, seg_top, seg_bottom;
+  var range_necktop = [0.0, 0.36];
+  var range_slide = [0.6, 0.84];
+  var range_neckbottom = [0.88, 1.0];
+  var range_top = [0.48, 0.56];
+  var range_bottom = [0.4, 0.44];
+  var t_necktop, t_slide, t_neckbottom, t_top, t_bottom;
   var s5, strings, mag1, mag2, mic;
   var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
 
@@ -122,37 +126,44 @@ Ndef(\banjo, {
   insig = [In.ar(4,1), In.ar(5,1)];
   insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
   insig = Compander.ar(insig, insig, 0.05, 2.5, 1.0, 0.005, 0.01); // get rid of low noise
-  s5 = insig[0] * 3.0; // drone
-  strings = insig[1] * 5.0; // other four strings
+  s5 = insig[0] * 6.0; // drone
+  strings = insig[1] * 13.0; // other four strings
 
   centroids = TrillCentroids.kr(i2c_bus, i2c_address, noiseThresh, prescalerOpt);
 
   // SYNTH MODEL TOGGLE: 0.4-0.44 bottom segment bounds
   t_bottom = (centroids[1] >= 0.4) * (centroids[1] <= 0.44);
-  mode = Stepper.kr(t_bottom,0,0,1,1);
+  mode = Stepper.kr(t_bottom,0,0,2,1);
   //t_bottom.poll(1);
-  mode.poll(1);
 
   // CONTINUOUS SYNTH (latching):
-  // Latching touch position, but ignores top segment (0.48-0.56) and bottom segment (0.4-0.44)
+  // Latching touch position, but ignores top segment (0.48-0.56), bottom segment (0.4-0.44) and necktop (0.0-0.36)
   t1 = [centroids[1], centroids[2]]; // pos, size
-  t_t1on = (t1[1] > 10) * ((t1[0] < 0.4) + (t1[0] > 0.56) + ((t1[0] > 0.44) * (t1[0] < 0.48)));
+  t_t1on = (t1[1] > 10) * ((t1[0] > 0.56) + ((t1[0] > 0.44) * (t1[0] < 0.48)));
+  // TODO: segmented remapping, like linlin or linexp...
   t1 = [Gate.kr(t1[0], t_t1on), t1[1]]; // gate and hold control signal if not within segment range
 
+
   sig1 = Select.ar(mode, [
-    CombL.ar(GrainFM.ar(1, Dust.ar(30), 0.04, t1[0].linexp(0,1,100,4000), t1[1].linlin(0,2000, 30, 2000), 0.1), 0.2, 0.2, 3.0), // mode 0
-    Resonz.ar(WhiteNoise.ar, t1[0].linexp(0,1, 60, 14000), 0.3), // mode 1
+    CombL.ar(GrainFM.ar(1, Dust.ar(40), 0.03, t1[0].linexp(0.6, 1.0, 60,4000), t1[1].linlin(0,2000, 30, 2000), 0.1, mul: 0.5), 0.2, 0.2, 3.0), // mode 0
+    Resonz.ar(WhiteNoise.ar, t1[0].linexp(0.6, 1.0, 60, 14000), 0.3), // mode 1
+    DC.ar(0), // mode 2 (silent)
   ]);
 
 
-  // TRIGGERED SYNTH (non latching): 0.48-0.56 top segment bounds,
-  t_top = (centroids[1] >= 0.48) * (centroids[1] <= 0.56);
+  // TRIGGERED SYNTH (non latching): necktop segment 0.0-0.36 top segment bounds
+  // for the 0.0 segment you need an extra test that there is indeed a touch recognized, because all touches default to 0!
+  t_necktop = (centroids[2] > 10) * (centroids[1] >= 0.0) * (centroids[1] <= 0.36);
+  t2 = [Gate.kr(centroids[1], t_necktop), centroids[2]];// pos, size
   sig2 = Select.ar(mode, [
-    SinOsc.ar(centroids[1].linlin(0.4, 0.56, 200, 600)) * 0.5 * EnvGen.ar(Env.perc, t_top), // mode0
-    Pulse.ar(centroids[1].linexp(0.4, 0.56, 80, 1000)) * 0.5 * EnvGen.ar(Env.perc, t_top), // mode1
+    SinOsc.ar(centroids[1].linlin(0.0, 0.36, 200, 600)) * 0.5 * EnvGen.ar(Env.perc, t_necktop), // mode0
+    Pulse.ar(centroids[1].linexp(0.0, 0.36, 80, 1000)) * 0.5 * EnvGen.ar(Env.perc, t_necktop), // mode1
+    Resonz.ar(Pluck.ar(PinkNoise.ar, 1 - t_necktop, 0.2, t2[0].linexp(0.0, 0.36, 80, 1000).reciprocal, 3.0, 0.8, mul: 6.0),
+			t2[0].linexp(0.0, 0.36, 800, 2400), 0.1, 4.0).tanh, // mode2
   ]);
 
-
+  //centroids[1].poll(1);
+  t_necktop.poll(1);
 
   mix = sig1 + sig2 + [s5, strings];
   mix = Limiter.ar(LeakDC.ar(mix));
@@ -289,3 +300,61 @@ Ndef(\banjo, {
 );
 
 
+( // Expansion on the drone string
+Ndef(\jo, {
+  var mix;
+  var insig;
+  var s1, s2, s3, s4, s5;
+  var s_amp, s_pitch1, s_pitch2, s_haspitch;
+  var mag1, mag2;
+  var mic;
+  var beat1 = 8, beat2 = 8;
+  var amp = 1.0;
+  var mag_lag = 0.1;
+  var nastynoise_hz = 230;
+  var noise_co_hz = 7000;
+  mic = In.ar(2, 1) * 2.0;
+  mag1 = Lag.ar(In.ar(7, 1).abs * 100.0, mag_lag) * 10.0;
+  mag1 = (mag1 > 0.25) * (mag1 - 0.25);
+  mag2 = Lag.ar(In.ar(8, 1).abs * 100.0, mag_lag) * 10.0;
+  mag2 = (mag2 > 0.25) * (mag2 - 0.25);
+  insig = [In.ar(4,1), In.ar(5,1)] * 1.0;
+  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
+  insig = SVF.ar(insig, nastynoise_hz*28, 0.01 ,0,0,0,1,0);
+  insig = LPF.ar(insig, noise_co_hz);
+  s5 = insig[0] * 6.0; // drone
+  s1 = s2 = s3 = s4 = insig[1] * 9.0; // other four strings
+
+  // Start your code here
+  // slopebelow > 1.0 (noise gating), slopeabove > 1.0 (expansion)
+  s5 = Compander.ar(s5, s5, 0.05, 2.0, 1.0, 0.005, 0.01, mul: 1.0);
+  s1 = Compander.ar(s1, s1, 0.05, 2.0, 1.0, 0.005, 0.01, mul: 3.0);
+  //Amplitude.kr(s5).poll(2);
+  //Amplitude.kr(s1).poll(2);
+  s_amp = Amplitude.kr(s5);
+  //# s_pitch, s_haspitch = Pitch.kr(s5, ampThreshold: 0.02, median: 7);
+  //s5 = Pluck.ar(PinkNoise.ar(), (s_amp > 0.1), 0.02, 0.2, 1.0) * 0.1;
+
+
+  beat1 = 12 * s_amp;
+  beat2 = 50 * s_amp;
+  s_pitch2 = 391.95; // G5
+
+  s_pitch1 = mag1.linlin(0.00, 1.0, 0.0007, 0.005);
+  s_pitch2 = mag2.linlin(0.00, 1.0, 391.95.reciprocal, 0.01);
+  mag2.poll(2);
+  //BeatTrack2
+  s5 = s5 +
+  [Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat1), 0.2, s_pitch1, 0.2, 0.5, mul: 2.0),
+    Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat2), 0.2, s_pitch2, 0.2, 0.5, mul: 2.0)];
+  //s1 = CombL.ar(s1, 0.2, 0.001, 0.1);
+
+  mix = FreeVerb.ar(s1+s5);
+
+
+  Limiter.ar(LeakDC.ar(mix * amp), 1.0, 0.001);
+}).play(0, numChannels: 2, group: s);
+
+);
