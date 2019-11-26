@@ -99,6 +99,76 @@ c.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_audio.wav", "WAV", "flo
 Ndef.clear; // clear all
 
 
+// **** DEMONSTRATION OF TRILL CRAFT SEGMENTATION & TOUCH POSITION LATCHING **** //
+/****
+Trill sensor is segmented into three sections:
+ * one controls synth parameters
+ * one is a separate synth (triggered envelope)
+ * one functions as a toggle switch between two synth models
+*****/
+(
+Ndef(\banjo, {
+  var i2c_bus = 1, i2c_address = 0x18, noiseThresh = 60, prescalerOpt = 1;
+  var centroids, t1, t_t1on, t_t1off;
+  var insig, mix, out;
+  var sig1, sig2, sig3, sig4;
+  var mode = 0;
+  var seg_thumb, seg_slide, seg_bar, seg_top, seg_bottom;
+  var t_thumb, t_slide, t_bar, t_top, t_bottom;
+  var s5, strings, mag1, mag2, mic;
+  var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
+
+  // Strings
+  insig = [In.ar(4,1), In.ar(5,1)];
+  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
+  insig = Compander.ar(insig, insig, 0.05, 2.5, 1.0, 0.005, 0.01); // get rid of low noise
+  s5 = insig[0] * 3.0; // drone
+  strings = insig[1] * 5.0; // other four strings
+
+  centroids = TrillCentroids.kr(i2c_bus, i2c_address, noiseThresh, prescalerOpt);
+
+  // SYNTH MODEL TOGGLE: 0.4-0.44 bottom segment bounds
+  t_bottom = (centroids[1] >= 0.4) * (centroids[1] <= 0.44);
+  mode = Stepper.kr(t_bottom,0,0,1,1);
+  //t_bottom.poll(1);
+  mode.poll(1);
+
+  // CONTINUOUS SYNTH (latching):
+  // Latching touch position, but ignores top segment (0.48-0.56) and bottom segment (0.4-0.44)
+  t1 = [centroids[1], centroids[2]]; // pos, size
+  t_t1on = (t1[1] > 10) * ((t1[0] < 0.4) + (t1[0] > 0.56) + ((t1[0] > 0.44) * (t1[0] < 0.48)));
+  t1 = [Gate.kr(t1[0], t_t1on), t1[1]]; // gate and hold control signal if not within segment range
+
+  sig1 = Select.ar(mode, [
+    CombL.ar(GrainFM.ar(1, Dust.ar(30), 0.04, t1[0].linexp(0,1,100,4000), t1[1].linlin(0,2000, 30, 2000), 0.1), 0.2, 0.2, 3.0), // mode 0
+    Resonz.ar(WhiteNoise.ar, t1[0].linexp(0,1, 60, 14000), 0.3), // mode 1
+  ]);
+
+
+  // TRIGGERED SYNTH (non latching): 0.48-0.56 top segment bounds,
+  t_top = (centroids[1] >= 0.48) * (centroids[1] <= 0.56);
+  sig2 = Select.ar(mode, [
+    SinOsc.ar(centroids[1].linlin(0.4, 0.56, 200, 600)) * 0.5 * EnvGen.ar(Env.perc, t_top), // mode0
+    Pulse.ar(centroids[1].linexp(0.4, 0.56, 80, 1000)) * 0.5 * EnvGen.ar(Env.perc, t_top), // mode1
+  ]);
+
+
+
+  mix = sig1 + sig2 + [s5, strings];
+  mix = Limiter.ar(LeakDC.ar(mix));
+  mix;
+}).play(0, numChannels: 2, group: s);
+
+//OSCdef(\trilldata, {|msg| msg[3..].postln}, "/trill");
+
+
+);
+
+// **** SIMPLE TRILL LIVE SAMPLER **** ///
+();
+
+// **** SIMPLE TRILL SCENE CHANGE **** ///
+();
 
 
 
