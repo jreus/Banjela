@@ -47,9 +47,18 @@ b.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_snip.wav", "WAV", "floa
 
 
 /*
-┬  ┌─┐┌─┐┌┬┐  ┌┬┐┌─┐
-│  │ │├─┤ ││  │││├┤
-┴─┘└─┘┴ ┴─┴┘  ┴ ┴└─┘
+ ▄            ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄        ▄▄       ▄▄  ▄▄▄▄▄▄▄▄▄▄▄
+▐░▌          ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░▌      ▐░░▌     ▐░░▌▐░░░░░░░░░░░▌
+▐░▌          ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀█░▌     ▐░▌░▌   ▐░▐░▌▐░█▀▀▀▀▀▀▀▀▀
+▐░▌          ▐░▌       ▐░▌▐░▌       ▐░▌▐░▌       ▐░▌     ▐░▌▐░▌ ▐░▌▐░▌▐░▌
+▐░▌          ▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄█░▌▐░▌       ▐░▌     ▐░▌ ▐░▐░▌ ▐░▌▐░█▄▄▄▄▄▄▄▄▄
+▐░▌          ▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌     ▐░▌  ▐░▌  ▐░▌▐░░░░░░░░░░░▌
+▐░▌          ▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀█░▌▐░▌       ▐░▌     ▐░▌   ▀   ▐░▌▐░█▀▀▀▀▀▀▀▀▀
+▐░▌          ▐░▌       ▐░▌▐░▌       ▐░▌▐░▌       ▐░▌     ▐░▌       ▐░▌▐░▌
+▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄█░▌     ▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄▄▄
+▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░░░░░░░░░▌      ▐░▌       ▐░▌▐░░░░░░░░░░░▌
+ ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀        ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀
+
 */
 (
 Ndef.clear;
@@ -58,10 +67,10 @@ if(~bufs.notNil) { ~bufs.keysValuesDo {|key,val| val.free } };
 ~bufs = Dictionary.new;
 [
   ~sf["voice"]["Ahhhs"], ~sf["voice"]["Moonshiner"], ~sf["percussive"]["Chinga_002"], ~sf["percussive"]["JapaDrum1_13"],
-  ~sf["voice"]["Hallelujah_Amazing_Grace_001"], ~sf["voice"]["Ahhhs_mono"], ~sf["percussive"]["Tribal_Mbira"],
+  ~sf["voice"]["Hallelujah_Amazing_Grace_001"], ~sf["voice"]["Ahhhs_mono"], ~sf["percussive"]["Chinga_0122"],
 ].do {|it,idx| ~bufs[it.fileNameWithoutExtension] = ~spath +/+ it.folderName +/+ it.fileName };
 
-~offsets = Dictionary.with(*[
+~offsets = Dictionary.with(*[å
   "Moonshiner_verses" -> [1.503, 13.726, 25.414, 37.428, 48.943, 60.96, 71.9, 83.89, 96.23, 108.4],
 ]);
 
@@ -97,7 +106,28 @@ if(~bufs.notNil) { ~bufs.keysValuesDo {|key,val| val.free } };
 ██████╔╝╚██████╔╝███████║
 ╚═════╝  ╚═════╝ ╚══════╝
 ╚═════╝  ╚═════╝ ╚══════╝    ╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
-F modal >> G F Bb C Eb*/
+    ___    ___     ___     ___     _       ___   __  __    ___
+   | _ \  | _ \   / _ \   | _ )   | |     | __| |  \/  |  / __|
+   |  _/  |   /  | (_) |  | _ \   | |__   | _|  | |\/| |  \__ \
+  _|_|_   |_|_\   \___/   |___/   |____|  |___| |_|__|_|  |___/
+_| """ |_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
+
+    ___    ___     ___     ___     _       ___   __  __    ___
+   | _ \  | _ \   / _ \   | _ )   | |     | __| |  \/  |  / __|
+   |  _/  |   /  | (_) |  | _ \   | |__   | _|  | |\/| |  \__ \
+  _|_|_   |_|_\   \___/   |___/   |____|  |___| |_|__|_|  |___/
+_| """ |_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
+
+    ___    ___     ___     ___     _       ___   __  __    ___
+   | _ \  | _ \   / _ \   | _ )   | |     | __| |  \/  |  / __|
+   |  _/  |   /  | (_) |  | _ \   | |__   | _|  | |\/| |  \__ \
+  _|_|_   |_|_\   \___/   |___/   |____|  |___| |_|__|_|  |___/
+_| """ |_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
+
+F modal >> g C Bb C Eb*/
 [~bufs["Chinga_002"], ~bufs["JapaDrum1_13"]];
 
 (
@@ -133,19 +163,15 @@ Ndef(\jo, {
   t2 = [Gate.kr(centroids[1], t_necktop), centroids[2]];// pos, size
   thumbsig = Resonz.ar(Pluck.ar(PinkNoise.ar, Changed.kr(t_necktop), 0.2, t2[0].linexp(0.0, 0.36, 50, 1000).reciprocal, 15.8, 0.8, mul: 6.0), [60, 300,2200], 0.1, 10.0).sum.clip; // mode0
 
-  // SAMPLE DRAG ON AND PULL SLIDER
-  buf3 = ~bufs["Tribal_Mbira"];
+  // SAMPLE DRAG ON AND PULL ON THE SLIDE SENSOR
+  buf3 = ~bufs["Chinga_0122"];
   b3frames = BufFrames.kr(buf3);
   t_slide = (centroids[2] > 10) * (centroids[1] >= ~ranges[\slide][0]) * (centroids[1] <= ~ranges[\slide][1]);
   t3 = Gate.kr([centroids[1], centroids[2]], t_slide); // pos, size
-  b3dur = BufDur.kr(buf3);
-  spos3 = t3[0].linlin(~ranges[\slide][0], ~ranges[\slide][0], 0, b3dur / 3.0);
-  spos3 = Lag.ar(K2A.ar(spos3), 5.0);
-  b3dur = t3[1].linlin(10, 2000, 0.1, 1.6);
-  graintrig = Impulse.ar(t3[1].linlin(0,2000,10,20));
-  slidesig = BufRd.ar(1, buf3, spos3 * BufSampleRate.kr(buf3), 0.0);
+  spos3 = t3[0].linlin(~ranges[\slide][0], ~ranges[\slide][1], 0, BufFrames.kr(buf3));
+  spos3 = Lag.ar(K2A.ar(spos3), 4.0);
+  slidesig = BufRd.ar(1, buf3, spos3, 0.0);
   //slidesig = AllpassC.ar(slidesig, 0.5, 0.3, 2.0) + slidesig;
-
 
 
   // mag signals
@@ -183,10 +209,10 @@ Ndef(\jo, {
   smpl2 = BufRd.ar(1, buf2, spos2, 0.0, 2);
 
   // *STRING SIGNAL POST PRODUCTION* output processing
-  s5=s5*4.0; strings=strings*6.0; // boost
-  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.1, 0.001, 0.1, mul: 10.0);
+  s5=s5*5.0; strings=strings*6.0; // boost
+  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.3, 0.001, 0.1, mul: 12.0);
   //s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 3.0);
-  stringsmix = AllpassC.ar(s5+strings, 0.2, 0.01, 2.0);
+  stringsmix = AllpassC.ar(s5+strings, 0.2, 0.01, 1.0) + strings + s5;
   stringsmix = GVerb.ar(stringsmix+s5+strings+thumbsig, 65, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4) * 2.0;
 
 
@@ -199,7 +225,7 @@ Ndef(\jo, {
 
 
 
-/*
+
  \  /  \  /  /  \  /  /  \  \  /  /  \  /  \  /
 \ \/ /\ \/ // /\ \/ // /\ \\ \/ // /\ \/ /\ \/ /
  \  /  \  /  /  \  /  /  \  \  /  /  \  /  \  /
@@ -227,7 +253,7 @@ Ndef(\jo, {
  /  \  /  \  /  /  \  /  /  \  /  \  \  \  /  \
 / /\ \/ /\ \/ // /\ \/ // /\ \/ /\ \\ \\ \/ /\ \
  /  \  /  \  /  /  \  /  /  \  /  \  \  \  /
-Amaj >> G E A Cs E */
+/* Amaj >> G E A Cs E */
 
 ( //******* WEAVE 2 > CRIPPLE CHIP Amaj ***************//
 Ndef(\jo, {
@@ -240,7 +266,7 @@ Ndef(\jo, {
   var centroids, t_neckbottom, t_top, t_necktop;
   var chain1, chain2, onsets1, onsets2, pitches1, pitches2, seq1, seq2, dur1, dur2;
 
-  mic = In.ar(2, 1);
+  //mic = In.ar(2, 1);
   mag1 = In.ar(7,1);
   mag2 = In.ar(8,1);
 
@@ -251,16 +277,19 @@ Ndef(\jo, {
   strings = insig[1] * 3.0; // other four strings
 
   // trill sensor
-  centroids = TrillCentroids.kr(1, 0x18, 60, 1);
+  centroids = TrillCentroids.kr(1, 0x18, 40, 1);
 
   // MODE TOGGLE: neckbottom toggles echo/delay
   t_neckbottom = (centroids[1] >= ~ranges[\neckbottom][0]) * (centroids[1] <= ~ranges[\neckbottom][1]);
   mode = Stepper.kr(t_neckbottom,0,0,1);
-  //t_bottom.poll(1);
+  //t_bottom.poll(2);
+  //mode.poll(1);
 
   // SEQUENCE TOGGLE: necktop toggles pitch range
-  t_necktop = (centroids[1] >= ~ranges[\necktop][0]) * (centroids[1] <= ~ranges[\necktop][1]);
-  sequence = Stepper.kr(t_necktop,0,0,2);
+  t_necktop = (centroids[2] > 10) * (centroids[1] >= ~ranges[\necktop][0]) * (centroids[1] <= ~ranges[\necktop][1]);
+  sequence = Stepper.kr(t_necktop,0,0,3);
+  //t_necktop.poll(2);
+  //sequence.poll(1);
 
   // string onset detection
   chain1 = FFT(LocalBuf(512), s5, 0.5, 1); // drone
@@ -273,9 +302,10 @@ Ndef(\jo, {
   strings = Compander.ar(strings, strings, 0.5, 1.0, 0.2, 0.01, 0.1) * 11.0;
 
   // Drone string sequence
-  pitches1 = Select.kr(sequence % 2, [
+  pitches1 = Select.kr(sequence, [
     [[\a4.f, \e5.f], [\gs4.f, \d4.f], [\fs3.f, \a4.f]],
     [[\cs4.f, \fs4.f], [\e3.f, \b4.f], [\d3.f, \a3.f]],
+    [[\cs4.f, \fs4.f], [\e3.f, \b4.f], [\d3.f, \a3.f]] / 2.0,
   ]);
   seq1 = Select.kr(Stepper.kr(onsets1, 0, 0, 2), pitches1);
   dur1 = Select.kr(mode, [0.6, 0.2, 0.2]);
@@ -286,10 +316,11 @@ Ndef(\jo, {
   ]);
 
   // 4-strings sequence
-  pitches2 = Select.kr(sequence % 3, [
-    [[\e5.f, \cs4.f], [\a3.f, \cs4.f], [\e4.f, \gs5.f], [\gs3.f, \b4.f]],       //0
+  pitches2 = Select.kr(sequence, [
+    [[\e5.f, \cs4.f], [\a3.f, \cs4.f], [\e4.f, \gs5.f], [\gs3.f, \b4.f]] * 4,       //0
     [[\e5.f, \cs4.f], [\a3.f, \cs4.f], [\e4.f, \gs5.f], [\gs3.f, \b4.f]] * 2,   //1
-    [[\e5.f, \cs4.f], [\a3.f, \cs4.f], [\e4.f, \gs5.f], [\gs3.f, \b4.f]] * 3,   //2
+    [[\e5.f, \cs4.f], [\a3.f, \cs4.f], [\e4.f, \gs5.f], [\gs3.f, \b4.f]] * 5.5,   //2
+    [[\e5.f, \cs4.f, \d3.f], [\a3.f, \cs4.f], [\a4.f, \cs2.f], [\e4.f, \gs5.f], [\gs3.f, \b4.f]],   //2
   ]);
   seq2 = Select.kr(Stepper.kr(onsets2, 0, 0, 3), pitches2);
   seq2 = Pulse.ar(seq2, mul: 1.0).sum * 0.5 * EnvGen.ar(Env.perc(0.01, dur1), onsets2);
@@ -298,9 +329,7 @@ Ndef(\jo, {
     seq2,
   ]);
 
-  mix = seq1 + seq2 + GVerb.ar(s5+(strings*2.0), 5, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.1);
-  mic = Compander.ar(mic, mic, 0.6, 1.5, 0.1, 0.01, 0.1, mul: 20.0);
-  mix = mix + FreeVerb.ar(mic, 1.0, 0.8, 0.4);
+  mix = seq1 + seq2 + GVerb.ar(s5+(strings*2.0), 15, 1, 0.2, 0.2, 5, 1.0, 0.5, 0.1);
   mix = Limiter.ar(LeakDC.ar(mix * 0.8), 1.0, 0.001);
   //RecordBuf.ar(mix, b, loop: 0); // record first 10 seconds of audio
   mix;
@@ -314,13 +343,47 @@ Ndef(\jo, {
 
 
 
-/*                                  .__    .__
+/*
+
+                                               .__    .__
 ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗███████╗██╗  ██╗██╗███╗   ██╗███████╗██████╗
 ████╗ ████║██╔═████╗██╔═████╗████╗  ██║██╔════╝██║  ██║██║████╗  ██║██╔════╝██╔══██╗
 ██╔████╔██║██║██╔██║██║██╔██║██╔██╗ ██║███████╗███████║██║██╔██╗ ██║█████╗  ██████╔╝
 ██║╚██╔╝██║████╔╝██║████╔╝██║██║╚██╗██║╚════██║██╔══██║██║██║╚██╗██║██╔══╝  ██╔══██╗
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████║██║  ██║██║██║ ╚████║███████╗██║  ██║
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
+  __                        __                                __
+.-----.--.--.-----.----.    .-----.|__|.-----.----.-----.    |__|    .--.--.--.---.-.-----.    |  |--.-----.----.-----.
+|  -__|  |  |  -__|   _|    |__ --||  ||     |  __|  -__|    |  |    |  |  |  |  _  |__ --|    |  _  |  _  |   _|     |
+|_____|\___/|_____|__|      |_____||__||__|__|____|_____|    |__|    |________|___._|_____|    |_____|_____|__| |__|__|
 
 C modal >> G F Bb C Eb */
 ~bufs["Moonshiner"];
@@ -434,9 +497,9 @@ Ndef(\jo, {
 
   // *STRING SIGNAL POST PRODUCTION* output processing
   s5=s5*4.0;
-  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.1, 0.001, 0.1, mul: 10.0) * 6.0;
+  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.3, 0.001, 0.1, mul: 10.0) * 8.0;
   s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 5.0);
-  stringsmix = GVerb.ar(s5+strings, 45, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4);
+  stringsmix = GVerb.ar(s5+strings, 65, 3, 0.1, 0.2, 5, 1.0, 0.4, 0.6) + strings;
 
   mix = FreeVerb.ar(seq1+seq2+slidesig, 0.5, 0.8, 0.3, mul: 1.0) + stringsmix;
 
