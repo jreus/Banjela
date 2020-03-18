@@ -31,6 +31,8 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
+Platform.systemExtensionDir;
+Platform.userExtensionDir;
 
 
 /*-------------------------------------------
@@ -62,6 +64,7 @@ b.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_snip.wav", "WAV", "floa
 */
 (
 Ndef.clear;
+~jo.free;
 ~readSounds.();
 if(~bufs.notNil) { ~bufs.keysValuesDo {|key,val| val.free } };
 ~bufs = Dictionary.new;
@@ -131,8 +134,9 @@ F modal >> g C Bb C Eb*/
 [~bufs["Chinga_002"], ~bufs["JapaDrum1_13"]];
 
 (
-Ndef(\jo, {
-  var mix, insig, s5, strings, stringsmix, thumbsig, slidesig, mag1, mag2, mic;
+~jo.free;
+~jo = {
+  var mix, verbmix, insig, s5, strings, stringsmix, thumbsig, slidesig, mag1, mag2, mic;
   var buf1, buf2, buf3, b1frames, b2frames, b3frames, smpl1, smpl2, spos1, spos2, spos3, b3dur, pos3var, graintrig;
   var t_mag1, t_mag2, magmap1, magmap2, mt1, mt2, seq1, seq2;
   var centroids, t_bottom, t_top, t_necktop, t_slide, mode = 0, t1, t2, t3;
@@ -143,11 +147,15 @@ Ndef(\jo, {
   mag2 = In.ar(7,1);
 
   // STRINGS INPUT
-  insig = [In.ar(4,1), In.ar(5,1)];
-  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
-  insig = Compander.ar(insig, insig, 0.1, 3.0, 1.0, 0.005, 0.01); // get rid of low noise
-  s5 = insig[0] * 1; // drone
-  strings = insig[1] * 3.0; // other four strings
+	s5 = In.ar(4,1);
+	strings = In.ar(5,1);
+	s5 = SVF.ar(s5, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
+	strings = SVF.ar(strings, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
+
+	// pull out the good signal, get rid of digital noise
+	s5 = Compander.ar(s5, s5, 0.02, 4.0, 1.0, 0.05, 0.01, mul: 15.0);
+	strings = Compander.ar(strings, strings, 0.02, 2.5, 1.0, 0.01, 0.01, mul: 80.0);
+
 
   // TRILL INPUT
   centroids = TrillCentroids.kr(1, 0x18, 60, 1);
@@ -208,23 +216,24 @@ Ndef(\jo, {
   smpl1 = BufRd.ar(1, buf1, spos1, 0.0, 2);
   smpl2 = BufRd.ar(1, buf2, spos2, 0.0, 2);
 
-  // *STRING SIGNAL POST PRODUCTION* output processing
-  s5=s5*5.0; strings=strings*6.0; // boost
-  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.3, 0.001, 0.1, mul: 12.0);
-  //s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 3.0);
-  stringsmix = AllpassC.ar(s5+strings, 0.2, 0.01, 1.0) + strings + s5;
-  stringsmix = GVerb.ar(stringsmix+s5+strings+thumbsig, 65, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4) * 2.0;
+	// *STRING SIGNAL POST PRODUCTION* output processing
+	strings = Compander.ar(strings, strings, 0.2, 1.3, 0.3, 0.1, 0.1, mul: 5.0);
+	//s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 3.0);
+	//stringsmix = AllpassC.ar(s5+strings, 0.2, 0.01, 1.0) + strings + s5;
+	//stringsmix = BPeakEQ.ar(stringsmix, 1200, 0.3, 6);
+	stringsmix = (s5 * 1.0) + (strings * 1.0);
+	stringsmix = FreeVerb.ar(stringsmix, 0.2, 0.5, 0.5);
+	verbmix = thumbsig + slidesig + smpl1 + smpl2;
+	verbmix = GVerb.ar(verbmix, 65, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4) * 2.0;
 
-
-  mix = smpl1+smpl2+stringsmix+slidesig;
-
-  Limiter.ar(LeakDC.ar(mix * 0.5), 1.0, 0.001);
-}).play(0, numChannels: 2, group: s);
+	mix = (stringsmix * 1.0) + (verbmix * 0.5);
+	mix = Limiter.ar(LeakDC.ar(mix * 1.0), 1.0, 0.001);
+	mix;
+}.play(s, outbus: 0);
 
 );
 
-
-
+~jo.free;
 
  \  /  \  /  /  \  /  /  \  \  /  /  \  /  \  /
 \ \/ /\ \/ // /\ \/ // /\ \\ \/ // /\ \/ /\ \/ /
@@ -256,9 +265,10 @@ Ndef(\jo, {
 /* Amaj >> G E A Cs E */
 
 ( //******* WEAVE 2 > CRIPPLE CHIP Amaj ***************//
-Ndef(\jo, {
+~jo.free;
+~jo = {
   var magMax = 0.001, magMin = -0.001, magSmooth = 0.2; // magic numbers
-  var mix, insig, s5, strings, stringsmix, mag1, mag2, mic;
+  var stringmix, synthmix, mix, insig, s5, strings, mag1, mag2, mic;
   var s_amp, s_pitch1, s_pitch2, s_haspitch, beat1 = 8, beat2 = 8;
   var mapped1, mapped2;
   var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
@@ -270,11 +280,17 @@ Ndef(\jo, {
   mag1 = In.ar(7,1);
   mag2 = In.ar(8,1);
 
-  insig = [In.ar(4,1), In.ar(5,1)];
-  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
-  insig = Compander.ar(insig, insig, 0.05, 2.5, 1.0, 0.005, 0.01); // get rid of low noise
-  s5 = insig[0] * 1; // drone
-  strings = insig[1] * 3.0; // other four strings
+	  // STRINGS INPUT
+	s5 = In.ar(4,1);
+	strings = In.ar(5,1);
+	s5 = SVF.ar(s5, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
+	strings = SVF.ar(strings, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
+
+	// pull out the good signal, get rid of digital noise
+	s5 = Compander.ar(s5, s5, 0.02, 4.0, 1.0, 0.05, 0.01, mul: 15.0);
+	strings = Compander.ar(strings, strings, 0.02, 2.5, 1.0, 0.01, 0.01, mul: 80.0);
+
+
 
   // trill sensor
   centroids = TrillCentroids.kr(1, 0x18, 40, 1);
@@ -297,9 +313,6 @@ Ndef(\jo, {
   onsets1 = Onsets.kr(chain1, 0.5, \power); // try different algorithms for CPU
   onsets2 = Onsets.kr(chain2, 0.5, \power); // try different algorithms for CPU
 
-  // amp for output
-  s5=s5*4.0;
-  strings = Compander.ar(strings, strings, 0.5, 1.0, 0.2, 0.01, 0.1) * 11.0;
 
   // Drone string sequence
   pitches1 = Select.kr(sequence, [
@@ -329,14 +342,15 @@ Ndef(\jo, {
     seq2,
   ]);
 
-  mix = seq1 + seq2 + GVerb.ar(s5+(strings*2.0), 15, 1, 0.2, 0.2, 5, 1.0, 0.5, 0.1);
-  mix = Limiter.ar(LeakDC.ar(mix * 0.8), 1.0, 0.001);
+	stringmix = (s5 * 1.0) + (strings * 1.0);
+	synthmix = (seq1 * 1.0) + (seq2 * 1.0);
+  mix = synthmix + GVerb.ar(stringmix, 15, 1, 0.2, 0.2, 5, 1.0, 0.5, 0.1);
+  mix = Limiter.ar(LeakDC.ar(mix * 1.0), 1.0, 0.001);
   //RecordBuf.ar(mix, b, loop: 0); // record first 10 seconds of audio
   mix;
-}).play(0, numChannels: 2, group: s);
-
-
+}.play(s, outbus: 0);
 );
+~jo.free;
 
 
 
@@ -387,11 +401,12 @@ Ndef(\jo, {
 
 C modal >> G F Bb C Eb */
 ~bufs["Moonshiner"];
-Ndef.clear;
+
 ( // MOONSHINER
-Ndef(\jo, {
+~jo.free;
+~jo = {
   var magMax = 0.001, magMin = -0.001, magSmooth = 0.2; // magic numbers
-  var mix, insig, slidesig, strings, s5, stringsmix, mag1, mag2, mic;
+  var mix, stringmix, synthmix, insig, slidesig, strings, s5, stringsmix, mag1, mag2, mic;
   var s_amp, s_pitch1, s_pitch2, s_haspitch, beat1 = 8, beat2 = 8;
   var mapped1, mapped2;
   var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
@@ -411,19 +426,22 @@ Ndef(\jo, {
   mag2 = In.ar(8,1);
 
   // Audio inputs
-  mic = In.ar(2, 1);
-  insig = [In.ar(4,1), In.ar(5,1)];
-  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
-  insig = Compander.ar(insig, insig, 0.1, 3.0, 1.0, 0.005, 0.01); // get rid of low noise
-  s5 = insig[0] * 1; // drone
-  strings = insig[1] * 4.0; // other four strings
+	  // STRINGS INPUT
+	s5 = In.ar(4,1);
+	strings = In.ar(5,1);
+	s5 = SVF.ar(s5, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
+	strings = SVF.ar(strings, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
+
+	// pull out the good signal, get rid of digital noise
+	s5 = Compander.ar(s5, s5, 0.02, 4.0, 1.0, 0.05, 0.01, mul: 15.0);
+	strings = Compander.ar(strings, strings, 0.02, 2.5, 1.0, 0.01, 0.01, mul: 80.0);
 
   // *AUDIO ANALYSIS*
   // strings: onset detection before processing string signal further
   chain1 = FFT(LocalBuf(512), s5, 0.5, 1); // drone
   chain2 = FFT(LocalBuf(512), strings, 0.5, 1); // other strings
-  onsets1 = Onsets.kr(chain1, 0.5, \power); // try different algorithms for CPU
-  onsets2 = Onsets.kr(chain2, 0.2, \power); // try different algorithms for CPU
+  onsets1 = Onsets.kr(chain1, 2.5, \power); // try different algorithms for CPU
+  onsets2 = Onsets.kr(chain2, 4.0, \power); // try different algorithms for CPU
 
 
 
@@ -496,18 +514,16 @@ Ndef(\jo, {
 
 
   // *STRING SIGNAL POST PRODUCTION* output processing
-  s5=s5*4.0;
-  strings = Compander.ar(strings, strings, 0.7, 1.0, 0.3, 0.001, 0.1, mul: 10.0) * 8.0;
   s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 5.0);
-  stringsmix = GVerb.ar(s5+strings, 65, 3, 0.1, 0.2, 5, 1.0, 0.4, 0.6) + strings;
+  stringmix = GVerb.ar(s5+strings, 65, 3, 0.1, 0.2, 5, 1.0, 0.4, 0.6) + strings;
 
-  mix = FreeVerb.ar(seq1+seq2+slidesig, 0.5, 0.8, 0.3, mul: 1.0) + stringsmix;
+  mix = FreeVerb.ar(seq1+seq2+slidesig, 0.5, 0.8, 0.3, mul: 1.0) + stringmix;
 
   mix = Limiter.ar(LeakDC.ar(mix * 1.0), 1.0, 0.001);
   //mix = seq2;
   //RecordBuf.ar(mix, b, loop: 0); // record first 10 seconds of audio
   mix;
-}).play(0, numChannels: 2, group: s);
+}.play(s, outbus: 0);
 
 );
 
