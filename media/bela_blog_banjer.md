@@ -42,4 +42,4 @@ Capacitive touch inlays made on the vinyl cutter.
 
 ---
 
-<img src="AmmyPhull-IKLECTIK.jpg" width=400>
+<img src="AmmyPhull-IKLECTIK.JPG" width=400>
