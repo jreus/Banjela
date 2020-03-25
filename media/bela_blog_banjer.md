@@ -1,4 +1,4 @@
-<img src="banjer_desk.jpg" width=400>
+<img src="./banjer_desk.jpg" width=400>
 
 # Electric Folkways
 In the summer of 2019 I was graciously received by Andrew McPherson and the whole Augmented Instruments Lab at C4DM for a series of micro-residencies, aimed at kick-starting a new music project combining live electronics and sonic elements from the old, weird American music landscape. I've had a longstanding interest in American folk music histories since getting wrapped up in that musical world a lifetime ago when I lived and worked in Northern Florida. Florida is the state where, the farther north you go, before you know it, you're in The South.
@@ -9,8 +9,8 @@ Back then I really embraced every aspect of American folk art, and a lot of that
 
 # Belanjo Banjela
 
-<img src="proto_front_01.jpg" height=300>
-<img src="proto_back_02.jpg" height=300>
+<img src="./proto_front_01.jpg" height=300>
+<img src="./proto_back_02.jpg" height=300>
 
 I originally started talking to Andrew about building a prototype electronic "mountain banjo" some months before my residency started. I was mainly interested in exploring how to build digital extended techniques based on "old time", or "stroke" styles. I had a couple specific ideas: one was to see what could be done with the new trill sensors that were at the time under development, to build right-hand extensions into the body of the banjo. The other was to electrify the strings using a clever pickup design that was being used by another AIL researcher, Laurel Pardue, on the svampolin, a hybrid digital/acoustic violin she was designing. All of this would then go into a Bela embedded inside the pot of the banjo with a single stereo output.  
 
@@ -24,22 +24,22 @@ One lovely thing about a lot of stroke-style playing is the expressive dynamic v
 
 In electrifying the banjo I was looking for a way of getting independent signals for each string so as to be able to take advantage of this dynamic control, and use it for triggering electronic sounds on a per-string basis. The pickup system based on Michael Edinger's [StringAmp](https://www.stringamp.com/stringamp/) allows for separated string amplification and a non-invasive design, with signals picked up at the tail end of the instrument and the potential to mount signal-inducing magnets at the point where the neck meets the pot.
 
-<img src="magnet-frames.jpg" width=300>
-<img src="woodwork_tailpiece.jpg" width=300>
+<img src="./magnet-frames.jpg" width=300>
+<img src="./woodwork_tailpiece.jpg" width=300>
 
 
 ---
 
 # Right Hand Technique
 
-<img src="dana_03.png" width=400>
+<img src="./dana_03.png" width=400>
 
 Ergonomics experiments and impromptu banjo lesson from London-based banjoist/singer/songwriter Dana Immanuel, of [Dana Immanuel and the Stolen Band](http://danaimmanuel.com/).
 
-<img src="inlays_vinyl.jpg" width=400>
+<img src="./inlays_vinyl.jpg" width=400>
 
 Capacitive touch inlays made on the vinyl cutter.
 
 ---
 
-<img src="AmmyPhull-IKLECTIK.JPG" width=400>
+<img src="./AmmyPhull-IKLECTIK.JPG" width=400>
