@@ -1,1 +1,1 @@
-# banjer
+media/bela_blog_banjer.md
