@@ -188,46 +188,50 @@ var guiSketch = new p5(function( sketch ) {
 	// This must match GUI_FRAME_RATE in render.cpp
 	let frameRate = 30;
 
+
+	gui.sendBuffer(0, gNumActiveTouches);
+	gui.sendBuffer(1, gTouchLocation);
+	gui.sendBuffer(2, gTouchSize);
+
+	gui.sendBuffer(3, sigStrings); // hack
+	gui.sendBuffer(4, sigMag); // hack
+
+	gui.sendBuffer(5, sigMic); // hack
+	gui.sendBuffer(6, sigPiezo); // hack
+
 	// Indexes of data buffers coming from the Bela over websockets
     let idxNumActiveTouches = 0, idxTouchLocations = 1, idxTouchSizes = 2;
-    let idxString1 = 3, idxString2 = 4, idxString3 = 5, idxString4 = 6, idxString5 = 7;
-    // hack
-    let idxMag = 8;
-    let idxMic = 9;
+    //let idxString1 = 3, idxString2 = 4, idxString3 = 5, idxString4 = 6, idxString5 = 7;
+    //let idxMag1 = 8, idxMag2 = 9, idxMag3 = 10;
+    //let idxMic = 11, idxPiezo = 12;
     
-    //let idxMag1 = 8, idxMag2 = 9;
-    //let idxMic = 10;
-
-
+    //hack
+    let idxStrings = 3, idxMag = 4, idxMic = 5, idxPiezo = 6;
+    
 	// TOUCH GUI
-    let spacing;
-    let activeTouches = 0;
-    let sliderLength = 0.0;
-    let sliderHeight = 0.0;
-    let touchSizeScale = 1.25;
-
-	// MAG SENSE GUI
-
-	// AUDIO SIGNAL GUI
+    let spacing, activeTouches = 0, sliderLength = 0.0, sliderHeight = 0.0, touchSizeScale = 1.25;
 
     sketch.setup = function() {
         sketch.createCanvas(canvas_dimensions[0], canvas_dimensions[1]);
         //sketch.frameRate(120);
         sketch.frameRate(30);
         
-    	// Mic in waveform
+    	// Audio input waveforms
 		let micXpos = 150, micYpos = 10;
 		let micWidth = 50, micLength = 300;
 		let micWaveformScale = 1.0;
+		let piezoXpos = 150, piezoYpos = 60;
+		let piezoWidth = 50, piezoLength = 300;
+		let piezoWaveformScale = 1.0;
 		sketch.sigMic = new WaveForm(sketch, micLength, micWidth, [micXpos, micYpos], 0, bufSize, micWaveformScale);
+		sketch.sigPiezo = new WaveForm(sketch, piezoLength, piezoWidth, [piezoXpos, piezoYpos], 0, bufSize, piezoWaveformScale);
 
         // Trill Segments (TODO: Refactor this class to display multiple segments of a single trill sensor)
         sliderLength = 600; 
         sliderHeight = 60;
-        let sliderXpos = 10, sliderYpos = micYpos + micWidth + 10;
+        let sliderXpos = 10, sliderYpos = piezoYpos + piezoWidth + 10;
         let sliderScale = 2.0;
         sketch.trillBar = new TrillBar(sketch, sliderLength, sliderHeight, [sliderXpos, sliderYpos], sliderScale);
-        
         
         // String waveforms
         let stringsWidth = 300;
@@ -249,8 +253,7 @@ var guiSketch = new p5(function( sketch ) {
         let magWaveformScale = 100.00;
         sketch.magSense1 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos], 1, bufSize, magWaveformScale);
         sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos + magLength + 10, magYpos], 1, bufSize, magWaveformScale);
-
-        
+		sketch.magSense3 = new WaveForm(sketch, magLength, magWidth, [magXpos + magLength + 10 + magLength + 10, magYpos], 1, bufSize, magWaveformScale);
     };
 
     sketch.draw = function() {
@@ -264,21 +267,20 @@ var guiSketch = new p5(function( sketch ) {
     	sketch.textSize(32);
     	sketch.textFont("Helvetica");
 	    sketch.fill(5, 5, 5);
-		sketch.text("HOLA", 10, 32);
+		sketch.text("BANJELA", 10, 32);
 
-        
         // DEBUGGING in VERBOSE MODE
         if(verbose && (verboseFrameCounter % verboseEvery == 0)) {
     		// console.log() // put slow debug logging here
         }
 		verboseFrameCounter += 1;
     
-    
-    	// Draw the mic input signal guis
+    	// Draw the audio input signal guis
 		sketch.sigMic.updateBuffer(Bela.data.buffers[idxMic]);
 		sketch.sigMic.draw();
+		sketch.sigPiezo.updateBuffer(Bela.data.buffers[idxPiezo]);
+		sketch.sigPiezo.draw();
 
-    
 		// Draw the touch gui
         sketch.strokeWeight(1);
         
@@ -292,32 +294,49 @@ var guiSketch = new p5(function( sketch ) {
         sketch.trillBar.draw();
         
         // Draw the audio signal guis
+        /*
         sketch.sigString1.updateBuffer(Bela.data.buffers[idxString1]);
         sketch.sigString2.updateBuffer(Bela.data.buffers[idxString2]);
         sketch.sigString3.updateBuffer(Bela.data.buffers[idxString3]);
         sketch.sigString4.updateBuffer(Bela.data.buffers[idxString4]);
         sketch.sigString5.updateBuffer(Bela.data.buffers[idxString5]);
+        */
+		
+		//hack
+        sketch.sigString1.updateBuffer(Bela.data.buffers[idxStrings].slice(0,bufSize));
+        sketch.sigString2.updateBuffer(Bela.data.buffers[idxStrings].slice(bufSize, (bufSize*2)));
+        sketch.sigString3.updateBuffer(Bela.data.buffers[idxStrings].slice((bufSize*2), (bufSize*3)));
+        sketch.sigString4.updateBuffer(Bela.data.buffers[idxStrings].slice((bufSize*3), (bufSize*4)));
+        sketch.sigString5.updateBuffer(Bela.data.buffers[idxStrings].slice((bufSize*4));
+		//endhack
         
+        //sketch.sigString2.updateBuffer(Bela.data.buffers[idxString2]);
+        //sketch.sigString3.updateBuffer(Bela.data.buffers[idxString3]);
+        //sketch.sigString4.updateBuffer(Bela.data.buffers[idxString4]);
+        //sketch.sigString5.updateBuffer(Bela.data.buffers[idxString5]);
         sketch.sigString1.draw();
         sketch.sigString2.draw();
         sketch.sigString3.draw();
         sketch.sigString4.draw();
         sketch.sigString5.draw();
         
-        
 		// Draw the MagSense signal guis
-		//sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag1]);
-		sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize)); // hack
-		sketch.magSense1.feedbackText = Bela.data.buffers[idxMag][bufSize].toFixed(5);
-		sketch.magSense1.draw();
-		//sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag2]);
-		sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag].slice(0,bufSize)); // hack
-		sketch.magSense2.feedbackText = Bela.data.buffers[idxMag][0].toFixed(5);
-		sketch.magSense2.draw();
 		
+		//hack
+		sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag].slice(0,bufSize)); // hack
+		sketch.magSense1.feedbackText = Bela.data.buffers[idxMag][0].toFixed(5); //hack
+		sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize,bufSize*2)); // hack
+		sketch.magSense2.feedbackText = Bela.data.buffers[idxMag][bufSize].toFixed(5); //hack
+		sketch.magSense3.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize*2)); // hack
+		sketch.magSense3.feedbackText = Bela.data.buffers[idxMag][(bufSize*2)].toFixed(5); //hack
+		//endhack
+		
+		//sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag1]);
+		//sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag2]);
+		//sketch.magSense3.updateBuffer(Bela.data.buffers[idxMag3]);
 
-
-
+		sketch.magSense1.draw();
+		sketch.magSense2.draw();
+		sketch.magSense3.draw();
     };
-    
 }, 'gui');

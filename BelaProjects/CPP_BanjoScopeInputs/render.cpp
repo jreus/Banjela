@@ -36,8 +36,6 @@ void render(BelaContext *context, void *userData)
 
 		// roughly zero-center all the signals by subtracting 0.5
 		scope.log(
-			audioRead(context, n, 0),
-			audioRead(context, n, 1),
 			analogRead(context, n, 0) - 0.5,
 			analogRead(context, n, 1) - 0.5,
 			analogRead(context, n, 4) - 0.5,

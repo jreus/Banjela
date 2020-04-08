@@ -1,8 +1,7 @@
  /**
 	Banjo Status Dashboard
-
- * 
- * 
+	
+	// Remember to set the block size to 64
  **/
 #include <Bela.h>
 #include <cmath>
@@ -12,20 +11,24 @@
 
 /** Audio Input Channel Mappings **/
 #define MIC_INCHAN 0
+#define PIEZO_INCHAN 1
 
 /** Analog Input Channel Mappings **/
-#define STRING1_INCHAN 1
-#define STRING2_INCHAN 1
-#define STRING3_INCHAN 1
+#define STRING1_INCHAN 4
+#define STRING2_INCHAN 3
+#define STRING3_INCHAN 2
 #define STRING4_INCHAN 1
 #define STRING5_INCHAN 0
-#define MAG1_INCHAN 2
-#define MAG2_INCHAN 3
+#define MAG1_INCHAN 5
+#define MAG2_INCHAN 6
+#define MAG3_INCHAN 7
 
 int gAudioFramesPerAnalogFrame = 0;
 
 /** Trill Sensor **/
 #define NUM_TOUCH 5 // Number of simultaneous touches detectable on Trill sensor
+//#define I2C_ADDR 0x18 // Trill sensor I2C address
+#define I2C_ADDR 0x38 // Trill sensor I2C address
 
 Trill touchSensor;
 int gPrescalerOpts[6] = {1, 2, 4, 8, 16, 32}; // possible prescaler (sensitivity) settings, lower = more sensitvive
@@ -51,23 +54,23 @@ float gTimePeriod; // period (in seconds) between data sends to the GUI
 
 
 // arrays for sending data to the gui
-float sigString1[GUI_BUFFER_LENGTH];
-float sigString2[GUI_BUFFER_LENGTH];
-float sigString3[GUI_BUFFER_LENGTH];
-float sigString4[GUI_BUFFER_LENGTH];
-float sigString5[GUI_BUFFER_LENGTH];
+//float sigString1[GUI_BUFFER_LENGTH];
+//float sigString2[GUI_BUFFER_LENGTH];
+//float sigString3[GUI_BUFFER_LENGTH];
+//float sigString4[GUI_BUFFER_LENGTH];
+//float sigString5[GUI_BUFFER_LENGTH];
+// compress five string signals into a single array
+float sigStrings[GUI_BUFFER_LENGTH * 5];
 
-// compress two mag signals into a single array as a hack around the 10 index limit for GUI data buffers
-float sigMag[GUI_BUFFER_LENGTH * 2];
-/*
-float sigMag1[GUI_BUFFER_LENGTH];
-float sigMag2[GUI_BUFFER_LENGTH];
-*/
+// compress three mag signals into a single array as a hack around the 10 index limit for GUI data buffers
+float sigMag[GUI_BUFFER_LENGTH * 3];
+
+//float sigMag1[GUI_BUFFER_LENGTH];
+//float sigMag2[GUI_BUFFER_LENGTH];
+//float sigMag3[GUI_BUFFER_LENGTH];
+
 float sigMic[GUI_BUFFER_LENGTH];
-
-
-
-
+float sigPiezo[GUI_BUFFER_LENGTH];
 
 /*
 * Function to be run on an auxiliary task that reads data from the Trill sensor.
@@ -103,27 +106,32 @@ void auxiliarySensorReadLoop(void*)
 
 // send data back to the browser gui
 void updateGui() {
-			// Send touch sensor data
-			gui.sendBuffer(0, gNumActiveTouches);
-			gui.sendBuffer(1, gTouchLocation);
-			gui.sendBuffer(2, gTouchSize);
+	// Send touch sensor data
+	gui.sendBuffer(0, gNumActiveTouches);
+	gui.sendBuffer(1, gTouchLocation);
+	gui.sendBuffer(2, gTouchSize);
 
-			// Send string/audio signals
-			gui.sendBuffer(3, sigString1); // Bela.data.buffers[idx], value (scalar, array, vector)
-			gui.sendBuffer(4, sigString2); // Bela.data.buffers[idx], value (scalar, array, vector)
-			gui.sendBuffer(5, sigString3); // Bela.data.buffers[idx], value (scalar, array, vector)
-			gui.sendBuffer(6, sigString4); // Bela.data.buffers[idx], value (scalar, array, vector)
-			gui.sendBuffer(7, sigString5); // Bela.data.buffers[idx], value (scalar, array, vector)
-		
+	gui.sendBuffer(3, sigStrings); // hack
+	gui.sendBuffer(4, sigMag); // hack
+
+	gui.sendBuffer(5, sigMic); // hack
+	gui.sendBuffer(6, sigPiezo); // hack
+
+	// Send string/audio signals
+	//gui.sendBuffer(3, sigString1); // Bela.data.buffers[idx], value (scalar, array, vector)
+	//gui.sendBuffer(4, sigString2); // Bela.data.buffers[idx], value (scalar, array, vector)
+	//gui.sendBuffer(5, sigString3); // Bela.data.buffers[idx], value (scalar, array, vector)
+	//gui.sendBuffer(6, sigString4); // Bela.data.buffers[idx], value (scalar, array, vector)
+	//gui.sendBuffer(7, sigString5); // Bela.data.buffers[idx], value (scalar, array, vector)
 			
-			// Send mag sensor values
-			//gui.sendBuffer(8, sigMag1); // Bela.data.buffers[idx], value (scalar, array, vector)
-			//gui.sendBuffer(9, sigMag2); // Bela.data.buffers[idx], value (scalar, array, vector)
-			gui.sendBuffer(8, sigMag); // hack
-
-			// Send mic input signal
-			//gui.sendBuffer(10, sigMic);	
-			gui.sendBuffer(9, sigMic); // hack
+	// Send mag sensor values
+	//gui.sendBuffer(8, sigMag1); // Bela.data.buffers[idx], value (scalar, array, vector)
+	//gui.sendBuffer(9, sigMag2); // Bela.data.buffers[idx], value (scalar, array, vector)
+	//gui.sendBuffer(10, sigMag3); // Bela.data.buffers[idx], value (scalar, array, vector)
+	
+	// Send audio input signals
+	//gui.sendBuffer(11, sigMic);	
+	//gui.sendBuffer(12, sigPiezo);	
 }	
 
 
@@ -144,32 +152,50 @@ bool setup(BelaContext *context, void *userData)
 
 	gTimePeriod = 1.0 / GUI_FRAME_RATE; 
 
-	rt_printf("Audio Frames Per Analog Frame: %d", gAudioFramesPerAnalogFrame);
+	rt_printf("Audio Frames Per Analog Frame: %d \n", gAudioFramesPerAnalogFrame);
 	
 	// zero GUI buffers
 	for(int i = 0; i < GUI_BUFFER_LENGTH; i++) {
+		sigMic[i] = 0.0;
+		sigPiezo[i] = 0.0;
+		/*
 		sigString1[i] = 0.0;
 		sigString2[i] = 0.0;
 		sigString3[i] = 0.0;
 		sigString4[i] = 0.0;
 		sigString5[i] = 0.0;
-		//sigMag1[i] = 0.0;
-		//sigMag2[i] = 0.0;
-		sigMag[i] = 0.0; // hack
-		sigMic[i] = 0.0;
+		sigMag1[i] = 0.0;
+		sigMag2[i] = 0.0;
+		sigMag3[i] = 0.0;
+		*/
+		
+		//hack
+		sigMag[i] = 0.0;
+		sigMag[i + (GUI_BUFFER_LENGTH * 1)] = 0.0;
+		sigMag[i + (GUI_BUFFER_LENGTH * 2)] = 0.0;
+
+		sigStrings[i] = 0.0;
+		sigStrings[i + (GUI_BUFFER_LENGTH * 1)] = 0.0;
+		sigStrings[i + (GUI_BUFFER_LENGTH * 2)] = 0.0;
+		sigStrings[i + (GUI_BUFFER_LENGTH * 3)] = 0.0;
+		sigStrings[i + (GUI_BUFFER_LENGTH * 4)] = 0.0;
 	}
 	
-	// Init trill state, NORMAL==centroid, DIFF==different from baseline
+	// Init trill state, CENTROIDS==centroid, DIFF==different from baseline
 	// baseline can be recomputed using touchSensor.updateBaseline()
-	if(touchSensor.setup(1, 0x18, Trill::NORMAL, gThresholdOpts[optthresh], gPrescalerOpts[optpre]) != 0) {
+	if(touchSensor.setup(1, I2C_ADDR, Trill::CENTROID, gThresholdOpts[optthresh], gPrescalerOpts[optpre]) != 0) {
 		fprintf(stderr, "Unable to initialise touch sensor\n");
 		return false;
 	}
 
 	touchSensor.printDetails();
 
-	 // Exit program if sensor is not a Trill Bar
-	if(touchSensor.deviceType() != Trill::ONED) {
+	// Exit program if sensor is not a Trill Bar or Trill Craft
+	rt_printf("Trill Device Type: %d \n", touchSensor.deviceType());
+
+	 
+	if(touchSensor.deviceType() != Trill::BAR && touchSensor.deviceType() != Trill::CRAFT && 
+		touchSensor.deviceType() != Trill::RING  && touchSensor.deviceType() != Trill::FLEX ) {
 		fprintf(stderr, "This example is supposed to work only with a One-Dimensional Trill Sensor. \n You may have to adapt it to make it work with other Trill devices.\n");
 		return false;
 	}
@@ -186,7 +212,8 @@ void render(BelaContext *context, void *userData)
 {	
 	static unsigned int cg = 0, c = 0;
 	unsigned int m = 0;
-	float s1 = 0.0, s2 = 0.0, s3 = 0.0, s4 = 0.0, s5 = 0.0, mag1 = 0.0, mag2 = 0.0, mic = 0.0;
+	float s1 = 0.0, s2 = 0.0, s3 = 0.0, s4 = 0.0, s5 = 0.0, mag1 = 0.0, mag2 = 0.0, mag3 = 0.0;
+	float mic = 0.0, piezo = 0.0;
 	float mixL = 0.0, mixR = 0.0;
 	
 	float amp = 0.8;
@@ -202,33 +229,46 @@ void render(BelaContext *context, void *userData)
 			s5 = analogRead(context, m, STRING5_INCHAN) - 0.5;
 			mag1 = analogRead(context, m, MAG1_INCHAN) - 0.5;
 			mag2 = analogRead(context, m, MAG2_INCHAN) - 0.5;
+			mag3 = analogRead(context, m, MAG3_INCHAN) - 0.5;
 		}
 		
 		mic = audioRead(context, n, MIC_INCHAN);
+		piezo = audioRead(context, n, PIEZO_INCHAN);
 
-		// TODO: Why is this sending out a steady sine tone?
 		mixL = (mic + s1 + s3 + s5) * amp;
-		mixR = (mic + s2 + s4) * amp;
+		mixR = (piezo + s2 + s4) * amp;
 
 		audioWrite(context, n, 0, mixL);	
 		audioWrite(context, n, 1, mixR);
 		
-		// GUI buffers
+		// Update GUI buffers
 		if(n == 0) { // every block add a sample to the gui buffers
+			sigMic[c] = mic;
+			sigPiezo[c] = piezo;
+
+			// hacks
+			sigMag[c] = mag1;
+			sigMag[c + (GUI_BUFFER_LENGTH * 1)] = mag2;
+			sigMag[c + (GUI_BUFFER_LENGTH * 2)] = mag3;
+
+			sigStrings[c] = s1;
+			sigStrings[c + (GUI_BUFFER_LENGTH * 1)] = s2;
+			sigStrings[c + (GUI_BUFFER_LENGTH * 2)] = s3;
+			sigStrings[c + (GUI_BUFFER_LENGTH * 3)] = s4;
+			sigStrings[c + (GUI_BUFFER_LENGTH * 4)] = s5;
+
+			
+			/*
 			sigString1[c] = s1;
 			sigString2[c] = s2;
 			sigString3[c] = s3;
 			sigString4[c] = s4;
 			sigString5[c] = s5;
 
-			// hack
-			sigMag[c] = mag1;
-			sigMag[c + GUI_BUFFER_LENGTH] = mag2;
-
-			//sigMag1[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
-			//sigMag2[c] = analogRead(context, n, MAG2_INCHAN) - 0.5;
-
-			sigMic[c] = mic;
+			sigMag1[c] = analogRead(context, n, MAG1_INCHAN) - 0.5;
+			sigMag2[c] = analogRead(context, n, MAG2_INCHAN) - 0.5;
+			sigMag3[c] = analogRead(context, n, MAG3_INCHAN) - 0.5;
+			*/
 
 			c++;
 			if(c >= GUI_BUFFER_LENGTH) {
