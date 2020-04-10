@@ -73,33 +73,58 @@ From here it was pretty clear that an old-time knocking banjo player has a good 
 ---
 # Touch-Sensitive Inlays
 
-It could be really nice to have a photo of the earlier prototype with copper tape and then the evolution to the vinyl cut version with maybe a brief explanation of how the sensors work (I can flesh anything out there if you’d like).
-
-
-Capacitive touch inlays made on the vinyl cutter.
-
+I laser cut a new drum head for the banjo from blue acryllic, featuring some ornamental patterns inspired by the [American Fancy movement](https://en.wikipedia.org/wiki/American_Fancy) of the 1800's.
 
 <img src="./proto_lasercuts.jpg" width=500>
 
-<img src="./inlays_vinyl.jpg" width=400>
+And from there started working on design for the touch sensitive inlays I was looking to make. First making some paper prototypes and testing the ergonomics of these along with Dana, I moved on to fabricating some prototypes using a vinyl cutter and copper foil.
 
+<img src="./inlays_vinyl.jpg" width=400><br>
+First capacitive touch inlays made on the vinyl cutter.
+
+For this prototype the inlays were first attached to a piece of thin acetate using transfer tape. Once on the acetate each touch inlay was (carefully!) soldered to a thin-gauge piece of hookup wire. Finally, the whole thing gets 'sealed' to the acetate using a piece of transparent packing tape. The packing tape layer has the double benefit of both holding the assembly together and providing an extra thin layer of isolation on the copper surface, which makes the sensor response more linear when you attach it to a Trill board. This is also very close to the kind of response you'll get when fabricating flex sensors with a clear solder mask (future plans).
+
+After cutting out the sensor sandwiches from the acetate sheet they're then attached to the banjo using some double sided tape.
+
+This works for now. Future plans are to fabricate these as flex sensors and set them into the neck as inlays.
+
+<br>
 <img src="./proto_inlay_02.jpg" width=400>
 
 <img src="./proto_inlay_3.jpg" width=400>
 
 <img src="./proto_inlay_03.jpg" width=400>
 
-<img src="./proto_trill01.jpg" width=500>
+---
+# Voice and Pickups
+
+This leaves me with the Bela Mini's stereo audio inputs unused, which is a crying shame since that's where your best quality audio is coming from!
+
+American folk music tradition nearly always involves vocalizing in as many ways as there are individuals. In fact, with many of their instruments and musical taken or forbidden, most African musical traditions in the United States only survived through song. Hollars and work songs are remixed into gospel and blues. What European music calls "untrained" is more a deafness to the connection between music and lived experience. So let's celebrate the voice.
+
+You can pick up any number of lovely little head-mounted condenser microphones, or build your own. I went with the [t.bone Headmike](https://www.thomann.de/intl/the_tbone_headmike_o_ew.htm), which is a discount model designed to be compatible with Sennheiser "EW" wireless mic systems. Most of these microphones need a bit of power to work ~ luckily the Bela Mini's 3.3V supply is just enough, fed through a 2.2kΩ resistor.
+
+Since I also wanted to get the acoustic sound of the banjo to be able to mix into the overall sound coming from the pickups, I combined the mic input and a piezo pickup input into a single circuit that is powered by the Bela and goes to the stereo audio input.
+
+<img src="./INPUT_SCHEMATIC.png" width=500>
 
 
 ---
 # Bird's Eye View
 
- Then it would be also great to have a screenshot/gif of the debugging interface you built with all the signal visualisations.
+That's a lot of signals.
 
- <img src="./INPUT_SCHEMATIC.png" width=500>
+Wouldn't it be nice to see what's coming in from the banjo somehow? Around the time when I was doing my residency at Queen Mary the Bela team had just released a new browser-based GUI system.
 
- <img src="./BELA_BANJELA.png" width=500>
+Using the Bela GUI example sketches for the Trill sensor I built out a GUI to keep track of all the incoming signals into the Bela from the Banjo. This meant building a new GUI widget to represent real-time waveforms for the incoming audio signals:
+
+* one microphone signal
+* one piezo pickup acoustic signal
+* one audio signal for each of the five strings
+* one low frequency signal for each of the three magnetic sensors
+
+
+<img src="./BELA_BANJELA.png" width=500>
 
 
 ---
