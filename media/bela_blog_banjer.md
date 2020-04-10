@@ -37,7 +37,7 @@ One lovely thing about a lot of stroke-style playing is the expressive dynamic v
 
 In electrifying the banjo I was looking for a way of getting independent signals for each string so as to be able to take advantage of this dynamic control, and use it for triggering electronic sounds on a per-string basis. The pickup system based on Michael Edinger's [StringAmp](https://www.stringamp.com/stringamp/) allows for separated string amplification and a non-invasive design, with signals picked up at the tail end of the instrument and the potential to mount signal-inducing magnets at the point where the neck meets the pot.
 
-<embed src="./pickup_magnet_placement.m4v" autostart="false" width="500" />
+<a href="./pickup_magnet_placement.m4v">Video: experimenting with magnet placement</a>
 
 <br>
 <img src="./magnet-frames.jpg" width=300>
