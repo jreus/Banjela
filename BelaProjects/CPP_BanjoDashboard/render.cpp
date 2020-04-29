@@ -14,12 +14,14 @@
 #define PIEZO_INCHAN 1
 
 /** Analog Input Channel Mappings **/
-#define STRING1_INCHAN 4
-#define STRING2_INCHAN 3
-#define STRING3_INCHAN 2
+
+#define STRING1_INCHAN 2  // should be input 2 but doesn't work :-/
+#define STRING2_INCHAN 5
+#define STRING3_INCHAN 4
 #define STRING4_INCHAN 1
 #define STRING5_INCHAN 0
-#define MAG1_INCHAN 5
+
+#define MAG1_INCHAN 3
 #define MAG2_INCHAN 6
 #define MAG3_INCHAN 7
 

@@ -188,17 +188,6 @@ var guiSketch = new p5(function( sketch ) {
 	// This must match GUI_FRAME_RATE in render.cpp
 	let frameRate = 30;
 
-
-	gui.sendBuffer(0, gNumActiveTouches);
-	gui.sendBuffer(1, gTouchLocation);
-	gui.sendBuffer(2, gTouchSize);
-
-	gui.sendBuffer(3, sigStrings); // hack
-	gui.sendBuffer(4, sigMag); // hack
-
-	gui.sendBuffer(5, sigMic); // hack
-	gui.sendBuffer(6, sigPiezo); // hack
-
 	// Indexes of data buffers coming from the Bela over websockets
     let idxNumActiveTouches = 0, idxTouchLocations = 1, idxTouchSizes = 2;
     //let idxString1 = 3, idxString2 = 4, idxString3 = 5, idxString4 = 6, idxString5 = 7;
@@ -206,7 +195,7 @@ var guiSketch = new p5(function( sketch ) {
     //let idxMic = 11, idxPiezo = 12;
     
     //hack
-    let idxStrings = 3, idxMag = 4, idxMic = 5, idxPiezo = 6;
+    let idxStrings = 3, idxMag = 4, idxMic = 6, idxPiezo = 5;
     
 	// TOUCH GUI
     let spacing, activeTouches = 0, sliderLength = 0.0, sliderHeight = 0.0, touchSizeScale = 1.25;
@@ -216,44 +205,53 @@ var guiSketch = new p5(function( sketch ) {
         //sketch.frameRate(120);
         sketch.frameRate(30);
         
-    	// Audio input waveforms
-		let micXpos = 150, micYpos = 10;
-		let micWidth = 50, micLength = 300;
+        // Microphone input
+        let xpos = 10, ypos = 40;
+		let micWidth = 80, micLength = 150;
 		let micWaveformScale = 1.0;
-		let piezoXpos = 150, piezoYpos = 60;
-		let piezoWidth = 50, piezoLength = 300;
+		sketch.sigMic = new WaveForm(sketch, micLength, micWidth, [xpos, ypos], 0, bufSize, micWaveformScale);
+		
+        // String waveforms
+        let stringsWidth = 200;
+        let stringsLength = 300;
+        xpos = 200; ypos = 30;
+        let stringGap = 5;
+        let stringWidth = ((stringsWidth - (stringGap * 4)) / 5);
+        let stringWaveformScale = 5.0;
+        // 5th string is a bit shorter
+        sketch.sigString5 = new WaveForm(sketch, stringWidth, stringsLength * 0.8, [xpos, ypos + stringsLength * 0.2], 1, bufSize, stringWaveformScale);
+
+		// other 4 strings
+        sketch.sigString4 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*1), ypos], 1, bufSize, stringWaveformScale);
+        sketch.sigString3 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*2), ypos], 1, bufSize, stringWaveformScale);
+        sketch.sigString2 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*3), ypos], 1, bufSize, stringWaveformScale);
+        sketch.sigString1 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*4), ypos], 1, bufSize, stringWaveformScale);
+
+		// Mag waveforms 
+        let magXpos = 130; 
+        let magYpos = ypos + stringsLength + 50;
+        let magHeight = 80, magWidth = 100;
+        let magWaveformScale = 10.00;
+        sketch.magSense1 = new WaveForm(sketch, magWidth - 10, magHeight - 30, [magXpos, magYpos], 1, bufSize, magWaveformScale);
+        sketch.magSense2 = new WaveForm(sketch, magWidth, magHeight, [magXpos - 40, magYpos + magWidth - 30], 1, bufSize, magWaveformScale);
+		sketch.magSense3 = new WaveForm(sketch, magWidth - 10, magHeight - 30, [magXpos, magYpos + magWidth + magWidth - 30], 1, bufSize, magWaveformScale);
+
+        
+    	// Piezo pickup
+		let piezoXpos = xpos + 30;
+		let piezoYpos = ypos + stringsLength + 100;
+		let piezoWidth = 120, piezoLength = 180;
 		let piezoWaveformScale = 1.0;
-		sketch.sigMic = new WaveForm(sketch, micLength, micWidth, [micXpos, micYpos], 0, bufSize, micWaveformScale);
 		sketch.sigPiezo = new WaveForm(sketch, piezoLength, piezoWidth, [piezoXpos, piezoYpos], 0, bufSize, piezoWaveformScale);
 
         // Trill Segments (TODO: Refactor this class to display multiple segments of a single trill sensor)
         sliderLength = 600; 
         sliderHeight = 60;
-        let sliderXpos = 10, sliderYpos = piezoYpos + piezoWidth + 10;
+        let sliderXpos = 440, sliderYpos = 40;
         let sliderScale = 2.0;
-        sketch.trillBar = new TrillBar(sketch, sliderLength, sliderHeight, [sliderXpos, sliderYpos], sliderScale);
+        sketch.trillBar = new TrillBar(sketch, sliderHeight, sliderLength, [sliderXpos, sliderYpos], sliderScale);
         
-        // String waveforms
-        let stringsWidth = 300;
-        let stringsLength = 300;
-        let stringsXpos = 150;
-        let stringsYpos = 10 + sliderYpos + sliderHeight;
-        let stringGap = 10;
-        let stringWidth = ((stringsWidth - (stringGap * 4)) / 5);
-        let stringWaveformScale = 10.0;
-        sketch.sigString5 = new WaveForm(sketch, stringWidth, stringsLength * 0.8, [stringsXpos, stringsYpos + stringsLength * 0.2], 1, bufSize, stringWaveformScale);
-        sketch.sigString4 = new WaveForm(sketch, stringWidth, stringsLength, [stringsXpos + ((stringWidth + stringGap)*1), stringsYpos], 1, bufSize, stringWaveformScale);
-        sketch.sigString3 = new WaveForm(sketch, stringWidth, stringsLength, [stringsXpos + ((stringWidth + stringGap)*2), stringsYpos], 1, bufSize, stringWaveformScale);
-        sketch.sigString2 = new WaveForm(sketch, stringWidth, stringsLength, [stringsXpos + ((stringWidth + stringGap)*3), stringsYpos], 1, bufSize, stringWaveformScale);
-        sketch.sigString1 = new WaveForm(sketch, stringWidth, stringsLength, [stringsXpos + ((stringWidth + stringGap)*4), stringsYpos], 1, bufSize, stringWaveformScale);
-        
-		// Mag waveforms       
-        let magXpos = 10, magYpos = 10 + stringsYpos + stringsLength;
-        let magWidth = 300, magLength = 300;
-        let magWaveformScale = 100.00;
-        sketch.magSense1 = new WaveForm(sketch, magLength, magWidth, [magXpos, magYpos], 1, bufSize, magWaveformScale);
-        sketch.magSense2 = new WaveForm(sketch, magLength, magWidth, [magXpos + magLength + 10, magYpos], 1, bufSize, magWaveformScale);
-		sketch.magSense3 = new WaveForm(sketch, magLength, magWidth, [magXpos + magLength + 10 + magLength + 10, magYpos], 1, bufSize, magWaveformScale);
+
     };
 
     sketch.draw = function() {
@@ -307,7 +305,7 @@ var guiSketch = new p5(function( sketch ) {
         sketch.sigString2.updateBuffer(Bela.data.buffers[idxStrings].slice(bufSize, (bufSize*2)));
         sketch.sigString3.updateBuffer(Bela.data.buffers[idxStrings].slice((bufSize*2), (bufSize*3)));
         sketch.sigString4.updateBuffer(Bela.data.buffers[idxStrings].slice((bufSize*3), (bufSize*4)));
-        sketch.sigString5.updateBuffer(Bela.data.buffers[idxStrings].slice((bufSize*4));
+        sketch.sigString5.updateBuffer(Bela.data.buffers[idxStrings].slice((bufSize*4)));
 		//endhack
         
         //sketch.sigString2.updateBuffer(Bela.data.buffers[idxString2]);
