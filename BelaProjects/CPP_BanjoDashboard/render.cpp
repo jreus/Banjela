@@ -31,6 +31,7 @@ int gAudioFramesPerAnalogFrame = 0;
 #define NUM_TOUCH 5 // Number of simultaneous touches detectable on Trill sensor
 //#define I2C_ADDR 0x18 // Trill sensor I2C address
 #define I2C_ADDR 0x38 // Trill sensor I2C address
+#define MAX_LOCATION_INT 3712 // maximum location value returned by Trill sensor
 
 Trill touchSensor;
 int gPrescalerOpts[6] = {1, 2, 4, 8, 16, 32}; // possible prescaler (sensitivity) settings, lower = more sensitvive
@@ -89,8 +90,8 @@ void auxiliarySensorReadLoop(void*)
 	 
 	 // Normalize location and size so that they are expressed in a 0-1 range
 	 for(int i = 0; i <  touchSensor.numberOfTouches(); i++) {
-		 gTouchLocation[i] = map(touchSensor.touchLocation(i), 0, 3200, 0, 1);
-		 gTouchLocation[i] = constrain(gTouchLocation[i], 0, 1);
+		 gTouchLocation[i] = map(touchSensor.touchLocation(i), 0, MAX_LOCATION_INT, 0.0, 1.0);
+		 //gTouchLocation[i] = constrain(gTouchLocation[i], 0, 1);
 		 gTouchSize[i] = map(touchSensor.touchSize(i), gTouchSizeRange[0], gTouchSizeRange[1], 0, 1);
 		 gTouchSize[i] = constrain(gTouchSize[i], 0, 1);
 	 }

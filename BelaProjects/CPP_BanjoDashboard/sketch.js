@@ -15,7 +15,10 @@ if(typeof TrillBar === "undefined") {
 			this.position = position;
 			this.dimensions = [ length, height ];
 			this.cornerRadius = 10;
-			console.log("Building trill sensor GUI " + this.dimensions[0] + " x " + this.dimensions[1] + " pos: " + this.position);
+			this.verbose = true;
+			if(this.verbose) {
+				console.log("Building trill sensor GUI " + this.dimensions[0] + " x " + this.dimensions[1] + " pos: " + this.position);
+			}
 			this.touches = {
 				num: 5,
 				scale: touchScale,
@@ -43,9 +46,12 @@ if(typeof TrillBar === "undefined") {
 			if(i<5) {
 				this.touches.activations[i] = 1;
 				location = this.s.constrain(location, 0, 1);
-				this.touches.locations[i] = this.dimensions[0]*location;
+				this.touches.locations[i] = this.dimensions[0] * location;
 				size = this.s.constrain(size, 0, 1);
 				this.touches.sizes[i] = size;
+				if(this.verbose) {
+					console.log("Touch", i, location, size);
+				}
 			}
 		}
 
@@ -93,17 +99,19 @@ if(typeof TrillBar === "undefined") {
 if(typeof TrillCraft === "undefined") {
 	TrillCraft = class {
 		// segmentSpecs is an array of spec arrays, one for each segment
-		// a spec array contains the following [range, length, height, position, orientation, touchScale]
+		// a spec array contains the following [range, length, thickness, position, orientation, invert, touchScale, cornerRadius]
 		constructor(sketch, numSegments, segmentSpecs) {
 			this.s = sketch;
+			this.verbose = true;
 			this.numSegments = numSegments;
 			this.segments = new Array(numSegments);
 			segmentSpecs.forEach((spec, idx) => {
 				let newspec = {
-					num: idx, range: spec[0], dimensions: [spec[1], spec[2]],
-					position: spec[3], orientation: spec[4], touchScale: spec[5],
+					num: idx, range: spec[0], length: spec[1], thickness: spec[2],
+					position: spec[3], orientation: spec[4], invert: spec[5], touchScale: spec[6], cornerRadius: spec[7],
 				};
-				segments[idx] = newspec;
+				console.log("Built segment", newspec);
+				this.segments[idx] = newspec;
 			});
 			this.cornerRadius = 10;
 			console.log("Building trill craft GUI ");
@@ -122,8 +130,19 @@ if(typeof TrillCraft === "undefined") {
 			this.s.fill(35);
 
 			// draw segments
+			let width, height;
 			this.segments.forEach((seg, idx) => {
-				this.s.rect(seg.position[0], seg.position[1], seg.dimensions[0], seg.dimensions[1], this.cornerRadius);
+				switch(seg.orientation) {
+					case 0: // horizontal
+						width = seg.length; height = seg.thickness;
+    					break;
+					case 1: // vertical
+						width = seg.thickness; height = seg.length;
+    					break;
+					default:
+						throw new Error("Invalid Trill segment orientation", seg.orientation);
+				} 
+				this.s.rect(seg.position[0], seg.position[1], width, height, seg.cornerRadius);
 			});
 
 			// draw touches
@@ -145,8 +164,17 @@ if(typeof TrillCraft === "undefined") {
 				this.s.fill(this.touches.colors[i]);
 				if(this.touches.segments[i] != null) {
 					let seg = this.segments[this.touches.segments[i]];
-					let diameter = seg.dimensions[1] * this.touches.sizes[i] * seg.touchScale;
-					this.s.ellipse(seg.position[0] + this.touches.locations[i], seg.position[1] + seg.dimensions[1]/2, diameter);
+					let diameter = seg.thickness * this.touches.sizes[i] * seg.touchScale;
+					switch(seg.orientation) {
+						case 0: // horizontal
+							this.s.ellipse(seg.position[0] + this.touches.locations[i], seg.position[1] + seg.thickness/2, diameter);
+							break;
+						case 1: // vertical
+							this.s.ellipse(seg.position[0] + seg.thickness/2, seg.position[1] + this.touches.locations[i], diameter);
+							break;
+						default:
+							throw new Error("Invalid Trill segment orientation", seg.orientation);
+					}
 				}
 			}
 		}
@@ -157,7 +185,7 @@ if(typeof TrillCraft === "undefined") {
 				location = this.s.constrain(location, 0, 1);
 				let segment_num = null;
 				for(let k = 0; k < this.segments.length; k++) {
-						if(location >= this.segments[k].range[0] && location <= this.segments[k].range[k]) {
+						if(location >= this.segments[k].range[0] && location <= this.segments[k].range[1]) {
 							segment_num = k;
 							break;
 						}
@@ -165,12 +193,20 @@ if(typeof TrillCraft === "undefined") {
 				if(segment_num != null) {
 					let seg = this.segments[segment_num];
 					let mapped_location = this.s.map(location, seg.range[0], seg.range[1], 0.0, 1.0);
-					this.touches.locations[i] = seg.dimensions[0]*mapped_location;
+					if(seg.invert) { // invert direction
+						this.touches.locations[i] = seg.length * (1.0-mapped_location);
+					} else {
+						this.touches.locations[i] = seg.length * mapped_location;
+					}
 					this.touches.segments[i] = segment_num;
 					size = this.s.constrain(size, 0, 1);
 					this.touches.sizes[i] = size;
 				} else {
 					this.touches.segments[i] = null; // not displayed on any segment
+				}
+				if(this.verbose) {
+					console.log("Updating touch", i, location, size, segment_num);
+					
 				}
 			}
 		}
@@ -204,20 +240,23 @@ if(typeof TrillCraft === "undefined") {
 if(typeof WaveForm === "undefined") {
 	WaveForm = class {
 		// orientation: 0 (horizontal), 1 (vertical)
-		constructor(sketch, length, height, position = [50, 50], orientation = 0, bufferSize = 512, multiplier = 1.0) {
+		constructor(sketch, length, thickness, position = [50, 50], orientation = 0, bufferSize = 512, multiplier = 1.0, cornerRadius = 1) {
 			this.s = sketch;
 			this.position = position;
-			this.dimensions = [ length, height ];
+			this.length = length;
+			this.thickness = thickness;
 			this.multiplier = multiplier;
 			this.orientation = orientation;
 			this.feedbackText = "";
 			this.bufferSize = bufferSize;
-			this.segmentSize = this.dimensions[this.orientation] / this.bufferSize;
+			this.waveformColor = sketch.color(255, 55, 230);
+			this.cornerRadius = cornerRadius;
+			this.segmentSize = this.length / this.bufferSize;
 			if(this.orientation == 0) { // horizontal
 				this.xOffset = this.position[0];
-				this.yOffset = this.position[1] + (this.dimensions[1] / 2);
+				this.yOffset = this.position[1] + (this.thickness / 2);
 			} else { // vertical
-				this.xOffset = this.position[0] + (this.dimensions[0] / 2);
+				this.xOffset = this.position[0] + (this.thickness / 2);
 				this.yOffset = this.position[1];
 			}
 			this.buffer = new Array(bufferSize);
@@ -226,26 +265,35 @@ if(typeof WaveForm === "undefined") {
 		draw() {
 			this.s.fill(20);
 			this.s.noStroke();
-	        this.s.rect(this.position[0], this.position[1], this.dimensions[0], this.dimensions[1], 10);
+			switch(this.orientation) {
+				case 0: // horizontal
+	        		this.s.rect(this.position[0], this.position[1], this.length, this.thickness, this.cornerRadius);
+					break;
+				case 1: // vertical
+	        		this.s.rect(this.position[0], this.position[1], this.thickness, this.length, this.cornerRadius);
+					break;
+				default:
+					throw new Error("Invalid waveform orientation" + this.orientation);
+			}
 
 	    	let startX = 0.0, startY = 0.0;
 	    	if(this.orientation == 0) { // horizontal
-	    		startY = this.buffer[0] * this.multiplier * (this.dimensions[1] / 2);
+	    		startY = this.buffer[0] * this.multiplier * (this.thickness / 2);
 	    	} else { // vertical
-	    		startX = this.buffer[0] * this.multiplier * (this.dimensions[0] / 2);
+	    		startX = this.buffer[0] * this.multiplier * (this.thickness / 2);
 	    	}
 
 			this.s.strokeWeight(1);
-			this.s.stroke(255, 55, 230);
+			this.s.stroke(this.waveformColor);
 	        for(let i = 1; i < this.bufferSize; i++) {
 				let destX, destY;
 
-				if(this.orientation == 0) {
+				if(this.orientation == 0) { // horizontal
 					destX = startX + this.segmentSize;
-					destY = this.buffer[i] * this.multiplier * (this.dimensions[1] / 2);
+					destY = this.buffer[i] * this.multiplier * (this.thickness / 2);
 				} else {
 					destY = startY + this.segmentSize;
-					destX = this.buffer[i] * this.multiplier * (this.dimensions[0] / 2);
+					destX = this.buffer[i] * this.multiplier * (this.thickness / 2);
 				}
 
 				this.s.line(
@@ -263,7 +311,7 @@ if(typeof WaveForm === "undefined") {
 	        this.s.textSize(12);
 	        this.s.stroke(255, 255, 255);
 	        this.s.fill(255, 255, 255);
-			this.s.text(this.feedbackText, this.position[0] + 5, this.position[1] + this.dimensions[1] - 5);
+			this.s.text(this.feedbackText, this.position[0] + 5, this.position[1] + this.length - 5);
 
 		}
 
@@ -324,76 +372,76 @@ var guiSketch = new p5(function( sketch ) {
         sketch.frameRate(30);
 
         // Microphone input
-        let xpos = 10, ypos = 40;
-				let micWidth = 80, micLength = 150;
-				let micWaveformScale = 1.0;
-				sketch.sigMic = new WaveForm(sketch, micLength, micWidth, [xpos, ypos], 0, bufSize, micWaveformScale);
+        let xpos = 20, ypos = 40;
+				let micWidth = 60, micLength = 150;
+				let micWaveformScale = 5.0;
+				sketch.sigMic = new WaveForm(sketch, micLength, micWidth, [xpos, ypos], 0, bufSize, micWaveformScale, 5);
 
     		// String waveforms
-        let stringsWidth = 200;
-        let stringsLength = 300;
-        xpos = 200; ypos = 30;
+        let stringsWidth = 180; // width of the entire block of strings
+        let stringsLength = 350;
+        xpos = 210; ypos = 5;
         let stringGap = 5;
-        let stringWidth = ((stringsWidth - (stringGap * 4)) / 5);
-        let stringWaveformScale = 5.0;
+        let s5ratio = 0.6;
+        let stringThickness = ((stringsWidth - (stringGap * 4)) / 5);
+        let stringWaveformScale = 6.0;
         // 5th string is a bit shorter
-        sketch.sigString5 = new WaveForm(sketch, stringWidth, stringsLength * 0.8, [xpos, ypos + stringsLength * 0.2], 1, bufSize, stringWaveformScale);
+        sketch.sigString5 = new WaveForm(sketch, stringsLength * s5ratio, stringThickness, [xpos, ypos + stringsLength * (1-s5ratio)], 1, bufSize, stringWaveformScale, 0);
 
 				// other 4 strings
-        sketch.sigString4 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*1), ypos], 1, bufSize, stringWaveformScale);
-        sketch.sigString3 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*2), ypos], 1, bufSize, stringWaveformScale);
-        sketch.sigString2 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*3), ypos], 1, bufSize, stringWaveformScale);
-        sketch.sigString1 = new WaveForm(sketch, stringWidth, stringsLength, [xpos + ((stringWidth + stringGap)*4), ypos], 1, bufSize, stringWaveformScale);
+        sketch.sigString4 = new WaveForm(sketch, stringsLength, stringThickness, [xpos + ((stringThickness + stringGap)*1), ypos], 1, bufSize, stringWaveformScale, 0);
+        sketch.sigString3 = new WaveForm(sketch, stringsLength, stringThickness, [xpos + ((stringThickness + stringGap)*2), ypos], 1, bufSize, stringWaveformScale, 0);
+        sketch.sigString2 = new WaveForm(sketch, stringsLength, stringThickness, [xpos + ((stringThickness + stringGap)*3), ypos], 1, bufSize, stringWaveformScale, 0);
+        sketch.sigString1 = new WaveForm(sketch, stringsLength, stringThickness, [xpos + ((stringThickness + stringGap)*4), ypos], 1, bufSize, stringWaveformScale, 0);
+        
+        sketch.sigString5.waveformColor = 'olive';
+        sketch.sigString4.waveformColor = 'olive';
+        sketch.sigString3.waveformColor = 'olive';
+        sketch.sigString2.waveformColor = 'olive';
+        sketch.sigString1.waveformColor = 'olive';
 
 				// Mag waveforms
-        let magXpos = 130;
-        let magYpos = ypos + stringsLength + 50;
-        let magHeight = 80, magWidth = 100;
+        let magXpos = 165;
+        let magYpos = ypos + stringsLength + 40;
+        let magLength = 100, magThickness = 100;
         let magWaveformScale = 10.00;
-        sketch.magSense1 = new WaveForm(sketch, magWidth - 10, magHeight - 30, [magXpos, magYpos], 1, bufSize, magWaveformScale);
-        sketch.magSense2 = new WaveForm(sketch, magWidth, magHeight, [magXpos - 40, magYpos + magWidth - 30], 1, bufSize, magWaveformScale);
-				sketch.magSense3 = new WaveForm(sketch, magWidth - 10, magHeight - 30, [magXpos, magYpos + magWidth + magWidth - 30], 1, bufSize, magWaveformScale);
+        sketch.magSense1 = new WaveForm(sketch, magLength - 35, magThickness - 35, [magXpos - 20, magYpos], 1, bufSize, magWaveformScale, 40);
+        sketch.magSense2 = new WaveForm(sketch, magLength, magThickness, [magXpos - 60, magYpos + magThickness - 15], 1, bufSize, magWaveformScale, 50);
+		sketch.magSense3 = new WaveForm(sketch, magLength - 30, magThickness - 30, [magXpos + 20, magYpos + magThickness + magThickness], 1, bufSize, magWaveformScale, 40);
 
 
     		// Piezo pickup
-				let piezoXpos = xpos + 30;
-				let piezoYpos = ypos + stringsLength + 100;
-				let piezoWidth = 120, piezoLength = 180;
-				let piezoWaveformScale = 1.0;
-				sketch.sigPiezo = new WaveForm(sketch, piezoLength, piezoWidth, [piezoXpos, piezoYpos], 0, bufSize, piezoWaveformScale);
+				let piezoXpos = xpos + 50;
+				let piezoYpos = ypos + stringsLength + 80;
+				let piezoThickness = 130, piezoLength = 220;
+				let piezoWaveformScale = 2.0;
+				sketch.sigPiezo = new WaveForm(sketch, piezoLength, piezoThickness, [piezoXpos, piezoYpos], 0, bufSize, piezoWaveformScale, 5);
 
-				// a spec array contains the following [range, length, height, position, orientation, touchScale]
+				// a spec array contains the following [range, length, thickness, position, orientation, invert, touchScale, cornerRadius]
 				let segmentSpecs = [
-					[[0.0, 0.2], 100, 40, [400, 50], 0, 1.0],
-					[[0.201, 0.4], 100, 40, [400, 150], 0, 1.0],
-					[[0.401, 0.7], 100, 40, [400, 250], 0, 1.0],
-					[[0.701, 0.8], 100, 40, [400, 350], 0, 1.0],
-					[[0.801, 1.0], 100, 40, [400, 450], 0, 1.0],
+					[[0.015237288162112236, 0.3103448152542114], 150, 15, [165, 200], 1, true, 3.0, 10], // top neck
+					[[0.3448275923728943, 0.41379308700561523], 40, 40, [80, 330], 1, false, 3.0, 10], // rim top
+					[[0.517241358757019, 0.7241379022598267], 150, 15, [420, 15], 1, false, 3.0, 10], // bottom neck /head end
+					[[0.7586206793785095, 0.8620689511299133], 150, 15, [420, 200], 1, false, 3.0, 10], // bottom neck /pot end
+					[[0.8965517282485962, 0.931034505367279], 40, 40, [490, 330], 1, false, 3.0, 10], // rim bottom
 				];
-
+				
 				sketch.trillCraft = new TrillCraft(sketch, 5, segmentSpecs);
-
-				/*
-        // Trill Segments (TODO: Refactor this class to display multiple segments of a single trill sensor)
-        sliderLength = 600;
-        sliderHeight = 60;
-        let sliderXpos = 440, sliderYpos = 40;
-        let sliderScale = 2.0;
-        sketch.trillBar = new TrillBar(sketch, sliderHeight, sliderLength, [sliderXpos, sliderYpos], sliderScale);
-				*/
+				sketch.trillCraft.verbose = false; // turn off console feedback
+				//sketch.trillBar = new TrillBar(sketch, 600, 50, [400, 50], 2.0);
     }; // end setup function
 
     sketch.draw = function() {
         sketch.background(255, 10); // fading opacity background fun...
 
-        sketch.strokeWeight(2);
+        sketch.strokeWeight(1);
         sketch.stroke('black');
-        sketch.fill('honeydew');
-        sketch.ellipse(300, 600, 500);
-    		sketch.textSize(32);
+        sketch.fill('gainsboro');
+        sketch.ellipse(300, 500, 400);
+    		sketch.textSize(22);
     		sketch.textFont("Helvetica");
 	    	sketch.fill(5, 5, 5);
-				sketch.text("BANJELA", 10, 32);
+			sketch.text("BANJELA", 20, 30);
 
         // DEBUGGING in VERBOSE MODE
         if(verbose && (verboseFrameCounter % verboseEvery == 0)) {
@@ -404,6 +452,7 @@ var guiSketch = new p5(function( sketch ) {
     		// Draw the audio input signal guis
 				sketch.sigMic.updateBuffer(Bela.data.buffers[idxMic]);
 				sketch.sigMic.draw();
+				sketch.sigMic.feedbackText = "mic";
 				sketch.sigPiezo.updateBuffer(Bela.data.buffers[idxPiezo]);
 				sketch.sigPiezo.draw();
 
@@ -416,8 +465,10 @@ var guiSketch = new p5(function( sketch ) {
         activeTouches = Bela.data.buffers[idxNumActiveTouches];
         for(let t = 0; t < activeTouches; t++) {
         	sketch.trillCraft.updateTouch(t, Bela.data.buffers[idxTouchLocations][t], Bela.data.buffers[idxTouchSizes][t]);
+        	//sketch.trillBar.updateTouch(t, Bela.data.buffers[idxTouchLocations][t], Bela.data.buffers[idxTouchSizes][t]);
         }
         sketch.trillCraft.draw();
+		 //sketch.trillBar.draw();
 
         sketch.sigString1.updateBuffer(Bela.data.buffers[idxStrings].slice(0,bufSize));
         sketch.sigString2.updateBuffer(Bela.data.buffers[idxStrings].slice(bufSize, (bufSize*2)));
@@ -432,12 +483,12 @@ var guiSketch = new p5(function( sketch ) {
 
 				// Draw the MagSense signal guis
 
-				sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag].slice(0,bufSize)); // hack
-				sketch.magSense1.feedbackText = Bela.data.buffers[idxMag][0].toFixed(5); //hack
+				sketch.magSense3.updateBuffer(Bela.data.buffers[idxMag].slice(0,bufSize)); // hack
+				sketch.magSense3.feedbackText = Bela.data.buffers[idxMag][0].toFixed(5); //hack
 				sketch.magSense2.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize,bufSize*2)); // hack
 				sketch.magSense2.feedbackText = Bela.data.buffers[idxMag][bufSize].toFixed(5); //hack
-				sketch.magSense3.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize*2)); // hack
-				sketch.magSense3.feedbackText = Bela.data.buffers[idxMag][(bufSize*2)].toFixed(5); //hack
+				sketch.magSense1.updateBuffer(Bela.data.buffers[idxMag].slice(bufSize*2)); // hack
+				sketch.magSense1.feedbackText = Bela.data.buffers[idxMag][(bufSize*2)].toFixed(5); //hack
 				sketch.magSense1.draw();
 				sketch.magSense2.draw();
 				sketch.magSense3.draw();
