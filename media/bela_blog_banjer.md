@@ -1,55 +1,32 @@
 <img src="./banjer_desk.jpg" width=400>
 
-# Electric Folkways
-In the summer of 2019 I was graciously received by Andrew McPherson and the whole Augmented Instruments Lab at C4DM for a series of micro-residencies, aimed at kick-starting a new music project combining live electronics and sonic elements from the old, weird American music landscape. I've had a longstanding interest in American folk music histories since getting wrapped up in that musical world a lifetime ago when I lived and worked in Northern Florida. Florida is the state where, the farther north you go, before you know it, you're in The South.
+# Hacking the Appalachian Banjo
+In the summer of 2019 I was graciously received by Andrew McPherson and the whole Augmented Instruments Lab at C4DM for a series of micro-residencies. I've had a longstanding interest in "old time" American folk music since getting wrapped up in that musical world a lifetime ago when I lived and worked in Northern Florida.
 
-Back then I really embraced every aspect of American folk art, and a lot of that hands-on, material/social-oriented cultural ethos still sticks with me in the way that I approach digital music. It has always fascinated me the ways in which American folk instruments and music transformed historically through twisting evolutionary paths, geographic enclaves and waypoints, and heterogeneous mixtures of cultural attitudes towards music and instrumentality.
+Florida is the state where, the farther north you go, before you know it, you're in The South. A lot of that hands-on, material/social-oriented cultural ethos still sticks with me in the way that I approach digital music. It has always fascinated me the ways in which American folk instruments and music transformed historically through twisting evolutionary paths, geographic enclaves and waypoints, and heterogeneous mixtures of cultural attitudes towards music and instrumentality.
 
 <img src="./banjo_history_monarch.jpeg" width=400>
-An example of an 1800's era banjo advert, when the banjo was being transformed to fit the tastes of the modern elite, industrialists who equated civilization with the spread and growth of a technologized society. The banjo, too, needed to be "civilized", the more metal and machinery thrown at it the better. This is the time when the American banjo started sporting a more steampunky design around the pot that is still present today.
+The American banjo is a really interesting example of that. It's an instrument that's the result of a confluence of cultures and is representative of a complex history with extremes of deep inequalities based on race and class at one end, and the ambitions of elites and industrialists at the other.
+
+The banjo has a strange and complex relationship to technological innovation as well. During a period in the 19th century there were certain (white) entrepreneurs who, many through a certain idealism and love for the instrument, wanted to... for lack of a better term, "rescue" the banjo from its reputation as a crude and vulgar instrument (a reputation strongly linked to its association with African music). The modern elite of the time connected civilization with the spread and growth of a technologized society. So there was a push by many entrepreneurial luthiers to "civilize" the banjo by adding more machinic refinement. This is the time when the American banjo started morphing from wooden designs to the designs with metal hardware and tone rings that you see today. There are still specialty luthiers out there making "mountain" banjos, which is kind of a catch-all for any kind of banjo-like instrument made from wood or gourd.
 
 <br>
 
 <img src="./banjo_history_harpers.jpeg" width=400>
-While some European Americans were working to "civilize" the banjo through technological enhancement, at the same time there was a trend in white America that embraced the "uncivilized" image of the banjo, presenting it as the perfect parlor instrument for the idealized upper class woman; whose whims and emotional storms fit such an "untamed" instrument.
+<!-- While some European Americans were working to "civilize" the banjo through technological enhancement, at the same time there was a trend in white America that embraced the "uncivilized" image of the banjo, presenting it as the perfect parlor instrument for the idealized upper class woman; whose whims and emotional storms fit such an "untamed" instrument. -->
 
 -------------------
 
 # Belanjo Banjela
 
-
-<img src="./proto_trill_02.jpg" width=500>
-
-<img src="./proto_front_01.jpg" height=300>
-
-<img src="./proto_back_02.jpg" height=300>
+<img src="./banjo_raw2.jpg" width=500>
 
 
-I originally started talking to Andrew about building a prototype electronic "mountain banjo" some months before my residency started. I was mainly interested in exploring how to build digital extended techniques based on "old time", or "stroke" styles. I had a couple specific ideas: one was to see what could be done with the new trill sensors that were at the time under development, to build right-hand extensions into the body of the banjo. The other was to electrify the strings using a clever pickup design that was being used by another AIL researcher, Laurel Pardue, on the svampolin, a hybrid digital/acoustic violin she was designing. All of this would then go into a Bela embedded inside the pot of the banjo with a single stereo output.  
+I had started sketching out plans for a prototype electric/programmable mountain banjo a few months before coming to London. I was mainly interested in exploring how to build digital extended techniques that could expand on "stroke" styles. "Stroke" styles are a stringed instrument playing technique where the player strokes down with the back of their fingernails on to a melody string and then pulls up with the thumb on another string (usually tuned as a drone). Nearly identical techniques exist in West Africa (where the ancestors of the banjo originated) ~ e.g. in the Akonting of the Jola people (see [Daniel Jatta](https://www.youtube.com/watch?v=lzt0v9roU6g)) and the Gimbri used in Gnawa music (see [Yassir Chadly](https://www.youtube.com/watch?v=WsGgkt2OpSQ)).  
 
 ---
 
-For the first experiments I found a lovely little "mountain banjo" kit from the luthier shop [Backyard Music](https://www.backyardmusic.com/banjos.html). These kits are especially nice for prototyping because of their all-wood construction and absence of a drum skin-head. They have a little scoop in the neck for stroke style playing and also sound surprisingly good.
-
-"Stroke" styles are an interesting stringed instrument playing technique where the player strokes down with the back of their fingernails on to a melody string and then pulls up with the thumb on another string (usually tuned as a drone). The technique has its roots in the West African instrument makers/players who were brought to the American South as slaves. Some of these original instrument traditions still exist ~ e.g. in the akonting of the Jola people (see [Daniel Jatta](https://www.youtube.com/watch?v=lzt0v9roU6g) for example).
-
-One lovely thing about a lot of stroke-style playing is the expressive dynamic variation most players put into it. Give a listen to [this recording of Sourwood Mountain](https://www.youtube.com/watch?v=TrOv7qHgo3k) performed by Boone Reid. The dynamics ebb and swell, even on a per-string basis. Contrast this against the much more widely known 3-finger "bluegrass" style, played using fingerpicks, which has a much punchier, more consistent dynamic level. You could say 3-finger style has the dynamics of a freight train. While stroke style is more like a rain storm.
-
-In electrifying the banjo I was looking for a way of getting independent signals for each string so as to be able to take advantage of this dynamic control, and use it for triggering electronic sounds on a per-string basis. The pickup system based on Michael Edinger's [StringAmp](https://www.stringamp.com/stringamp/) allows for separated string amplification and a non-invasive design, with signals picked up at the tail end of the instrument and the potential to mount signal-inducing magnets at the point where the neck meets the pot.
-
-<a href="./pickup_magnet_placement.m4v">Video: experimenting with magnet placement</a>
-
-<br>
-<img src="./magnet-frames.jpg" width=300>
-Lasercut frames to experiment with mounting different sizes of magnets.
-
-<br>
-<img src="./woodwork_tailpiece.jpg" width=300>
-Picking up signals from each string at the tail of the instrument.
-
-<br>
-<img src="./woodwork_bone_tail.jpg" width=300>
-Installing a bone tail to replace the conductive fret built into the kit.
+For the first experiments I found a lovely little "mountain banjo" kit from the luthier shop [Backyard Music](https://www.backyardmusic.com/banjos.html). These kits are nice for prototyping because, unlike most banjos, they don't have a drum skin head, but rather a very thin piece of wood that could easily be swapped out for other materials. They also sound surprisingly good and can handle steel strings without a problem (needed for the magnet-based pickup design I used).
 
 ---
 
@@ -96,6 +73,32 @@ This works for now. Future plans are to fabricate these as flex sensors and set 
 <img src="./proto_inlay_03.jpg" width=400>
 
 ---
+
+# Going Electric
+
+feature as. I had a couple specific ideas: one was to see what could be done with the new trill sensors that were at the time under development, to build right-hand extensions into the body of the banjo. The other was to electrify the strings using a clever pickup design that was being used by another AIL researcher, Laurel Pardue, on the svampolin, a hybrid digital/acoustic violin she was designing. All of this would then go into a Bela embedded inside the pot of the banjo with a single stereo output.  
+
+
+
+One lovely thing about a lot of stroke-style playing is the expressive dynamic variation most players put into it. Give a listen to [this recording of Sourwood Mountain](https://www.youtube.com/watch?v=TrOv7qHgo3k) performed by Boone Reid. The dynamics ebb and swell, even on a per-string basis. Contrast this against the much more widely known 3-finger "bluegrass" style, played using fingerpicks, which has a much punchier, more consistent dynamic level. You could say 3-finger style has the dynamics of a freight train. While stroke style is more like a rain storm.
+
+In electrifying the banjo I was looking for a way of getting independent signals for each string so as to be able to take advantage of this dynamic control, and use it for triggering electronic sounds on a per-string basis. The pickup system based on Michael Edinger's [StringAmp](https://www.stringamp.com/stringamp/) allows for separated string amplification and a non-invasive design, with signals picked up at the tail end of the instrument and the potential to mount signal-inducing magnets at the point where the neck meets the pot.
+
+<a href="./pickup_magnet_placement.m4v">Video: experimenting with magnet placement</a>
+
+<br>
+<img src="./magnet-frames.jpg" width=300>
+Lasercut frames to experiment with mounting different sizes of magnets.
+
+<br>
+<img src="./woodwork_tailpiece.jpg" width=300>
+Picking up signals from each string at the tail of the instrument.
+
+<br>
+<img src="./woodwork_bone_tail.jpg" width=300>
+Installing a bone tail to replace the conductive fret built into the kit.
+
+
 # Voice and Pickups
 
 This leaves me with the Bela Mini's stereo audio inputs unused, which is a crying shame since that's where your best quality audio is coming from!
@@ -108,9 +111,17 @@ Since I also wanted to get the acoustic sound of the banjo to be able to mix int
 
 <img src="./INPUT_SCHEMATIC.png" width=500>
 
+---
+
+# What's Inside
+
+<img src="./proto_front_01.jpg" height=300>
+
+<img src="./proto_back_02.jpg" height=300>
 
 ---
-# Bird's Eye View
+
+# Building a Bird's Eye View
 
 That's a lot of signals.
 
