@@ -29,8 +29,8 @@ s.options.maxLogins = 8; // NOTE: does this actually do anything? - I get the fo
 // belaServer: server process has maxLogins 8 - adjusting my options accordingly.
 
 
-s.options.pgaGainLeft = 24;     // pregain for left / right audio inputs (+dB)
-s.options.pgaGainRight = 30;
+s.options.pgaGainLeft = 24;   // mic
+s.options.pgaGainRight = 30;  // pickup
 s.options.headphoneLevel = 0; // headphone output (main stereo out) level (-dB)
 s.options.speakerMuted = 1;    // 1=mute the speaker amp
 s.options.dacLevel = 0;       // sets the gain of the analog outputs (+dB)
@@ -39,7 +39,7 @@ s.options.adcLevel = 0;       // sets the gain of the analog inputs (+dB)
 s.options.blockSize = 128; // max blocksize possible on the Bela is 128, good when doing analysis & MML stuff
 
 // analog inputs 2-7 will still be available through the AnalogIn Ugen.
-s.options.numInputBusChannels = 10; // Use stereo input + all 8 analog inputs as audio input channels
+s.options.numInputBusChannels = 12; // Use stereo input + all 8 analog inputs as audio input channels
 s.options.numOutputBusChannels = 2; // Use only the L/R audio output channels
 
 s.options.memSize = 8192 * 32; // the default is 8192 which is quite little

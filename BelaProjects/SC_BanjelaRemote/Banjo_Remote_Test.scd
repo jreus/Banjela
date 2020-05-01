@@ -7,7 +7,7 @@ Server.default = s = Server("belaServer", NetAddr("192.168.7.2", 57110));
 s.options.maxLogins = 8; // should match the settings on the Bela
 s.initTree;
 s.startAliveThread;
-~in = (mic: 2, pickup: 3, s1: 6, s2: 9, s3: 8, s4: 5, s5: 4, m1: 11, m2: 10, m3: 7);
+~in = (mic: 3, pickup: 2, s1: 6, s2: 9, s3: 8, s4: 5, s5: 4, m1: 11, m2: 10, m3: 7);
 ~tr = (
 	ntop: [0.01, 0.3104], nbottom1: [0.5171, 0.7242], nbottom2: [0.7579, 0.8621],
 	rimtop: [0.3447, 0.4138], rimbottom: [0.8964, 0.9311],
@@ -30,8 +30,8 @@ s.options.pgaGainRight = 24;
 // In channel listing
 // 0- ??
 // 1- ??
-// 2- MIC
-// 3- PICKUP
+// 2- PICKUP
+// 3- MIC
 // 4- 5th string
 // 5- 4th string
 // 6- 1st string
@@ -172,7 +172,7 @@ Ndef(\jo, {
 	var t_necktop, t_slide, t_neckbottom, t_top, t_bottom;
 	var pickup, m1, m2, m3, mic;
 
-	pickup = In.ar(~in.pickup,1) * 2.0;
+	pickup = In.ar(~in.pickup,1) * 1.0;
 	centroids = TrillCentroids.kr(~tr.i2c_bus, ~tr.i2c_addr, ~tr.noiseThresh, ~tr.prescalerOpt, 0.0);
 
 	// SYNTH MODEL TOGGLE: 0.4-0.44 bottom segment bounds
@@ -180,7 +180,7 @@ Ndef(\jo, {
 	t_top = (centroids[1] >= ~tr.rimtop[0]) * (centroids[1] <= ~tr.rimtop[1]);
 	mode = Stepper.kr(t_bottom,0,0,2,1);
 	verb = Stepper.kr(t_top,0,0,1,1);
-	mode.poll(1);
+	[mode, verb].poll(1);
 
 	// CONTINUOUS SYNTH (latching):
 	// Latching touch position on bottom neck segments
@@ -205,11 +205,9 @@ Ndef(\jo, {
 		Resonz.ar(Pluck.ar(PinkNoise.ar, 1 - t_necktop, 0.2, t2[0].linexp(0.0, 0.36, 80, 1000).reciprocal, 3.0, 0.8, mul: 6.0), t2[0].linexp(0.0, 0.36, 800, 2400), 0.1, 4.0).tanh, // mode2
 	]);
 
-	//centroids[1].poll(1);
-	//t_necktop.poll(1);
 
 	mix = Mix([sig1, sig2, pickup]);
-	mix = Select.ar(verb, [mix, FreeVerb.ar(mix, 0.7)]);
+	mix = Select.ar(verb, [mix, FreeVerb.ar(mix, 0.9, 0.9, 0.6, 4.0)]);
 	mix = Limiter.ar(LeakDC.ar(mix));
 	mix * 2.0;
 }).play(0, numChannels: 2, group: s, addAction: \addToTail);
@@ -217,85 +215,34 @@ Ndef(\jo, {
 //OSCdef(\trilldata, {|msg| msg[3..].postln}, "/trill");
 );
 
-// **** SIMPLE TRILL LIVE SAMPLER **** ///
-();
-
-// **** SIMPLE TRILL SCENE CHANGE **** ///
-();
-
-
-
-
-
-
-// Simple passthrough with "magpick" tremolo effect on mic and Bela noise removal
-(
-Ndef(\jo, {
-  var mix;
-  var insig;
-  var s1, s2, s3, s4, s5;
-  var mag1, mag2;
-  var mic;
-  var amp = 1.0;
-
-  var mag_lag = 0.1;
-  var nastynoise_hz = 230;
-  var noise_co_hz = 4000;
-
-  mic = In.ar(2, 1) * 2.0;
-
-  mag1 = Lag.ar(In.ar(7, 1), mag_lag) * 100.0;
-  mag2 = Lag.ar(In.ar(8, 1), mag_lag) * 100.0;
-
-  // Bela Noise removal
-  insig = [In.ar(4,1), In.ar(5,1)];
-  insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
-  insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
-  insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
-  insig = SVF.ar(insig, nastynoise_hz*28, 0.01 ,0,0,0,1,0);
-  insig = LPF.ar(insig, noise_co_hz);
-
-  s5 = insig[0] * 5.0; // drone
-  s1 = s2 = s3 = s4 = insig[1] * 11.0;
-
-  mic = FreeVerb.ar(mic, 0.7, 0.95, 0.1) * (mag1 * 20.0).abs;
-  mix = [s5+mic, s1+mic];
-  Amplitude.kr(mix.sum).poll(2);
-  Limiter.ar(LeakDC.ar(mix * amp), 1.0, 0.001);
-}).play(0, numChannels: 2, group: s);
-
-);
-
-
+Ndef(\jo).free;
 
 // Trill raw data test
 (
-Ndef(\test, {
-  var i2c_bus = 1; // I2C bus to use on BeagleBone, usually you want this to be 1
-  var i2c_address = 0x18; // I2C address of Trill sensor
-  var thresh = 6; // noise threshold, int: 0-6 (6=highest threshold)
-  var prescaler = 1; // sensitvity, int: 0-5 (0=highest sensitivity, might have issues with complex craft setups)
+Ndef(\jo).fadeTime = 0;
+Ndef(\jo, {
   var rawvals;
   var sig;
-
-  rawvals = TrillRaw.kr(i2c_bus, i2c_address, thresh, prescaler);
-  SendReply.kr(Impulse.kr(1.0), "/trill", rawvals);
-
-  sig = Saw.ar(rawvals.linlin(0.0, 4100, 30, 2000), mul: Lag.kr(rawvals.linlin(0.0, 4100, 0.0, 1.0), 0.1)) * 0.3;
-  //sig = CombL.ar(sig, 0.2, 0.2, 1.0) + sig;
-  Splay.ar(sig.tanh);
-}).play(0, numChannels: 2, group:s);
+  rawvals = TrillRaw.kr(~tr.i2c_bus, ~tr.i2c_addr, ~tr.noiseThresh, ~tr.prescalerOpt);
+  //SendReply.kr(Impulse.kr(1.0), "/trill", rawvals);
+  sig = Saw.ar(rawvals.linexp(0.0, 3000, 30, 10000), mul: Lag.kr(rawvals.linlin(0.0, 4100, 0.0, 1.0), 0.1));
+  sig = Splay.ar(sig);
+  sig = (sig * 100).tanh;
+  sig = CombL.ar(sig, 1.0, 0.1, 1.0) + sig;
+  sig * 2.0;
+}).play(out: 0, numChannels: 2, group:s, addAction: \addToTail);
 
 );
 
-OSCdef(\trill, {|msg| msg.postln }, "/trill");
+Ndef(\jo).free;
+OSCdef(\trill, {|msg| [msg, msg.size].postln }, "/trill");
 
 
 
-// Trill Centroid patch
+// Trill Centroid Test
 (
 
-Ndef(\banjo, {
+Ndef(\jo, {
   var i2c_bus = 1;
   var i2c_address = 0x18;
   var thresh = 6;
