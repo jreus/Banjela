@@ -21,7 +21,7 @@ s.startAliveThread;
 s.plotTree;
 s.freeAll;
 
-Ndef.fadeTime
+
 // Remember to set the pregain for the PGA in the stereo audio input (mic/pickup)
 s.options.pgaGainLeft = 24;
 s.options.pgaGainRight = 24;
@@ -234,41 +234,30 @@ Ndef(\jo, {
 
 );
 
-Ndef(\jo).free;
+Ndef(\jo).fadeTime = 0; Ndef(\jo).free;
 OSCdef(\trill, {|msg| [msg, msg.size].postln }, "/trill");
 
 
 
-// Trill Centroid Test
+// Trill Centroids Test
 (
-
+Ndef(\jo).fadeTime = 0; Ndef(\jo).free;
 Ndef(\jo, {
-  var i2c_bus = 1;
-  var i2c_address = 0x18;
-  var thresh = 6;
-  var prescaler = 0;
   var touchsigs = DC.ar(0).dup(5);
   var centroids;
   var mix, out;
-  var s1, s2, s3, s4, s5;
   var strings;
-  var mag1, mag2;
-
+  var m1, m2, m3;
   var str_co_hz = 2200;
   var mag_co_hz = 15;
-  s1 = s3 = s5 = LeakDC.ar(LPF.ar(LPF.ar(LPF.ar(In.ar(4, 1), str_co_hz), str_co_hz), str_co_hz));
-  s2 = s4 = LeakDC.ar(LPF.ar(LPF.ar(LPF.ar(In.ar(5, 1), str_co_hz), str_co_hz), str_co_hz));
-  strings = [s1,s2,s3,s4,s5];
-  //strings = (strings * 15.0).tanh;
-
+  strings = In.ar(~in.pickup, 1);
   strings = CompanderD.ar(strings, 0.01, 2.0, 1.0, 0.001, 0.01);
 
-  mag1 = LPF.ar(In.ar(7, 1), mag_co_hz, mul: 10.0);
-  mag2 = LPF.ar(In.ar(8, 1), mag_co_hz, mul: 10.0);
+  m1 = LPF.ar(In.ar(~in.m1, 1), mag_co_hz, mul: 10.0);
+  m2 = LPF.ar(In.ar(~in.m2, 1), mag_co_hz, mul: 10.0);
+  m3 = LPF.ar(In.ar(~in.m3, 1), mag_co_hz, mul: 10.0);
 
-  centroids = TrillCentroids.kr(i2c_bus, i2c_address, thresh, prescaler);
-
-
+  centroids = TrillCentroids.kr(~tr.i2c_bus, ~tr.i2c_addr, ~tr.noiseThresh, ~tr.prescalerOpt);
 
   // slap tappy
   touchsigs[0] = Resonz.ar(Pluck.ar(PinkNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 800, 2400).reciprocal, 20, 0.5, mul: 6.0), centroids[1].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
@@ -276,38 +265,24 @@ Ndef(\jo, {
   touchsigs[2] = EnvGen.ar(Env.perc(0.001, 0.2), (centroids[6] > 0.0)) * SinOsc.ar([40, 45, 60, 61, 100], mul: 1.0).sum;
   touchsigs[3] = Pluck.ar(WhiteNoise.ar, (centroids[8] > 0), 0.2, centroids[7].linexp(0.0, 1.0, 50, 400).reciprocal, 1.0, 0.8);
   touchsigs[4] = Pluck.ar(WhiteNoise.ar, (centroids[10] > 0), 0.2, centroids[9].linexp(0.0, 1.0, 1000, 2000).reciprocal, 0.5, 0.5);
-  mix = Splay.ar(touchsigs);
-
-  //Pulse.ar([mag1,mag2].linlin(-1.0, 1.0, 50, 1000)) * [mag1.abs, mag2.abs];
-
-  Limiter.ar(mix + (Splay.ar(strings)));
-
-}).play(0, numChannels: 2, group: s);
-
-//OSCdef(\trilldata, {|msg| msg[3..].postln}, "/trill");
-
+  mix = Splay.ar(touchsigs) * 2.0;
+	mix = mix + Splay.ar(Pulse.ar([m1.linlin(-1, 1, 30, 70), m2.linlin(-1, 1, 20, 200), m3.linlin(-1, 1, 50, 100)]) * [m1.abs, m2.abs, m3.abs]);
+  mix = Limiter.ar(mix + strings, 1.0, 0.001);
+  mix * 3.0;
+}).play(out: 0, numChannels: 2, group: s, addAction: \addToTail);
 );
 
 
-( // Expansion on the drone string
+( // String expansion
+Ndef(\jo).fadeTime = 0; Ndef(\jo).free;
 Ndef(\jo, {
-  var mix;
-  var insig;
-  var s1, s2, s3, s4, s5;
-  var s_amp, s_pitch1, s_pitch2, s_haspitch;
-  var mag1, mag2;
-  var mic;
+  var s_amp, s_pitch1, s_pitch2;
+  var mix, strings, s5;
   var beat1 = 8, beat2 = 8;
-  var amp = 1.0;
-  var mag_lag = 0.1;
-  var nastynoise_hz = 230;
-  var noise_co_hz = 7000;
-  mic = In.ar(2, 1) * 2.0;
-  mag1 = Lag.ar(In.ar(7, 1).abs * 100.0, mag_lag) * 10.0;
-  mag1 = (mag1 > 0.25) * (mag1 - 0.25);
-  mag2 = Lag.ar(In.ar(8, 1).abs * 100.0, mag_lag) * 10.0;
-  mag2 = (mag2 > 0.25) * (mag2 - 0.25);
-  insig = [In.ar(4,1), In.ar(5,1)] * 1.0;
+  var nastynoise_hz = 230, noise_co_hz = 7000; // high frequency noise on analog inputs
+
+  /* old 2-channel string version
+  insig = [In.ar(~in.s5,1), In.ar(~in.pickup,1)] * 1.0;
   insig = SVF.ar(insig, nastynoise_hz*2, 0.01 ,0,0,0,1,0);
   insig = SVF.ar(insig, nastynoise_hz*12, 0.01 ,0,0,0,1,0);
   insig = SVF.ar(insig, nastynoise_hz*24, 0.01 ,0,0,0,1,0);
@@ -315,35 +290,29 @@ Ndef(\jo, {
   insig = LPF.ar(insig, noise_co_hz);
   s5 = insig[0] * 6.0; // drone
   s1 = s2 = s3 = s4 = insig[1] * 9.0; // other four strings
+  */
+  s5 = In.ar(~in.s5, 1); // drone
+  strings = In.ar(~in.pickup, 1);
 
-  // Start your code here
+  // Expansion of the drone string for use in triggering
   // slopebelow > 1.0 (noise gating), slopeabove > 1.0 (expansion)
   s5 = Compander.ar(s5, s5, 0.05, 2.0, 1.0, 0.005, 0.01, mul: 1.0);
-  s1 = Compander.ar(s1, s1, 0.05, 2.0, 1.0, 0.005, 0.01, mul: 3.0);
-  //Amplitude.kr(s5).poll(2);
-  //Amplitude.kr(s1).poll(2);
   s_amp = Amplitude.kr(s5);
-  //# s_pitch, s_haspitch = Pitch.kr(s5, ampThreshold: 0.02, median: 7);
-  //s5 = Pluck.ar(PinkNoise.ar(), (s_amp > 0.1), 0.02, 0.2, 1.0) * 0.1;
-
-
   beat1 = 12 * s_amp;
   beat2 = 50 * s_amp;
   s_pitch2 = 391.95; // G5
+  s_pitch1 = m1.linlin(0.00, 1.0, 0.0007, 0.005);
+  s_pitch2 = m2.linlin(0.00, 1.0, 391.95.reciprocal, 0.01);
 
-  s_pitch1 = mag1.linlin(0.00, 1.0, 0.0007, 0.005);
-  s_pitch2 = mag2.linlin(0.00, 1.0, 391.95.reciprocal, 0.01);
-  mag2.poll(2);
-  //BeatTrack2
-  s5 = s5 +
-  [Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat1), 0.2, s_pitch1, 0.2, 0.5, mul: 2.0),
-    Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat2), 0.2, s_pitch2, 0.2, 0.5, mul: 2.0)];
+  //Plucks
+  s5 = s5 + [Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat1), 0.2, s_pitch1, 0.2, 0.5, mul: 2.0),
+             Pluck.ar(WhiteNoise.ar(), Impulse.ar(beat2), 0.2, s_pitch2, 0.2, 0.5, mul: 2.0)];
   //s1 = CombL.ar(s1, 0.2, 0.001, 0.1);
-
-  mix = FreeVerb.ar(s1+s5);
-
-
-  Limiter.ar(LeakDC.ar(mix * amp), 1.0, 0.001);
-}).play(0, numChannels: 2, group: s);
+  mix = Mix([s5, strings]);
+  mix = FreeVerb.ar(mix);
+  mix = Limiter.ar(LeakDC.ar(mix), 1.0, 0.001);
+  mix * 1.0;
+}).play(out: 0, numChannels: 2, group: s, addAction: \addToTail);
 
 );
+

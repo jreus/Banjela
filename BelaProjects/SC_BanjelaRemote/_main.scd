@@ -42,5 +42,7 @@ s.options.blockSize = 128; // max blocksize possible on the Bela is 128, good wh
 s.options.numInputBusChannels = 12; // Use stereo input + all 8 analog inputs as audio input channels
 s.options.numOutputBusChannels = 2; // Use only the L/R audio output channels
 
-s.options.memSize = 8192 * 32; // the default is 8192 which is quite little
+s.options.memSize = 8192 * 2; // kilobytes memory reserved for allocating synths, the default is 8192
+s.options.numWireBufs = 64 * 2; // max number of Ugen interconnection buffers, limits complexity of synths
+
 s.boot;
