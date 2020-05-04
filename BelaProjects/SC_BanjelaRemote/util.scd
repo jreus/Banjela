@@ -70,8 +70,10 @@ b.write(~path_bela +/+ Date.getDate.stamp ++ "_snip.wav", "WAV", "float");
 ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░░░░░░░░░░▌      ▐░▌       ▐░▌▐░░░░░░░░░░░▌
  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀        ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀
 
+LOAD SAMPLES
+
 ---------------------------------------------------------------------------------------- */
-( // LOAD BUFFERS & BUILD A LOCAL GRAPH OF BELA FILESYSTEM SAMPLES
+(
 Ndef.clear;
 if(~jo.notNil) { ~jo.free; ~jo=nil; };
 ~readSounds.(); // load buffers
