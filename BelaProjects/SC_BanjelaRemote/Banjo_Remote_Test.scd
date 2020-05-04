@@ -9,7 +9,7 @@ s.initTree;
 s.startAliveThread;
 ~in = (mic: 3, pickup: 2, s1: 6, s2: 9, s3: 8, s4: 5, s5: 4, m1: 11, m2: 10, m3: 7);
 ~tr = (
-	ntop: [0.01, 0.3104], nbottom1: [0.5171, 0.7242], nbottom2: [0.7579, 0.8621],
+	ntop: [0.01, 0.3104], slide: [0.5171, 0.7242], nbottom: [0.7579, 0.8621],
 	rimtop: [0.3447, 0.4138], rimbottom: [0.8964, 0.9311],
 	i2c_bus: 1,
 	i2c_addr: 0x38,
@@ -149,6 +149,49 @@ b.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_magsense.wav", "WAV", "
 c.write("/root/banjer/data/" +/+ Date.getDate.stamp ++ "_audio.wav", "WAV", "float");
 
 
+~bela_scpath = "";
+~abuf = Buffer.read(s, "");
+
+( // MAG SENSOR SAMPLE CONTROL
+Ndef(\jo).fadeTime = 0;
+Ndef(\jo, {
+  var mix;
+  var m1, m2, m3;
+  var mapped1, mapped2, mapped3;
+  var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
+
+  m1 = In.ar(~in.m1,1);
+  m2 = In.ar(~in.m2,1);
+  m3 = In.ar(~in.m3,1);
+
+  m1 = Lag2.ar(m1, 0.1);
+  m1 = m1.linlin(-0.002, 0.002, -1.0, 1.0);
+
+  m2 = Lag2.ar(m2, 0.2);
+  m2 = m2.linlin(-0.0019, 0.0017, -1.0, 1.0);
+
+  m3 = Lag2.ar(m3, 0.2);
+  m3 = m2.linlin(-0.002, 0.002, -1.0, 1.0);
+
+
+  // testing max/min values
+  RunningMax.ar(m1, Impulse.ar(0.5)).poll(1);
+  //RunningMin.ar(m2, Impulse.ar(1)).poll(4);
+
+  mapped1 = m1.linexp(-1,1,50,3000);
+  mapped2 = m2.linexp(-1,1,50,8000);
+  mapped3 = m3.linexp(-1,1, 1, 1000);
+  mix = Splay.ar([Pulse.ar(mapped1), BLowPass4.ar(WhiteNoise.ar, mapped2, 0.8), PMOsc.ar(mapped1, mapped3, 1.0, mul: 1)]);
+  mix = mix * 2.0;
+  Limiter.ar(LeakDC.ar(mix * 0.2), 1.0, 0.001);
+}).play(out: 0, numChannels: 2, group: s, addAction: \addToTail);
+
+);
+
+
+
+
+
 Ndef.clear; // clear all
 
 //******************
@@ -185,7 +228,7 @@ Ndef(\jo, {
 	// CONTINUOUS SYNTH (latching):
 	// Latching touch position on bottom neck segments
 	t1 = [centroids[1], centroids[2]]; // touch1 [pos, size]
-	t_t1on = (t1[1] > 10) * (((t1[0] >= ~tr.nbottom1[0]) * (t1[0] <= ~tr.nbottom1[1])) + ((t1[0] >= ~tr.nbottom2[0]) * (t1[0] <= ~tr.nbottom2[1])));
+	t_t1on = (t1[1] > 10) * (((t1[0] >= ~tr.slide[0]) * (t1[0] <= ~tr.slide[1])) + ((t1[0] >= ~tr.nbottom[0]) * (t1[0] <= ~tr.nbottom[1])));
 	// TODO: write a segmented remapping function, like linlin or linexp...
 	t1 = [Gate.kr(t1[0], t_t1on), t1[1]]; // gate and hold control signal if not within segment range
 
@@ -316,3 +359,56 @@ Ndef(\jo, {
 
 );
 
+
+~smpl_path = "/usr/local/share/SuperCollider/sounds/a11wlk01.wav";
+~buf = Buffer.read(s, ~smpl_path);
+~in = (mic: 3, pickup: 2, s1: 6, s2: 9, s3: 8, s4: 5, s5: 4, m1: 11, m2: 10, m3: 7);
+~tr = (
+	ntop: [0.01, 0.3104], slide: [0.5171, 0.7242], nbottom: [0.7579, 0.8621],
+	rimtop: [0.3447, 0.4138], rimbottom: [0.8964, 0.9311],
+	i2c_bus: 1,
+	i2c_addr: 0x38,
+	noiseThresh: 30, // int: 5-255 with 255 being the highest noise thresh
+	prescalerOpt: 1, // int: 0-4 with 0 being the highest sensitivity
+);
+
+
+// COMBINED MAG SENSOR SAMPLE PLAYBACK AND "extra strings" ON TOP AND BOTTOM
+(
+~jo = {
+	var strings, mag2, trill, touch0, vstringtop, vstringbottom, smpl, mix;
+	var buf, bframes, spos;
+	var t_top, t_bottom, t_mag;
+	strings = In.ar(~in.pickup, 1);
+	mag2 = In.ar(~in.m2,1);
+	trill = TrillCentroids.kr(~tr.i2c_bus, ~tr.i2c_addr, ~tr.noiseThresh, ~tr.prescalerOpt);
+
+	// virtual plucked strings on top and bottom of Banjela neck
+	t_top = (trill[2] > 10) * (trill[1] >= ~tr.ntop[0]) * (trill[1] <= ~tr.ntop[1]);
+	t_bottom = (trill[2] > 10) * (trill[1] >= ~tr.nbottom[0]) * (trill[1] <= ~tr.nbottom[1]);
+
+	touch0 = [Gate.kr(trill[1], t_top), trill[2]]; // pos, size
+	vstringtop = Resonz.ar(Pluck.ar(PinkNoise.ar, Changed.kr(t_top), 0.2, touch0[0].linexp(~tr.ntop[0], ~tr.ntop[1], 50, 1000).reciprocal, 25.8, 0.5, mul: 6.0), [60, 300,2200], 0.1, 10.0).clip;
+
+	touch0 = [Gate.kr(trill[1], t_bottom), trill[2]]; // pos, size
+	vstringbottom = Resonz.ar(Pluck.ar(PinkNoise.ar, Changed.kr(t_bottom), 0.2, touch0[0].linexp(~tr.nbottom[0], ~tr.nbottom[1], 100, 2000).reciprocal, 20.8, 0.4, mul: 6.0), [90, 1300,3200], 0.1, 10.0).clip;
+
+
+  // mag signal mapping
+  buf = ~buf;
+  bframes = BufFrames.kr(buf);
+  mag2 = Lag2.ar(mag2, 0.1).linlin(-0.02, 0.02, -1.0, 1.0);
+  t_mag = Trig1.kr(mag2.abs > 0.4, 0.1);
+  mag2 = mag2.abs.explin(0.4, 1, 0.2, 0.05);
+  spos = EnvGen.ar(Env.new([0, 0, 1], [mag2, 1.0], \lin), t_mag, bframes, 0, BufDur.kr(buf));
+  smpl = BufRd.ar(1, buf, spos, 0.0, 2);
+
+  // Signal Chain
+  mix = Mix([smpl, vstringtop, vstringbottom, strings]);
+  mix = Limiter.ar(LeakDC.ar(mix), 1.0, 0.001);
+  mix * 1.0;
+}.play(s, outbus: 0, addAction: \addToTail, fadeTime: 0.01);
+
+
+);
+s.freeAll;

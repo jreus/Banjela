@@ -68,12 +68,12 @@ s.freeAll;
   b4 = ~bufs["livesampler"];
   RecordBuf.ar(mic, b4, loop: 1.0); // record string audio
   b4frames = BufFrames.kr(b4);
-	t_slide = (centroids[2] > 10) * (((centroids[1] >= ~tr.nbottom1[0]) * (centroids[1] <= ~tr.nbottom1[1])) + ((centroids[1] >= ~tr.nbottom2[0]) * (centroids[1] <= ~tr.nbottom2[1])));
+	t_slide = (centroids[2] > 10) * (((centroids[1] >= ~tr.slide[0]) * (centroids[1] <= ~tr.slide[1])) + ((centroids[1] >= ~tr.nbottom[0]) * (centroids[1] <= ~tr.nbottom[1])));
   t3 = Gate.kr([centroids[1], centroids[2]], t_slide); // pos, size
   // calculate sample pos from touch 0 location
-  //spos3 = t3[0].linlin(~tr.nbottom1[0], ~tr.nbottom1[1], 0, BufFrames.kr(b4));
+  //spos3 = t3[0].linlin(~tr.slide[0], ~tr.slide[1], 0, BufFrames.kr(b4));
   // todo: need to make a fragmented mapping that can map multiple segments to a range...
-  spos3 = t3[0].linlin(~tr.nbottom1[0], ~tr.nbottom2[1], 0, 1.0);
+  spos3 = t3[0].linlin(~tr.slide[0], ~tr.nbottom[1], 0, 1.0);
   spos3 = Lag.ar(K2A.ar(spos3), 1.0);
   //slidesig = BufRd.ar(1, b4, spos3, 0.0);
   slidesig = GrainBuf.ar(1, Impulse.ar(10), 0.5, b4, 1.0, spos3, 2, 0.0);

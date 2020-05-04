@@ -6,51 +6,59 @@ In the summer of 2019 I was graciously received by Andrew McPherson and the whol
 
 Florida is the state where, the farther north you go, before you know it, you're in The South. A lot of that hands-on, material/social-oriented cultural ethos still sticks with me in the way that I approach digital music. It has always fascinated me the ways in which American folk instruments and music transformed historically through twisting evolutionary paths, geographic enclaves and waypoints, and heterogeneous mixtures of cultural attitudes towards music and instrumentality.
 
+<figure>
 <img src="./banjo_history_monarch_2.jpg" width=500>
+<figcaption></figcaption>
+</figure>
 
-The American banjo is a really interesting example of that. It's an instrument that's the result of a confluence of cultures and is representative of a complex history with extremes of deep inequalities based on race and class at one end, and the ambitions of elites and industrialists at the other.
 
-The banjo has a strange and complex relationship to technological innovation as well. During a period in the 19th century there were certain (white) entrepreneurs who, many through a certain idealism and love for the instrument, wanted to... for lack of a better term, "rescue" the banjo from its reputation as a crude and vulgar instrument (a reputation strongly linked to its association with African music). The modern elite of the time connected civilization with the spread and growth of a technologized society. So there was a push by many entrepreneurial luthiers to "civilize" the banjo by adding more machinic refinement. This is the time when the American banjo started morphing from wooden designs to the designs with metal tone rings and tension brackets that you see today.
+The American banjo is an interesting example of that. It's an instrument that's the result of a confluence of cultures and is representative of a complex history with extremes of deep inequalities based on race and class at one end, and the ambitions of elites and industrialists at the other.
+
+The banjo has a complicated relationship to technological innovation as well. During a period in the 19th century there were certain (white) entrepreneurs who, many through a combination of musical idealism and business opportunism, wanted to... for lack of a better term, "rescue" the banjo from its reputation as a crude and vulgar instrument (a reputation strongly linked to its association with African music). The modern elite of the time connected notions of civility with high levels of technology. So there was a push by many entrepreneurial luthiers to "civilize" the banjo by adding more machinic refinement. This is the time when the American banjo started morphing from all-wooden or gourd-based designs to the metal tone rings and steampunk-esque tension brackets that you see today.
 
 There are still specialty luthiers out there making "mountain" banjos, which is kind of a catch-all for any kind of banjo-like instrument made from wood or gourd, smaller and varied pot sizes, fretless and fretted, often home-made.
 
 <br>
 
+<figure>
 <img src="./banjo_smithsonian.png" width=4000>
+<figcaption>Five-string fretless banjo, src: [National Museum of American History](https://www.si.edu/object/five-string-fretless-banjo:nmah_605678)</figcaption>
+</figure>
 
-
-Five-string fretless banjo, src: [National Museum of American History](https://www.si.edu/object/five-string-fretless-banjo:nmah_605678)
-
-
-<img src="./banjo_history_harpers.jpeg" width=300>
+<!-- img src="./banjo_history_harpers.jpeg" width=300 -->
 <!-- While some European Americans were working to "civilize" the banjo through technological enhancement, at the same time there was a trend in white America that embraced the "uncivilized" image of the banjo, presenting it as the perfect parlor instrument for the idealized upper class woman; whose whims and emotional storms fit such an "untamed" instrument. -->
 
 -------------------
 
-# Belanjo Banjela
+# Belanjo or Banjela?
 
 
-I had started sketching out plans for a prototype electric/programmable mountain banjo a few months before coming to London. I was mainly interested in exploring how to build digital extended techniques that could expand on "stroke" styles. "Stroke" styles are a stringed instrument playing technique where the player strokes down with the back of their fingernails on to a melody string and then pulls up with the thumb on another string (usually tuned as a drone). People often refer to this kind of playing as "frailing" or "clawhammer", but their origins, like the banjo's, are rooted in West African folk instruments like the Akonting of the Jola people (see [Daniel Jatta](https://www.youtube.com/watch?v=lzt0v9roU6g)) and the Gimbri used in Gnawa music (see [Yassir Chadly](https://www.youtube.com/watch?v=WsGgkt2OpSQ)).
+I had started sketching out plans for a prototype electric/programmable mountain banjo a few months before coming to London. I was mainly interested in exploring how to build digital extended techniques that could expand on "stroke" styles. "Stroke" styles are a stringed instrument playing technique where the player strokes down with the back of their fingernails on to a melody string and then pulls up with the thumb on another string (usually tuned as a drone). People often refer to this kind of playing as "frailing" or "clawhammer", but the origins of this playing approach, much like the origins of the banjo itself, are rooted in African musical techniques on spiked-lute instruments like the ekonting (see [Daniel Jatta](https://www.youtube.com/watch?v=lzt0v9roU6g)) or the Gimbri used in Gnawa music (see [Yassir Chadly](https://www.youtube.com/watch?v=WsGgkt2OpSQ)).
 
 ---
-
+<figure>
 <img src="./banjo_raw2.jpg" width=500>
+<figcaption>Partly assembled banjo with wooden head and 3D-printed brackets used for holding the whole neck+pot+head assembly together without glue.</figcaption>
+</figure>
 
-I found a lovely little "mountain banjo" kit from the luthier shop [Backyard Music](https://www.backyardmusic.com/banjos.html). I chose the backyard music kit because, unlike most banjos, it doesn't have a drum skin head, but rather a very thin piece of wood that can easily be modified or swapped out for other materials. It also sounds surprisingly good, has a full-size neck, and can handle steel strings without a problem (really important for the magnet-based pickup design I used). Pictured is the bare-bones kit with additional 3D-printed brackets used for holding the whole neck+pot+head assembly together without glue.
+I found a lovely little "mountain banjo" kit from the luthier shop [Backyard Music](https://www.backyardmusic.com/banjos.html). I chose the backyard music kit because, unlike most banjos, it doesn't have a drum skin head, but rather a very thin piece of wood that can easily be modified or swapped out for other materials. It also sounds surprisingly good, has a full-size neck, and can handle steel strings without a problem (really important for the magnet-based pickup design I used).
 
 ---
 
 # Right Hand Technique
 
+<figure>
 <img src="./dana_03.png" width=400>
+<figcaption>Dana Immanuel and I in the studio at C4DM</figcaption>
+</figure>
 
-When I used to work at STEIM in Amsterdam, we would often talk about finding the "core" of your instrument and building an extended practice from there. For stroke-style, the core is the right hand and being in the pocket of its rhythm. These kinds of techniques are sometimes called "knocking", because of the way you knock on the head of the banjo like knocking on a door. It's a more or less constant motion and you don't want to 'break rhythm'.
+When I used to work at <a href="https://en.wikipedia.org/wiki/STEIM">STEIM</a> in Amsterdam, we would often talk about finding the "core" of your instrument and building an extended practice from there. For stroke-style, the core is the right hand and being in the pocket of its rhythm. Stroke techniques are sometimes called "knocking", because of the way you knock on the head of the banjo like knocking on a door. It's a more or less constant motion and you don't want to 'break rhythm'.
 
 While in London I teamed up with banjo diva Dana Immanuel, of [Dana Immanuel and the Stolen Band](http://danaimmanuel.com/), to experiment with possibilities for extended right hand techniques.
 
-More skilled banjoists like Dana like to work the right hand at different positions up and down the pot and the neck while playing to vary the timbre and make the banjo stand out when it needs to, or to move emphasis from rhythm to melody.
-Appalachian
-There is a sweet spot for frailing near the 19th fret of most banjos (sometimes accompanied by a scoop carved into the neck). This is the location of one of the banjo's noisiest natural harmonics, and is used to emphasize the "cluck", a technique where the right hand activates the string harmonics to make a sharp percussive sound when the banjo is serving more of a percussion/rhythm role. As the right hand moves down to the bridge the strings resonate with generally more upper harmonics, creating a more cutting, twanging timbre. Banjoists like Dana like to work this range as they play to vary up tonality and make the banjo stand out more when it needs to, or to move the emphasis from rhythm to melody.
+More skilled banjoists like Dana like to work the right hand at different positions up and down the pot and the neck while playing to vary the timbre and make the banjo stand out when it needs to, or to move emphasis from rhythm to melody. There is an especially important sweet spot for frailing near the 19th fret of most banjos (sometimes accompanied by a scoop carved into the neck). This is the location of some of the banjo's noisiest natural harmonics, and is used for extra oomph when ["clucking"](https://www.youtube.com/watch?v=xtLhXkV17fQ), a technique where the down stroke of the right hand plays a sort of muted harmonic slap across the strings to vary up the rhythmic emphasis.
+
+More generally, the closer the right hand is to the bright, the more upper harmonics, creating a more cutting, twanging timbre. Pro frailing banjo players like Dana work the timbre constantly as they play to vary up tonality and make the banjo stand out more when it needs to, or to move emphasis from rhythm to melody.
 
 ---
 
@@ -60,12 +68,9 @@ From here it was pretty clear that an old-time knocking banjo player has a good 
 
 To do this I leveraged two technologies that were being prototyped at the Augmented Instruments Lab, the touch-sensing Trill and the magnetic-field sensing tech used to sense guitar picking motions in the Magpick.
 
-<figure>
-<img src="./MAGSENSE_WAVEFORM.png">
-<figcaption>Waveform of a single right-hand stroke captured by the mag sensor.</figcaption>
-</figure>
-
 The magpick sensors were integrated into the head of the banjo to track frailing motions and knocking, while custom-made trill touch inlays were positioned at different places along the pot and lower part of the neck to function like extra strings, above the 5th and below the 1st.
+
+Since I'm using SuperCollider for all my live electronic sound needs, I needed to develop some [custom UGens](https://github.com/jreus/Trill_SC) for the Bela to be able to get the Trill sensor's data into my signal chains.
 
 <figure>
 <img src="./dana_01.png" width=400>
@@ -84,9 +89,12 @@ From the first time the Bela team introduced me to Trill I started thinking abou
 
 After designing some paper prototypes, taped to the banjo and testing the ergonomics of these along with Dana, I moved on to making some copper stick-on inlays using a vinyl cutter and copper foil.
 
-I also used the QMUL laser cutter to fashion a new head for the banjo from blue acryllic, featuring some ornamental patterns inspired by the fancy aesthetic.
+I also used the C4DM's laser cutter to fashion a new head for the banjo from blue acrylic, featuring some ornamental patterns inspired by the Fancy aesthetic.
 
+<figure>
 <img src="./proto_lasercuts.jpg" width=500>
+<figcaption>Acrylic drum-head fresh off the laser cutter at the C4DM's materials lab.</figcaption>
+</figure>
 
 <figure>
 <img src="./inlays_vinyl.jpg" width=400><br>
@@ -100,26 +108,30 @@ After cutting out the sensor sandwiches from the acetate sheet they're then atta
 This works for now as a proof of concept and playability. For the future I'm still torn between either designing these as flex sensors and running a ribbon connector down the neck, or milling them out of copper plate and mounting the wires behind each segment. In either case, I'd like to give my router and chisel skills a brush up and set them into the neck.
 
 <br>
+<figure>
 <img src="./proto_inlay_02.jpg" width=400>
-
-<img src="./proto_inlay_3.jpg" width=400>
-
 <img src="./proto_inlay_03.jpg" width=400>
+<figcaption>Inlay prototypes mounted on the banjo neck and rim</figcaption>
+</figure>
 
 ---
 
 # Going Electric
 
-Now how about amplifying those strings? One thing I really love about stroke-style playing is the expressive dynamic variation most players put into it. Give a listen to [this recording of Sourwood Mountain](https://www.youtube.com/watch?v=TrOv7qHgo3k) performed by Boone Reid. The dynamics ebb and swell, even on a per-string basis. Contrast this against the much more widely known 3-finger "Scruggs-style" techniques used in bluegrass and a lot of modern jazz-inspired banjo playing. The latter is played using metal fingerpicks and has a punchier, more consistent dynamic level. I feel the Scruggs-like styles have dynamics like a freight train. While stroke style is like a rain storm, more diffuse and temperamental.
+Now how about amplifying those strings? One thing I really love about stroke-style playing is the expressive dynamic variation most players put into it. Give a listen to [this recording of Sourwood Mountain](https://www.youtube.com/watch?v=TrOv7qHgo3k) performed by Boone Reid. The dynamics ebb and swell, even on a per-string basis. Contrast this against the much more widely known 3-finger "Scruggs-style" techniques used in bluegrass and a lot of modern jazz-inspired banjo playing. These more modern banjo techniques are played using metal finger picks and produce a punchier, more consistent dynamic level (along with higher speed and precision). I feel the Scruggs-like styles have dynamics like a freight train. While stroke style is like a rain storm, more diffuse and temperamental.
 
-At Queen Mary Andrew introduced me to the work of Laurel Pardue, one of the researchers at the AIL and digital instrument luthier par excellence. In her svampolin, a hybrid digital/acoustic violin, she uses a quirky electric pickup system based on Michael Edinger's [StringAmp](https://www.stringamp.com/stringamp/) which has a couple exciting features like per-string amplification and a non-invasive design. Signals are picked up at the tail end of the instrument from the strings and created by placing fixed magnets in close proximity to where each string vibrates. It's a bit like an inversion of the classic electric guitar pickup design.
+At the C4DM Andrew introduced me to the work of [Laurel Pardue](https://scholar.google.com/citations?user=UXWpcQ4AAAAJ), one of the researchers at the Augmented Instruments Labor and electronic luthier par excellence. In her svampolin, a hybrid digital/acoustic violin, she uses a quirky electric pickup system based on Michael Edinger's [StringAmp](https://www.stringamp.com/stringamp/) which has a couple exciting features like per-string amplification and a non-invasive design. Signals are picked up at the tail end of the instrument from the strings and created by placing fixed magnets in close proximity to where each string vibrates. It's a bit like an inversion of the classic electric guitar pickup design.
 
-Getting the pickup system to work was a lot of trial and error, and required a bit of basic lutherie skills to remove some frets and fashion a new tail from a bone blank. For the moment the fixed magnets are embedded into a wooden frame so they can be easily adjusted to different locations. In the future I'm looking to embed them into the neck, as they're currently occupying an inconvenient space where the neck meets the pot - an important spot for the right hand.
+Getting the pickup system to work was a lot of trial and error, and required learning a bit of basic lutherie to remove some frets and fashion a new tail from a bone blank. For the moment the fixed magnets are embedded into a wooden frame so they can be easily adjusted to different locations. In the future I'm looking to embed them into the neck, as they're currently occupying an inconvenient space where the neck meets the pot - an important spot for the right hand to be able to play.
 
 <figure>
-<a href="./pickup_magnet_placement.m4v">Video: experimenting with magnet placement</a>
+<video>
+  <source src="./pickup_magnet_placement.m4v" type="video/mp4">
+</video>
 <figcaption>Experimenting with signal strength and interference with different magnet placements.</figcaption>
 </figure>
+<a href="./pickup_magnet_placement.m4v">Video: experimenting with magnet placement</a>
+
 
 <br>
 
@@ -145,13 +157,14 @@ inputs
 
 ---
 
----
-
 # What's Inside
 
-Inside the banjo is a Bela mini with analog inputs used to full capacity: five independent signals (one for each string pickup) going into the Bela's first 5 analog inputs, three magpick sensors going into the remaining 3 analog inputs, and the copper inlay sensors wired to a Trill craft, connected to the Bela mini via I2C.
+Inside the banjela is a Bela mini with analog inputs used to full capacity: five independent signals (one for each string pickup) going into the Bela's first 5 analog inputs, three magpick sensors going into the remaining 3 analog inputs, and the copper inlay sensors wired to a Trill craft, connected to the Bela mini via I2C.
 
-<img src="./proto_back_01.jpg" height=300>
+<figure>
+<img src="./insides_02.jpeg" width=300>
+<figcaption>Banjela backside, here shown plugged into a laptop via USB for reprogramming</figcaption>
+</figure>
 
 The whole thing is a stand-alone hybrid electronic instrument, powered by an off-the-shelf USB power bank. There's a single stereo 3.5mm headphone jack output that combines the banjo's acoustic signal with reprogrammable DSP and synthesis, written using the SuperCollider music programming language. The banjo can be reprogrammed live, or live coded, if you hook it up to a laptop via USB.
 
@@ -164,11 +177,15 @@ The Bela mini's highest quality audio comes in through the main stereo inputs, w
 
 One stereo input is dedicated to a piezo pickup attached to the banjo's head right behind the bridge. This allows for creating a mix between the acoustic sound and electric pickups in software. The second channel of the stereo input is left open to plug in whatever you like - opening up the possibility of feeding instrument signals from other musicians into the banjo for analysis and processing.
 
-I was most interested in using this second input for live sampling and processing of voice. American folk music tradition nearly always involves vocalizing in as many ways as there are individuals. Hollars and work songs are remixed into gospel and blues. What European music calls "untrained" is more a deafness to the connection between music and lived experience. So let's celebrate the voice.
+I was most interested in using this second input for live sampling and processing of voice. American folk music tradition nearly always involves vocalizing in as many ways as there are individuals. Hollars and work songs are remixed into gospel and blues. What European music calls "untrained" is more a deafness to the connection between music and lived experience. Singing is part of living anyway.
 
-I built a combined preamp circuit (powered by the Bela mini) that provides a high-Z interface for the piezo pickup and also a powered input for electret microphones. For voice work while playing, there are a number of lovely little head-mounted condenser microphones, or you can build your own. I've been using the [t.bone Headmike](https://www.thomann.de/intl/the_tbone_headmike_o_ew.htm), which is a discount model designed to be compatible with Sennheiser "EW" wireless mic systems. Most of these microphones need a bit of power to work ~ the Bela Mini's 3.3V supply is just enough, fed through a 2.2kΩ resistor.
+I built a combined pre-amp circuit (powered by the Bela mini) that provides a high-Z interface for the piezo pickup and also a powered input for electret microphones. For voice work while playing, there are a number of affordable head-mounted condenser microphones, or you can build your own. I've been using the [t.bone Headmike](https://www.thomann.de/intl/the_tbone_headmike_o_ew.htm), which is a discount model designed to be compatible with Sennheiser "EW" wireless mic systems. Most of these microphones need a bit of power to work ~ the Bela Mini's 3.3V supply is just enough, fed through a 2.2kΩ resistor.
 
+<figure>
 <img src="./INPUT_SCHEMATIC.png" width=500>
+
+<figcaption>Stereo input pre-amp and mic power circuit</figcaption>
+</figure>
 
 ---
 
@@ -185,6 +202,7 @@ All in all I had the following that needed to be represented:
 * three magpick sensors on the head
 * one trill craft broken into five segments  (two long segments on the bottom of the neck, one on the top by the thumb, and two small segments on the pot)
 
+<img src="./BANJELA_SCHEMATIC.png">
 <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/413710173?byline=0" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
 <a href="https://vimeo.com/413710173">Banjela GUI Interface demo</a>
 
@@ -197,155 +215,80 @@ All in all I had the following that needed to be represented:
 <figcaption>Songwriting and soundmaking at the C4DM studio</figcaption>
 </figure>
 
-For a first attempt at songwriting for this instrument I made a suite of three songs, each exploring different extended techniques. Mapping and sound synthesis in this case was a pretty elaborate process, a bit too much to get into here. Below is the DSP code for one song that shows off a couple key signal processing tactics, like mapping the Trill segments above and below the lower part of the neck to act like additional strings (connected to a string synthesis physical model), and using the magpick sensors on the head of the banjo to control forward/backwards sample playback of percussion instruments.
+For a first attempt at songwriting for this instrument I made a suite of three songs, each exploring different extended techniques.
+
+
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/414719601?byline=0" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+<a href="https://vimeo.com/414719601">Banjela percussion techniques video</a>
+
+Mapping and sound synthesis in this case was a pretty elaborate process, a bit too much to get into here. Below is some DSP code that shows off a couple of these sound design tactics, like mapping the Trill segments above and below the lower part of the neck to act like additional strings (connected to a string physical model), and using the magpick sensors on the head of the banjo to control forward/backwards sample playback of percussion instruments.
+
+<figure>
+<img src="./MAGSENSE_WAVEFORM.png">
+<figcaption>Waveform of a single right-hand stroke captured by the magpick sensor. This signal gets mapped to forward and backward sample playback.</figcaption>
+</figure>
+
 
 ```
-/*
-.----------------------------.
-|\  /\  /\  /\  /\  /\  /\  /|
-| )(  )(  )(  )(  )(  )(  )( |
-|(  )(  )(  )(  )(  )(  )(  )|
-███╗   ███╗ █████╗  ██████╗  ██████╗ ██╗███████╗     ██████╗ ███╗   ██╗    ████████╗██╗  ██╗███████╗
-████╗ ████║██╔══██╗██╔════╝ ██╔════╝ ██║██╔════╝    ██╔═══██╗████╗  ██║    ╚══██╔══╝██║  ██║██╔════╝
-██╔████╔██║███████║██║  ███╗██║  ███╗██║█████╗      ██║   ██║██╔██╗ ██║       ██║   ███████║█████╗
-██║╚██╔╝██║██╔══██║██║   ██║██║   ██║██║██╔══╝      ██║   ██║██║╚██╗██║       ██║   ██╔══██║██╔══╝
-██║ ╚═╝ ██║██║  ██║╚██████╔╝╚██████╔╝██║███████╗    ╚██████╔╝██║ ╚████║       ██║   ██║  ██║███████╗
-╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝     ╚═════╝ ╚═╝  ╚═══╝       ╚═╝   ╚═╝  ╚═╝╚══════╝
-██████╗ ██╗   ██╗███████╗
-██╔══██╗██║   ██║██╔════╝
-██████╔╝██║   ██║███████╗
-██╔══██╗██║   ██║╚════██║
-██████╔╝╚██████╔╝███████║
-╚═════╝  ╚═════╝ ╚══════╝
-╚═════╝  ╚═════╝ ╚══════╝    ╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
-    ___    ___     ___     ___     _       ___   __  __    ___
-   | _ \  | _ \   / _ \   | _ )   | |     | __| |  \/  |  / __|
-   |  _/  |   /  | (_) |  | _ \   | |__   | _|  | |\/| |  \__ \
-  _|_|_   |_|_\   \___/   |___/   |____|  |___| |_|__|_|  |___/
-_| """ |_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
-"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
 
-    ___    ___     ___     ___     _       ___   __  __    ___
-   | _ \  | _ \   / _ \   | _ )   | |     | __| |  \/  |  / __|
-   |  _/  |   /  | (_) |  | _ \   | |__   | _|  | |\/| |  \__ \
-  _|_|_   |_|_\   \___/   |___/   |____|  |___| |_|__|_|  |___/
-_| """ |_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
-"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
-
-    ___    ___     ___     ___     _       ___   __  __    ___
-   | _ \  | _ \   / _ \   | _ )   | |     | __| |  \/  |  / __|
-   |  _/  |   /  | (_) |  | _ \   | |__   | _|  | |\/| |  \__ \
-  _|_|_   |_|_\   \___/   |___/   |____|  |___| |_|__|_|  |___/
-_| """ |_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
-"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
-
-F modal tuning >> g C Bb C Eb
-*/
-(
-~jo = {
-  var mix, verbmix, insig, s5, strings, stringsmix, thumbsig, slidesig, mag1, mag2, mic;
-  var buf1, buf2, buf3, b1frames, b2frames, b3frames, smpl1, smpl2, spos1, spos2, spos3, b3dur, pos3var, graintrig;
-  var t_mag1, t_mag2, magmap1, magmap2, mt1, mt2, seq1, seq2;
-  var centroids, t_bottom, t_top, t_necktop, t_slide, mode = 0, t1, t2, t3;
-
-  var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
-  mic = In.ar(2, 1) * 2.0;
-  mag1 = In.ar(6,1);
-  mag2 = In.ar(7,1);
-
-  // STRINGS INPUT
-	s5 = In.ar(4,1);
-	strings = In.ar(5,1);
-	s5 = SVF.ar(s5, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
-	strings = SVF.ar(strings, nastynoise_hz*1, 0.01 ,0,0,0,1,0);
-
-	// pull out the good signal, get rid of digital noise
-	s5 = Compander.ar(s5, s5, 0.02, 4.0, 1.0, 0.05, 0.01, mul: 15.0);
-	strings = Compander.ar(strings, strings, 0.02, 2.5, 1.0, 0.01, 0.01, mul: 80.0);
-
-
-  // TRILL INPUT
-  centroids = TrillCentroids.kr(1, 0x18, 60, 1);
-
-  // MODE TOGGLE: 0.4-0.44 bottom segment bounds
-  t_bottom = (centroids[1] >= ~ranges[\bottom][0]) * (centroids[1] <= ~ranges[\bottom][1]);
-  mode = Stepper.kr(t_bottom,0,0,1);
-  //t_bottom.poll(1);
-
-  // SIXTH STRING ON NECK TOPSIDE
-  // for the 0.0 segment you need an extra test that there is indeed a touch recognized, because all touches default to 0!
-  t_necktop = (centroids[2] > 10) * (centroids[1] >= ~ranges[\necktop][0]) * (centroids[1] <= ~ranges[\necktop][1]);
-  t2 = [Gate.kr(centroids[1], t_necktop), centroids[2]];// pos, size
-  thumbsig = Resonz.ar(Pluck.ar(PinkNoise.ar, Changed.kr(t_necktop), 0.2, t2[0].linexp(0.0, 0.36, 50, 1000).reciprocal, 15.8, 0.8, mul: 6.0), [60, 300,2200], 0.1, 10.0).sum.clip; // mode0
-
-  // SAMPLE DRAG ON AND PULL ON THE SLIDE SENSOR
-  buf3 = ~bufs["Chinga_0122"];
-  b3frames = BufFrames.kr(buf3);
-  t_slide = (centroids[2] > 10) * (centroids[1] >= ~ranges[\slide][0]) * (centroids[1] <= ~ranges[\slide][1]);
-  t3 = Gate.kr([centroids[1], centroids[2]], t_slide); // pos, size
-  spos3 = t3[0].linlin(~ranges[\slide][0], ~ranges[\slide][1], 0, BufFrames.kr(buf3));
-  spos3 = Lag.ar(K2A.ar(spos3), 4.0);
-  slidesig = BufRd.ar(1, buf3, spos3, 0.0);
-  //slidesig = AllpassC.ar(slidesig, 0.5, 0.3, 2.0) + slidesig;
-
-
-  // mag signals
-  mag1 = Lag2.ar(mag1, 0.1);
-  mag1 = mag1.linlin(-0.002, 0.002, -1.0, 1.0);
-
-  mag2 = Lag2.ar(mag2, 0.1);
-  mag2 = mag2.linlin(-0.002, 0.002, -1.0, 1.0);
-
-  buf1 = ~bufs["Chinga_002"];
-  buf2 = ~bufs["JapaDrum1_13"];
-  b1frames = BufFrames.kr(buf1);
-  b2frames = BufFrames.kr(buf2);
-
-
-  // magsense trigger thresholds
-  mt1 = 0.4;
-  mt2 = 0.4;
-  t_mag1 = Trig1.kr(mag1.abs > mt1, 0.1);
-  t_mag2 = Trig1.kr(mag2.abs > mt2, 0.1);
-  magmap1 = mag1.abs.explin(mt1, 1, 0.2, 0.05); // map to sample playback speed on approach
-  magmap2 = mag2.abs.explin(mt2, 1, 0.2, 0.05);
-
-  seq1 = (1..10) / 10.0; // drum pitches
-  seq1 = Select.kr(Stepper.kr(t_mag1, 0, 0, 10), seq1);
-  // chinga
-  spos1 = EnvGen.ar(Env.new([0, 0, 1], [magmap1, seq1], \lin), t_mag1, b1frames, 0, BufDur.kr(buf1));
-
-  // japanese drum
-  spos2 = EnvGen.ar(Env.new([0, 0, 1], [magmap2, 1.0], \lin), t_mag2, b2frames, 0, BufDur.kr(buf2));
-
-  smpl1 = BufRd.ar(1, buf1, spos1, 0.0, 2);
-  smpl2 = BufRd.ar(1, buf2, spos2, 0.0, 2);
-
-	// *STRING SIGNAL POST PRODUCTION* output processing
-	strings = Compander.ar(strings, strings, 0.2, 1.3, 0.3, 0.1, 0.1, mul: 5.0);
-	//s5 = s5 + AllpassC.ar(s5, 0.2, 0.01, 3.0);
-	//stringsmix = AllpassC.ar(s5+strings, 0.2, 0.01, 1.0) + strings + s5;
-	//stringsmix = BPeakEQ.ar(stringsmix, 1200, 0.3, 6);
-	stringsmix = (s5 * 1.0) + (strings * 1.0);
-	stringsmix = FreeVerb.ar(stringsmix, 0.2, 0.5, 0.5);
-	verbmix = thumbsig + slidesig + smpl1 + smpl2;
-	verbmix = GVerb.ar(verbmix, 65, 3, 0.2, 0.2, 5, 1.0, 1.0, 0.4) * 2.0;
-
-	mix = (stringsmix * 1.0) + (verbmix * 0.5);
-	mix = Limiter.ar(LeakDC.ar(mix * 1.0), 1.0, 0.001);
-	mix;
-}.play(s, outbus: 0);
-
+~smpl_path = "/usr/local/share/SuperCollider/sounds/a11wlk01.wav";
+~buf = Buffer.read(s, ~smpl_path);
+~in = (mic: 3, pickup: 2, s1: 6, s2: 9, s3: 8, s4: 5, s5: 4, m1: 11, m2: 10, m3: 7);
+~tr = ( // trill segment ranges
+	ntop: [0.01, 0.3104], slide: [0.5171, 0.7242], nbottom: [0.7579, 0.8621],
+	rimtop: [0.3447, 0.4138], rimbottom: [0.8964, 0.9311],
+	i2c_bus: 1,
+	i2c_addr: 0x38,
+	noiseThresh: 30, // int: 5-255 with 255 being the highest noise thresh
+	prescalerOpt: 1, // int: 0-4 with 0 being the highest sensitivity
 );
+
+~jo = {
+	var strings, mag2, trill, touch0, vstringtop, vstringbottom, smpl, mix;
+	var buf, bframes, spos;
+	var t_top, t_bottom, t_mag;
+	strings = In.ar(~in.pickup, 1);
+	mag2 = In.ar(~in.m2,1);
+	trill = TrillCentroids.kr(~tr.i2c_bus, ~tr.i2c_addr, ~tr.noiseThresh, ~tr.prescalerOpt);
+
+	// virtual plucked strings on top and bottom of Banjela neck
+	t_top = (trill[2] > 10) * (trill[1] >= ~tr.ntop[0]) * (trill[1] <= ~tr.ntop[1]);
+	t_bottom = (trill[2] > 10) * (trill[1] >= ~tr.nbottom[0]) * (trill[1] <= ~tr.nbottom[1]);
+
+	touch0 = [Gate.kr(trill[1], t_top), trill[2]]; // pos, size
+	vstringtop = Resonz.ar(Pluck.ar(PinkNoise.ar, Changed.kr(t_top), 0.2, touch0[0].linexp(~tr.ntop[0], ~tr.ntop[1], 50, 1000).reciprocal, 25.8, 0.5, mul: 6.0), [60, 300,2200], 0.1, 10.0).clip;
+
+	touch0 = [Gate.kr(trill[1], t_bottom), trill[2]]; // pos, size
+	vstringbottom = Resonz.ar(Pluck.ar(PinkNoise.ar, Changed.kr(t_bottom), 0.2, touch0[0].linexp(~tr.nbottom[0], ~tr.nbottom[1], 100, 2000).reciprocal, 20.8, 0.4, mul: 6.0), [90, 1300,3200], 0.1, 10.0).clip;
+
+
+  // mag signal mapping to sample playback
+  buf = ~buf;
+  bframes = BufFrames.kr(buf);
+  mag2 = Lag2.ar(mag2, 0.1).linlin(-0.02, 0.02, -1.0, 1.0);
+  t_mag = Trig1.kr(mag2.abs > 0.4, 0.1);
+  mag2 = mag2.abs.explin(0.4, 1, 0.2, 0.05);
+  spos = EnvGen.ar(Env.new([0, 0, 1], [mag2, 1.0], \lin), t_mag, bframes, 0, BufDur.kr(buf));
+  smpl = BufRd.ar(1, buf, spos, 0.0, 2);
+
+  // Signal Chain
+  mix = Mix([smpl, vstringtop, vstringbottom, strings]);
+  mix = Limiter.ar(LeakDC.ar(mix), 1.0, 0.001);
+  mix * 1.0;
+}.play(s, outbus: 0, addAction: \addToTail, fadeTime: 0.01);
+
 ```
 
 ---
 
+<figure>
 <img src="./AmmyPhull-IKLECTIK.JPG" width=400>
+<figcaption>Performing with the Augmented Instruments Lab and Kuljit Bhamra at <a href="https://iklectikartlab.com/">IKLECTIC</a> in London
+</figure>
 
 ---
 
-Made with the support of a development grant from the <a href="https://stimuleringsfonds.nl/en/">Dutch Creative Industries Fund</a>
+This work was done with a support grant from the <a href="https://stimuleringsfonds.nl/en/">Dutch Creative Industries Fund</a>
 <a href="https://stimuleringsfonds.nl/en/"><img src="sci_logo.jpg" height=100></a>
 
 
@@ -357,7 +300,7 @@ He has received commissions as a composer, performer and installation artist by 
 
 In addition to his artistic work, Jonathan has tirelessly demonstrated his support for local, bottom-up artistic initiatives and novel artist-education formats through curation and community organization. Since 2013 he has worked as a founding member of the non-profit cultural initiative [iii](https://instrumentinventors.org/) in The Hague. From 2015-2019 he organized and curated [The Reading Room](https://platformtm.tumblr.com/), at STROOM Den Haag. In 2017 he organized the first Berlin-based Algorave at transmediale festival, along with the performance program The Instrumental Subconscious, showcasing experimental musicians working with self-made instruments. And in 2016 he helped to design the Digital Media bachelors program at Leuphana University's Center for Digital Cultures, where he won the teaching prize for cross-disciplinary education for his courses on computational literacy through sound and body.
 
-Besides his artistic and educational work, Jonathan is an experienced researcher in the field of electronic music instruments and sonic interaction design. He recieved the W. J. Fulbright fellowship for his work in the research of new digital instruments for music. He has also lectured on the topic of performative sound and technological mediation at academies of art and design, music conservatories and universities.
+Jonathan is an experienced researcher in the field of electronic music instruments and sonic interaction design. He recieved the W. J. Fulbright fellowship for his work in the research of new digital instruments for music. He has also lectured on the topic of performative sound and technological mediation at academies of art and design, music conservatories and universities.
 
 https://jonathanreus.com/
 

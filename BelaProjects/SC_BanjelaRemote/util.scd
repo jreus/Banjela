@@ -7,7 +7,7 @@ s.startAliveThread;
 // IO parameters
 ~in = (mic: 3, pickup: 2, s1: 6, s2: 9, s3: 8, s4: 5, s5: 4, m1: 11, m2: 10, m3: 7);
 ~tr = (
-	ntop: [0.01, 0.3104], nbottom1: [0.5171, 0.7242], nbottom2: [0.7579, 0.8621],
+	ntop: [0.01, 0.3104], slide: [0.5171, 0.7242], nbottom: [0.7579, 0.8621],
 	rimtop: [0.3447, 0.4138], rimbottom: [0.8964, 0.9311],
 	i2c_bus: 1,
 	i2c_addr: 0x38,

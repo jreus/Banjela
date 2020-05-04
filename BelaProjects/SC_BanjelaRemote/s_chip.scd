@@ -90,7 +90,7 @@ s.freeAll;
   var nastynoise_hz = 230, noise_co_hz = 7000; // magic numbers
   var mode = 0, sequence = 0;
   var centroids, t_neckbottom, t_top, t_necktop;
-  var chain1, chain2, chain3, chain4, chain5;
+	var chain1, chain2, chain3, chain4, chain5;
   var onsets1, onsets2, onsets3, onsets4, onsets5;
   var seq1, seq2, seq3, seq4, seq5, dur1, dur2, dur3, dur4, dur5;
 
@@ -106,7 +106,7 @@ s.freeAll;
   centroids = TrillCentroids.kr(~tr.i2c_bus, ~tr.i2c_addr, ~tr.noiseThresh, ~tr.prescalerOpt);
 
   // FX TOGGLE: neckbottom echo/decay
-  t_neckbottom = (centroids[1] >= ~tr.nbottom2[0]) * (centroids[1] <= ~tr.nbottom2[1]);
+  t_neckbottom = (centroids[1] >= ~tr.nbottom[0]) * (centroids[1] <= ~tr.nbottom[1]);
   mode = Stepper.kr(t_neckbottom,0,0,1);
 
   // NOTE SEQUENCE TOGGLE: necktop toggles pitch range
