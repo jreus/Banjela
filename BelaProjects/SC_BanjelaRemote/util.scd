@@ -83,11 +83,6 @@ if(~bufs.notNil) { ~bufs.keysValuesDo {|key,val| val.free } };
   ~sf["ambient"]["sample_A1"], ~sf["voice"]["Ahhhs"], ~sf["voice"]["Moonshiner"], ~sf["percussive"]["Chinga_002"], ~sf["percussive"]["JapaDrum1_13"],
   ~sf["voice"]["Hallelujah_Amazing_Grace_001"], ~sf["voice"]["Ahhhs_mono"], ~sf["percussive"]["Chinga_0122"]].do {|it,idx| ~bufs[it.fileNameWithoutExtension] = ~spath_bela +/+ it.folderName +/+ it.fileName };
 
-
-~offsets = Dictionary.with(*[
-  "Moonshiner_verses" -> [1.503, 13.726, 25.414, 37.428, 48.943, 60.96, 71.9, 83.89, 96.23, 108.4],
-]);
-
 // Read buffers: slowly now.. take it easy now...
 {
   ~bufs.keysValuesDo {|key, val, idx|
