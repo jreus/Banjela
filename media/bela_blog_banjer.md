@@ -293,15 +293,28 @@ Here I'm mapping the Trill segments above and below the neck to synthetic string
 
 ---
 
+# Future Thoughts
+
 <figure>
 <img src="./AmmyPhull-IKLECTIK.JPG" width=400>
-<figcaption>3 folk songs ~ the premier performance with the Banjela at [IKLECTIK](https://iklectikartlab.com/) in London, performing with members of the Augmented Instruments Lab and [Kuljit Bhamra](https://en.wikipedia.org/wiki/Kuljit_Bhamra) 
+<figcaption>3 folk songs ~ the premier performance with the Banjela at [IKLECTIK](https://iklectikartlab.com/) in London, performing with members of the Augmented Instruments Lab and [Kuljit Bhamra](https://en.wikipedia.org/wiki/Kuljit_Bhamra)
 </figure>
+
+Next steps?
+
+Well, there's still a lot of design work to be done. Now that I've got a prototype it would be great to make it more sturdy and solid. I'm also beginning to experiment with translating the Banjela extensions over to a standard banjo.. I think the main question there would be mounting of the embedded electronics inside the pot in a way that doesn't disturb the natural vibrations of the drum skin.
+
+Artistically I'm looking to further explore an extended sonic language for the banjo that carries with it a sense of multi-temporality. Making it possible that the multiple music histories of this instrument can co-exist and perhaps project towards the future.
+
+I'm also thinking about how these extended techniques and augmentations could work to making the banjo into a sculptural object - for example, autonomously playing banjos (and other drum or spiked lute-like objects) filling a space, or creating a virtual social communion of sorts.
 
 ---
 
-This residency was supported in part by a development grant from the <a href="https://stimuleringsfonds.nl/en/">Dutch Creative Industries Fund</a>
+A big thank you to all those who supported me at the Centre for Digital Music and elsewhere with great discussions, conceptual and technical support, including: Andrew McPherson, Lia Mice, Laurel Pardue, Dana Immanuel, Duncan Menzies, Giulio Moro, Adán L. Benito Temprano, Giacomo Lepri, Jack Armitage, Charlotte Nordmoen, Francesca Ter-Berg and Fedor Tuinisse. In addition, I want to express extreme gratitude to the <a href="https://stimuleringsfonds.nl/en/">Dutch Creative Industries Fund</a> who supported the travel and stay costs of my residency through a development grant.
+
 <a href="https://stimuleringsfonds.nl/en/"><img src="sci_logo.jpg" height=100></a>
+
+---
 
 
 # Bio
