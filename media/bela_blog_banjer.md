@@ -2,21 +2,26 @@
 
 
 # Hacking the Five-String Banjo
-In the summer of 2019 I was graciously received by Andrew McPherson and the whole Augmented Instruments Lab at C4DM for a series of micro-residencies. I've had a longstanding interest in "old time" American folk music since getting wrapped up in that musical world a lifetime ago when I lived and worked in Northern Florida.
+In the summer of 2019 I was graciously received by [Andrew McPherson](http://andrewmcpherson.org/) and the rest of the [Augmented Instruments Lab](http://instrumentslab.org/) at [C4DM](https://c4dm.eecs.qmul.ac.uk/) in London for a series of micro-residencies. I've had a longstanding interest in "old time" American folk music since getting wrapped up in that culture a lifetime ago when I lived and worked in Northern Florida. You may have heard that Florida is the state where the farther north you go, the farther South you get.
 
-Florida is the state where, the farther north you go, before you know it, you're in The South. A lot of that hands-on, material/social-oriented cultural ethos still sticks with me in the way that I approach digital music, in that I often see new technological approaches to artmaking from a grounded material and social perspective.
+A lot of that hands-on, material/social-oriented cultural ethos that I associate with Southern craft and folk art still sticks with me in the way that I approach digital music, in that I often see new technological approaches to artmaking from a perspective grounded in materiality, sociability and egalitarianism. In some senses, folk instruments and music practices could be thought of as an archetype of the "convivial technology" that philosopher of science Ivan Illich described in his 1973 book "Tools for Conviviality".
+
+---
+
+> "Whenever different cultures meet, new instruments happen" ~ [Du Yun, composer, FutureTradition](https://channelduyun.com/futuretradition/)
 
 <figure>
 <img src="./banjo_history_monarch_2.jpg" width=500>
 <figcaption></figcaption>
 </figure>
 
+American folk instruments and music have transformed historically through convoluted evolutionary paths; passing via via different geographic enclaves and waypoints, heterogeneous mixtures of cultural attitudes towards music and playing. The 5-string banjo is an interesting example of that. It's an instrument that's the result of a confluence of cultures and is representative of a complex history with extremes of deep inequalities based on race and class at one end, and the ambitions of elites and industrialists at the other. It's one of the few musical instruments that I can really stamp as representative of American identity. Next to the banjo, what else? Maybe the electric guitar? The turntable?
 
-American folk instruments and music have transformed historically through convoluted evolutionary paths; passing via via different geographic enclaves and waypoints, heterogeneous mixtures of cultural attitudes towards music and playing. The banjo is an interesting example of that. It's an instrument that's the result of a confluence of cultures and is representative of a complex history with extremes of deep inequalities based on race and class at one end, and the ambitions of elites and industrialists at the other. It's one of the few musical instruments that I can really stamp as representative of an American identity, maybe alongside the turntable and the electric guitar.
+Despite its rustic aura, the 5-string banjo's history holds within it modernist mythology. During a period in the 19th century there were certain (white) entrepreneurs who, through varied combinations of musical idealism and business opportunism, wanted to ... for lack of a better term ... "rescue" the banjo from its reputation as a crude and untamed instrument (a reputation strongly linked to its association with African music). The 19th century elite believed that civility came through the development of high levels of technology. The industrial revolution was in full swing, but the banjo's story puts into relief the fact that this was not everybody's revolution.
 
-America's banjo holds a historically important relationship to technological innovation. During a period in the 19th century there were certain (white) entrepreneurs who, through varied combinations of musical idealism and business opportunism, wanted to ... for lack of a better term ... "rescue" the banjo from its reputation as a crude and untamed instrument (a reputation strongly linked to its association with African music). The modern elite of the time connected notions of civility with high levels of technology. So there was a push by many entrepreneurial luthiers to "civilize" the banjo by adding more machinic refinement. This is the time when the American banjo started morphing from all-wooden or gourd-based designs to the metal tone rings and steampunk-esque tension brackets that you see today. A base of oppression, a pinch of nostalgia, two tablespoons of technological fetishism and a whole lot of capitalism - that's the banjo.
+This is the time when the 5-string started morphing from all-wooden or gourd-based designs to the metal tone rings and steampunk-esque tension brackets that you see today. Take one cup selective memory, mixed vigorously with nostalgia, add two tablespoons of technological fetishism and garnish with a dollop of capitalism.
 
-While most modern banjos still sport a reduced version of the industrial makeover the instrument received in the late 19th century, there are still specialty luthiers out there making pre-industrial banjos, harkening back to the kinds of instruments that would have been played on slave plantations or by poor rural whites. These "mountain" banjos, a kind of a catch-all for any kind of banjo-like instrument made from wood or gourd, usually feature more idiosyncratic designs - smaller and varied pot sizes, fretless and fretted, often home-made.
+While most modern banjos still sport a reduced version of the industrial makeover the instrument received in the late 19th century, there are specialty luthiers out there making pre-industrial banjos, harkening back to the kinds of instruments that would have been played on plantations, on Caribbean islands or by poor rural whites who worked side-by-side with slaves. These "mountain" banjos, a kind of a catch-all for any kind of banjo-like instrument made from wood or gourd, usually feature more idiosyncratic designs - smaller and varied pot sizes, fretless and fretted, often home-made.
 
 <br>
 
@@ -33,7 +38,7 @@ While most modern banjos still sport a reduced version of the industrial makeove
 # Belanjo or Banjela?
 
 
-I had started sketching out plans for a prototype hybrid/programmable mountain banjo a few months before coming to London. I was mainly interested in exploring how to build digital extended techniques that could expand on "stroke" styles. "Stroke" styles are a stringed instrument playing technique where the player strokes down with the back of their fingernails on to a melody string and then pulls up with the thumb on another string (usually tuned as a drone). People often refer to this kind of playing as "frailing" or "clawhammer", but the origins of this playing approach, much like the origins of the banjo itself, are rooted in African musical techniques on spiked-lute instruments like the Akonting (see [Daniel Jatta](https://www.youtube.com/watch?v=lzt0v9roU6g)) or the Gimbri used in [Gnawa music](https://www.youtube.com/watch?v=WsGgkt2OpSQ).
+I had started sketching out plans for a prototype hybrid/programmable mountain banjo a few months before coming to London. I was mainly interested in exploring how to build digital extended techniques that could expand on "stroke" styles. "Stroke" styles are a stringed instrument playing technique where the player strokes down with the back of their fingernails on to a melody string and then pulls up with the thumb on another string (usually tuned as a drone). English speakers colloquially refer to this kind of playing as "frailing" or "clawhammer", but the origins of this playing approach, much like the origins of the banjo itself, are rooted in African musical techniques on spiked-lute instruments like the Akonting (see [Daniel Jatta](https://www.youtube.com/watch?v=lzt0v9roU6g)) or the Gimbri used in [Gnawa music](https://www.youtube.com/watch?v=WsGgkt2OpSQ).
 
 ---
 <figure>
@@ -41,7 +46,7 @@ I had started sketching out plans for a prototype hybrid/programmable mountain b
 <figcaption>Partly assembled banjo with wooden head and 3D-printed brackets used for holding the whole neck+pot+head assembly together without glue.</figcaption>
 </figure>
 
-To get started I found a lovely little banjo kit from the luthier shop [Backyard Music](https://www.backyardmusic.com/banjos.html). I chose this kit because, unlike most banjos, it doesn't have a drum skin head, but rather a very thin piece of wood that can easily be modified or swapped out for other head materials. It also sounds surprisingly good, has a full-size neck, and can handle steel strings without a problem (important for the pickup design > see "Going Electric" below).
+To get started I found a lovely DIY banjo kit from the luthier shop [Backyard Music](https://www.backyardmusic.com/banjos.html). I chose this kit because, unlike most banjos, it doesn't have a drum skin head, but rather a very thin piece of wood that can easily be modified or swapped out for other head materials. It also sounds surprisingly good, has a full-size neck, and can handle steel strings without a problem (important for the pickup design > see "Going Electric" below).
 
 ---
 
@@ -52,7 +57,9 @@ To get started I found a lovely little banjo kit from the luthier shop [Backyard
 <figcaption>Dana Immanuel and I in the studio at C4DM</figcaption>
 </figure>
 
-When I used to work at <a href="https://en.wikipedia.org/wiki/STEIM">STEIM</a> in Amsterdam, we would often talk shop about the design of new electronic music instruments. We often would say that you've got to find the "core" of your instrument to build upon. For stroke-style banjo, the core is inarguably the right hand. Stroke techniques are sometimes called "knocking", because of the way you knock on the head of the banjo like knocking on a door. It's a more or less constant motion and you don't want to 'break rhythm'.
+When I used to work at <a href="https://en.wikipedia.org/wiki/STEIM">STEIM</a> in Amsterdam, we would often have long and rich conversations around the studios about the needs of musicians in electronic music instrument design. At the time we considered ourselves explorers of new musical forms first, and engineers/designers second. From that music-first perspective, we often would say that you've got to find the "core" of your instrumental practice and that all technology would thereafter grow. For stroke-style banjo, the "core" is without question in the right hand.
+
+Stroke techniques are sometimes called "knocking", because of the way you knock on the head of the banjo like knocking on a door. It's a more or less constant motion and you don't want to 'break rhythm'.
 
 While in London I teamed up with banjo diva Dana Immanuel, of [Dana Immanuel and the Stolen Band](http://danaimmanuel.com/), to experiment with possibilities for extended right hand techniques.
 
@@ -288,7 +295,7 @@ Here I'm mapping the Trill segments above and below the neck to synthetic string
 
 <figure>
 <img src="./AmmyPhull-IKLECTIK.JPG" width=400>
-<figcaption>Performing with the Augmented Instruments Lab and Kuljit Bhamra at <a href="https://iklectikartlab.com/">IKLECTIC</a> in London
+<figcaption>3 folk songs ~ the premier performance with the Banjela at [IKLECTIK](https://iklectikartlab.com/) in London, performing with members of the Augmented Instruments Lab and [Kuljit Bhamra](https://en.wikipedia.org/wiki/Kuljit_Bhamra) 
 </figure>
 
 ---
