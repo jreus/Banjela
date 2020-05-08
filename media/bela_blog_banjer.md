@@ -21,7 +21,7 @@ Despite its rustic aura, the 5-string banjo's history holds within it modernist 
 
 This is the time when the 5-string started morphing from all-wooden or gourd-based designs to the metal tone rings and steampunk-esque tension brackets that you see today. Take one cup selective memory, mixed vigorously with nostalgia, add two tablespoons of technological fetishism and garnish with a dollop of capitalism.
 
-While most modern banjos still sport a reduced version of the industrial makeover the instrument received in the late 19th century, there are specialty luthiers out there making pre-industrial banjos, harkening back to the kinds of instruments that would have been played on plantations, on Caribbean islands or by poor rural whites who worked side-by-side with slaves. These "mountain" banjos, a kind of a catch-all for any kind of banjo-like instrument made from wood or gourd, usually feature more idiosyncratic designs - smaller and varied pot sizes, fretless and fretted, often home-made.
+While most modern banjos still sport a reduced version of the industrial makeover the instrument received in the late 19th century, there are specialty luthiers out there making pre-industrial banjos, harkening back to the kinds of instruments that would have been played on plantations, on Caribbean islands or by poor rural whites who worked side-by-side with slaves. These "mountain" banjos, a kind of a catch-all for any kind of banjo-like instrument made from wood or gourd, usually featuring more idiosyncratic designs - smaller and varied pot sizes, fretless and fretted, often home-made, with an ever-present fifth string.
 
 <br>
 
@@ -92,7 +92,7 @@ Since I'm using SuperCollider for all my live electronic sound needs, I needed t
 ---
 # Sketching Trill Inlays
 
-From the first time the Bela team introduced me to Trill I started thinking about making touch-responsive copper inlays for the banjo. I'm a big fan of the inlay work done on 19th century American folk instruments and furniture, and the kinds of ornamentation that was popular during the [American Fancy movement](https://en.wikipedia.org/wiki/American_Fancy). I had an Architect friend who told me once that modernist aesthetics have caused us to collectively forget how to be ornamental. I tend to agree. Let's imagine a digital future for ornamentation.
+From the first time the Bela team introduced me to Trill I started thinking about making touch-responsive copper inlays for the banjo. I'm a big fan of the inlay work done on 19th century American folk instruments and furniture, and the kinds of ornamentation that was popular during the [American Fancy movement](https://en.wikipedia.org/wiki/American_Fancy). I had an Architect friend who told me once that modernist aesthetics have caused us to collectively forget how to be ornamental. I tend to agree. Take a moment to imagine a future for ornamentation.
 
 After designing some paper prototypes, taped to the banjo and testing the ergonomics of these along with Dana, I moved on to making some copper stick-on inlays using a vinyl cutter and copper foil.
 
