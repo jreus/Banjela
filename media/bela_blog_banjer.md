@@ -21,7 +21,14 @@ Despite its rustic aura, the 5-string banjo's history holds within it modernist 
 
 This is the time when the 5-string started morphing from all-wooden or gourd-based designs to the metal tone rings and steampunk-esque tension brackets that you see today. Take one cup selective memory, mixed vigorously with nostalgia, add two tablespoons of technological fetishism and garnish with a dollop of capitalism.
 
-While most modern banjos still sport a reduced version of the industrial makeover the instrument received in the late 19th century, there are specialty luthiers out there making pre-industrial banjos, harkening back to the kinds of instruments that would have been played on plantations, on Caribbean islands or by poor rural whites who worked side-by-side with slaves. These "mountain" banjos, a kind of a catch-all for any kind of banjo-like instrument made from wood or gourd, usually featuring more idiosyncratic designs - smaller and varied pot sizes, fretless and fretted, often home-made, with an ever-present fifth string.
+While most modern banjos still sport a reduced version of the industrial makeover the instrument received in the late 19th century, there are specialty luthiers out there making pre-industrial banjos, harkening back to the kinds of instruments that would have been played in the Caribbean, on plantations, or by poor rural whites who worked side-by-side with slaves. These "mountain" banjos, a kind of a catch-all for any kind of banjo-like instrument made from wood, gourd or kalebas (squash), usually featuring more idiosyncratic designs - smaller and varied pot sizes, fretless and fretted, often home-made, with an ever-present fifth string.
+
+<br>
+
+<figure>
+<img src="./banjo_surinam_1770.png" width=400>
+<figcaption>Kalebas banjo from 1770 Surinam, the oldest surviving banjo from the American continent, src: [Tropenmuseum Amsterdam](https://hdl.handle.net/20.500.11840/609575)</figcaption>
+</figure>
 
 <br>
 
