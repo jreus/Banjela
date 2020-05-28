@@ -1,5 +1,5 @@
-<img src="./proto_front_02.jpg" width=400>
-
+<iframe src="https://player.vimeo.com/video/423540292" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<p><a href="https://vimeo.com/423540292">Augmented Banjo - Iklectik - Voices</a> from <a href="https://vimeo.com/jonathanreus">Jon Reus</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 
 # Hacking the Five-String Banjo
 In the summer of 2019 I was graciously received by [Andrew McPherson](http://andrewmcpherson.org/) and the rest of the [Augmented Instruments Lab](http://instrumentslab.org/) at [C4DM](https://c4dm.eecs.qmul.ac.uk/) in London for a series of micro-residencies. I've had a longstanding interest in "old time" American folk music since getting wrapped up in that culture a lifetime ago when I lived and worked in Northern Florida. You may have heard that Florida is the state where the farther north you go, the farther South you get.
@@ -8,7 +8,7 @@ A lot of that hands-on, material/social-oriented cultural ethos that I associate
 
 ---
 
-> "Whenever different cultures meet, new instruments happen" ~ [Du Yun, composer, FutureTradition](https://channelduyun.com/futuretradition/)
+## "Whenever different cultures meet, new instruments happen"
 
 <figure>
 <img src="./banjo_history_monarch_2.jpg" width=500>
@@ -307,6 +307,11 @@ Well, there's still a lot of design work to be done. Now that I've got a prototy
 Artistically I'm looking to further explore an extended sonic language for the banjo that carries with it a sense of multi-temporality. Making it possible that the multiple music histories of this instrument can co-exist and perhaps project towards the future.
 
 I'm also thinking about how these extended techniques and augmentations could work to making the banjo into a sculptural object - for example, autonomously playing banjos (and other drum or spiked lute-like objects) filling a space, or creating a virtual social communion of sorts.
+
+---
+
+<iframe src="https://player.vimeo.com/video/423539752" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<p><a href="https://vimeo.com/423539752">Augmented Banjo - Iklectik - Drums</a> from <a href="https://vimeo.com/jonathanreus">Jon Reus</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 
 ---
 
