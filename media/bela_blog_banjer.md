@@ -27,7 +27,7 @@ While most modern banjos still sport a reduced version of the industrial makeove
 
 <figure>
 <img src="./banjo_surinam_1770.png" width=400>
-<figcaption>Kalebas banjo from 1770 Surinam, the oldest surviving banjo from the American continent, src: [Tropenmuseum Amsterdam](https://hdl.handle.net/20.500.11840/609575)</figcaption>
+<figcaption>Kalebas banjo from 1770 Suriname, the oldest surviving banjo from the American continent, src: [Tropenmuseum Amsterdam](https://hdl.handle.net/20.500.11840/609575)</figcaption>
 </figure>
 
 <br>
